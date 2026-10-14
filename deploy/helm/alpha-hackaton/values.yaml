@@ -1,8 +1,8 @@
 # Образ приложения. repository и tag обновляет CI (.github/workflows/ci-cd.yaml) после каждой сборки main,
 # Argo CD видит новый коммит и раскатывает его. Руками менять только для отката.
 image:
-  repository: DOCKERHUB_USERNAME/alpha-hackaton
-  tag: "latest"
+  repository: devowt/alpha-hackaton
+  tag: "8f6697f9f2c8c702713c3ba3c67b0870160fb83d"
   pullPolicy: IfNotPresent
 
 # Секрет для pull из приватного Docker Hub, создаётся вручную (см. docs/cd-k3s.md).

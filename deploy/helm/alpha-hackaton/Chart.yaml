@@ -1,0 +1,6 @@
+apiVersion: v2
+name: alpha-hackaton
+description: Сервис персональной новостной аналитики (Go server + worker, Postgres, RustFS) для k3s
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

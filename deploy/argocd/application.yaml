@@ -1,0 +1,28 @@
+# Argo CD Application: следит за чартом в main и держит namespace alpha в описанном состоянии.
+# Применяется один раз вручную: kubectl apply -f deploy/argocd/application.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alpha-hackaton
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:CodeI000I/alpha-hackaton.git
+    targetRevision: main
+    path: deploy/helm/alpha-hackaton
+    helm:
+      releaseName: alpha
+      # Настройки конкретного кластера, которые не хочется держать в values.yaml:
+      # valuesObject:
+      #   ingress:
+      #     host: alpha.my-domain.ru
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: alpha
+  syncPolicy:
+    automated:
+      prune: true      # удалять из кластера то, что убрали из чарта
+      selfHeal: true   # откатывать ручные правки в кластере
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,65 @@
+{{- if .Values.rustfs.enabled }}
+{{- $name := printf "%s-rustfs" (include "alpha.fullname" .) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rustfs
+spec:
+  selector:
+    {{- include "alpha.selector" (list . "rustfs") | nindent 4 }}
+  ports:
+    - { name: s3, port: 9000 }
+    - { name: console, port: 9001 }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rustfs
+spec:
+  serviceName: {{ $name }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "alpha.selector" (list . "rustfs") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "alpha.selector" (list . "rustfs") | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: 10001   # образ работает от пользователя rustfs (10001), том должен быть ему доступен
+      containers:
+        - name: rustfs
+          image: {{ .Values.rustfs.image }}
+          env:
+            - { name: RUSTFS_CONSOLE_ENABLE, value: "true" }
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: S3_ACCESS_KEY } }
+            - name: RUSTFS_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: S3_SECRET_KEY } }
+          ports:
+            - { name: s3, containerPort: 9000 }
+            - { name: console, containerPort: 9001 }
+          readinessProbe:
+            httpGet: { path: /health, port: s3 }
+          resources:
+            {{- toYaml .Values.rustfs.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /data }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- with .Values.rustfs.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests: { storage: {{ .Values.rustfs.storage }} }
+{{- end }}

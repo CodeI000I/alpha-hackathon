@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "alpha.fullname" . }}-config
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := .Values.config }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}
+  {{- if .Values.rustfs.enabled }}
+  S3_ENDPOINT: {{ printf "%s-rustfs:9000" (include "alpha.fullname" .) | quote }}
+  {{- else }}
+  S3_ENDPOINT: {{ required "rustfs.externalEndpoint is required when rustfs.enabled=false" .Values.rustfs.externalEndpoint | quote }}
+  {{- end }}

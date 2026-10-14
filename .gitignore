@@ -2,3 +2,4 @@
 node_modules/
 frontend/dist/
 /bin/
+deploy/secrets.yaml

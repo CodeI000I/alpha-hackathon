@@ -1,0 +1,154 @@
+# Тесты → сборка образа в приватный Docker Hub → новый тег в Helm values.
+# Сам деплой делает Argo CD в кластере: он видит коммит с тегом и раскатывает чарт (docs/cd-k3s.md).
+name: CI-CD
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      # Чарт и Argo CD не требуют пересборки образа: Argo CD сам подхватит изменения из git.
+      # Заодно ручной откат (старый image.tag в values.yaml) не запускает новую сборку.
+      - "deploy/**"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_NAME: alpha
+  CHART_PATH: deploy/helm/alpha-hackaton
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/alpha-hackaton
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  test-and-validate:
+    name: Test and validate Helm chart
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Run Go vet and tests
+        working-directory: backend
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install Helm
+        uses: azure/setup-helm@v5
+
+      - name: Lint Helm chart
+        run: helm lint "$CHART_PATH" --strict --set-string image.tag="$IMAGE_TAG"
+
+      - name: Render Helm templates
+        run: |
+          helm template "$APP_NAME" "$CHART_PATH" \
+            --namespace alpha \
+            --set image.repository="$IMAGE_NAME" \
+            --set-string image.tag="$IMAGE_TAG" \
+            > rendered-manifests.yaml
+
+      - name: Upload rendered manifests
+        uses: actions/upload-artifact@v7
+        with:
+          name: rendered-manifests-${{ github.sha }}
+          path: rendered-manifests.yaml
+          retention-days: 7
+
+  build-and-push:
+    name: Build and publish Docker image
+    needs: test-and-validate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  update-image-tag:
+    name: Update image tag for Argo CD
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write   # коммит с новым тегом в main
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      # sed, а не yq -i: yq переформатирует values.yaml и съедает пустые строки.
+      - name: Set image in values.yaml
+        run: |
+          sed -i -E "/^image:/,/^[^[:space:]#]/{
+            s|^(  repository:).*|\1 ${IMAGE_NAME}|
+            s|^(  tag:).*|\1 \"${IMAGE_TAG}\"|
+          }" "$CHART_PATH/values.yaml"
+          test "$(yq '.image.repository' "$CHART_PATH/values.yaml")" = "$IMAGE_NAME"
+          test "$(yq '.image.tag' "$CHART_PATH/values.yaml")" = "$IMAGE_TAG"
+
+      - name: Commit and push
+        run: |
+          git add "$CHART_PATH/values.yaml"
+          if git diff --cached --quiet; then
+            echo "values.yaml already points at $IMAGE_TAG"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "deploy: alpha-hackaton ${IMAGE_TAG::7} [skip ci]"
+          # Если за время сборки в main успели запушить, перебазируемся и пробуем ещё раз.
+          for _ in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase origin main
+          done
+          exit 1

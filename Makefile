@@ -1,7 +1,7 @@
 -include .env
 export
 
-.PHONY: deps up down server worker web build seed image
+.PHONY: deps up down server worker web build seed image chart
 
 up:            ## поднять Postgres и RustFS (S3)
 	docker compose up -d
@@ -27,3 +27,7 @@ seed:          ## пересобрать справочники из company_res
 
 image:
 	docker build -t alpha-hackaton:dev .
+
+chart:         ## проверить Helm-чарт (нужен helm)
+	helm lint deploy/helm/alpha-hackaton --strict
+	helm template alpha deploy/helm/alpha-hackaton --namespace alpha > /dev/null

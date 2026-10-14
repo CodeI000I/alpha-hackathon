@@ -1,0 +1,14 @@
+# k3s ставит Traefik как ingress-контроллер по умолчанию.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app
+spec:
+  rules:
+    - host: alpha.example.local   # заменить на свой домен
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: app, port: { number: 80 } }

@@ -1,0 +1,24 @@
+# Локальная разработка: Postgres + RustFS (S3-совместимое хранилище файлов).
+# Backend и frontend запускаются с хоста (см. Makefile).
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: alpha
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  rustfs:
+    image: rustfs/rustfs:1.0.1
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfs12345
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports: ["9000:9000", "9001:9001"]   # 9000 — S3 API, 9001 — веб-консоль
+    volumes: [rustfsdata:/data]
+
+volumes:
+  pgdata:
+  rustfsdata:

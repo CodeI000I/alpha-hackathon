@@ -1,0 +1,14 @@
+{{- if and .Values.ingress.enabled .Values.ingress.tls.enabled .Values.ingress.redirectToHttps }}
+# Traefik перенаправляет http на https; подключается к Ingress аннотацией router.middlewares
+# в формате <namespace>-<имя>@kubernetescrd.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "alpha.fullname" . }}-redirect-https
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+{{- end }}

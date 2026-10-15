@@ -40,7 +40,7 @@ Helm-чарт нужен при любом варианте: он заменил
 deploy/
 ├── helm/alpha-hackaton/            Helm-чарт приложения
 │   ├── values.yaml                 образ (его обновляет CI), домен, реплики, ресурсы, тома
-│   └── templates/                  server (Deployment + Service), worker, postgres, rustfs, ingress, configmap
+│   └── templates/                  server (Deployment + Service), worker, postgres, rustfs, ingress + middleware, configmap
 ├── argocd/application.yaml         Application для Argo CD: какой чарт и куда раскатывать
 └── secrets.example.yaml            шаблон секрета с паролями (настоящий secrets.yaml в .gitignore)
 ```
@@ -149,9 +149,30 @@ kubectl -n argocd create secret generic repo-alpha-hackaton \
 kubectl -n argocd label secret repo-alpha-hackaton argocd.argoproj.io/secret-type=repository
 ```
 
-### 5. Домен
+### 5. Домен и HTTPS
 
-В `deploy/helm/alpha-hackaton/values.yaml` заменить `ingress.host: alpha.example.local` на свой домен. Другой вариант: раскомментировать `valuesObject` в `deploy/argocd/application.yaml`, тогда настройка кластера живёт рядом с Application, а не в чарте.
+В `deploy/helm/alpha-hackaton/values.yaml`, блок `ingress`:
+
+```yaml
+ingress:
+  host: alpha.devgit.net
+  tls:
+    enabled: true
+    clusterIssuer: letsencrypt-production   # ClusterIssuer cert-manager, который уже есть в кластере
+    secretName: alpha-tls                   # сюда cert-manager положит сертификат
+  redirectToHttps: true                     # Traefik Middleware: http → https, 301
+```
+
+Чарт сам ставит на Ingress аннотацию `cert-manager.io/cluster-issuer` и блок `tls`, а при `redirectToHttps` создаёт Middleware `alpha-redirect-https` и подключает его аннотацией `traefik.ingress.kubernetes.io/router.middlewares: alpha-alpha-redirect-https@kubernetescrd` (формат `<namespace>-<имя>@kubernetescrd`). Нужны cert-manager с этим ClusterIssuer и DNS-запись домена на IP сервера.
+
+Проверка после синхронизации:
+
+```bash
+kubectl -n alpha get certificate          # alpha-tls: READY True
+curl -sI http://alpha.devgit.net | head -3  # 301 и Location: https://...
+```
+
+Другой вариант для настроек конкретного кластера: раскомментировать `valuesObject` в `deploy/argocd/application.yaml`, тогда они живут рядом с Application, а не в чарте.
 
 ### 6. Запушить код в main и дождаться первой сборки
 

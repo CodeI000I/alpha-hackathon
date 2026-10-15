@@ -40,12 +40,16 @@ service:
 ingress:
   enabled: true
   className: ""                 # пусто = класс по умолчанию (traefik в k3s)
-  host: alpha.devgit.net     # заменить на свой домен
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-production
-  tls: []
-  #  - secretName: alpha-tls
-  #    hosts: [alpha.example.local]
+  host: alpha.devgit.net
+  annotations: {}               # дополнительные аннотации Ingress, если понадобятся
+  # HTTPS: сертификат для host выпускает cert-manager по существующему ClusterIssuer
+  # и кладёт в Secret secretName.
+  tls:
+    enabled: true
+    clusterIssuer: letsencrypt-production
+    secretName: alpha-tls
+  # Traefik Middleware redirectScheme: http → https (301). Работает только вместе с tls.enabled.
+  redirectToHttps: true
 
 postgres:
   enabled: true

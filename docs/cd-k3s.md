@@ -78,10 +78,20 @@ kubectl create namespace alpha
 kubectl -n alpha create secret docker-registry dockerhub \
   --docker-username=<dockerhub-user> --docker-password=<dockerhub-read-token>
 
-# Пароли: скопировать шаблон, вписать значения (пароль Postgres без @ : / ? #, например openssl rand -hex 24)
-cp deploy/secrets.example.yaml deploy/secrets.yaml
-kubectl -n alpha apply -f deploy/secrets.yaml
+# Пароли сразу на сервере, без файла (пароль Postgres без @ : / ? #, поэтому hex)
+kubectl -n alpha create secret generic alpha-secrets \
+  --from-literal=POSTGRES_PASSWORD="$(openssl rand -hex 24)" \
+  --from-literal=S3_ACCESS_KEY=alpha-app \
+  --from-literal=S3_SECRET_KEY="$(openssl rand -hex 24)"
+
+kubectl -n alpha get secrets   # должны быть dockerhub и alpha-secrets
 ```
+
+Тот же секрет можно описать файлом: скопировать `deploy/secrets.example.yaml` в `deploy/secrets.yaml` (он в `.gitignore`), вписать значения и `kubectl -n alpha apply -f deploy/secrets.yaml`.
+
+`POSTGRES_PASSWORD` Postgres читает только при первом запуске, когда создаёт базу на пустом томе. Если потом поменять его в секрете, приложение начнёт подключаться с новым паролем, а база будет ждать старый.
+
+Без этих секретов поды server и worker висят в `ImagePullBackOff` с событием `Unable to retrieve some image pull secrets (dockerhub)`, а postgres и rustfs в `CreateContainerConfigError`. Если секреты создали уже после синхронизации, поды можно не ждать, а пересоздать: `kubectl -n alpha delete pods --all`.
 
 `DATABASE_URL` писать не нужно: чарт собирает его из `POSTGRES_PASSWORD` и адреса `alpha-postgres`. Остальные ключи секрета (например, будущий токен Jev) попадут в окружение server и worker как есть.
 
@@ -95,7 +105,31 @@ kubectl apply -n argocd --server-side --force-conflicts \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 kubectl -n argocd rollout status deploy/argocd-server
+kubectl -n argocd get pods   # все поды Running
 ```
+
+Из чего состоит Argo CD:
+
+| Под | За что отвечает |
+|---|---|
+| `argocd-application-controller` | Главный: сравнивает то, что должно быть по чарту, с тем, что есть в кластере, и создаёт или обновляет объекты в `alpha`. Следит за здоровьем подов |
+| `argocd-repo-server` | Клонирует репозиторий во временную папку внутри своего пода, делает `helm template` и отдаёт готовые манифесты контроллеру. На диск сервера ничего не кладёт |
+| `argocd-redis` | Кэш манифестов и состояния кластера для остальных компонентов. Без него сверка не работает |
+| `argocd-server` | Веб-интерфейс и API для CLI `argocd`. Сам ничего не деплоит |
+| `argocd-applicationset-controller` | Генерирует много Application по шаблону (окружения, PR-стенды). Нам не нужен |
+| `argocd-notifications-controller` | Уведомления о деплоях в Telegram, Slack и т. п. Нам не нужен |
+| `argocd-dex-server` | Вход через GitHub, LDAP и т. п. Нам не нужен, входим под `admin` |
+
+Цепочка: объект Application (шаг 7) → контроллер просит манифесты у repo-server → repo-server клонирует репозиторий по секрету из шага 4 и рендерит чарт → контроллер применяет манифесты в namespace `alpha`.
+
+Если `argocd-redis` висит в `ImagePullBackOff`: Argo CD берёт redis из `public.ecr.aws`, а он бывает недоступен с сервера. Тот же образ есть на Docker Hub:
+
+```bash
+kubectl -n argocd describe pod -l app.kubernetes.io/name=argocd-redis | tail -5   # причина ошибки pull
+kubectl -n argocd set image deployment/argocd-redis redis=redis:8.2.3-alpine
+```
+
+Без redis Argo CD не может сверить приложение (ошибка `ComparisonError ... argocd-redis:6379`), так что это нужно починить до шага 7. Повторный `kubectl apply` манифеста установки вернёт образ из `public.ecr.aws`, команду `set image` тогда нужно повторить.
 
 ### 4. Дать Argo CD доступ к приватному репозиторию
 
@@ -139,6 +173,16 @@ git push origin main
 kubectl apply -f deploy/argocd/application.yaml
 ```
 
+Если `kubectl` настроен только на сервере с k3s, а репозиторий лежит на ноутбуке, скопируйте файл на сервер и примените его там в обычной ssh-сессии:
+
+```bash
+scp deploy/argocd/application.yaml <user>@<server>:~/   # на ноутбуке, из папки проекта
+ssh <user>@<server>
+kubectl apply -f ~/application.yaml                     # уже на сервере
+```
+
+Вариант `ssh <server> kubectl apply ...` одной командой часто падает с `permission denied` на `/etc/rancher/k3s/k3s.yaml`: неинтерактивный ssh не читает `~/.bashrc`, где обычно задан `KUBECONFIG`, и kubectl идёт в root-only конфиг k3s.
+
 Argo CD склонирует `main`, отрендерит чарт и создаст объекты в namespace `alpha`. Если применить Application раньше push, ничего страшного: Argo CD покажет ошибку `app path does not exist`, а после push сам всё поднимет. Если раньше первой сборки, поды server и worker повиснут в `ImagePullBackOff` на заглушке `DOCKERHUB_USERNAME/alpha-hackaton`, а после коммита с тегом поднимутся сами.
 
 ### 8. Проверить
@@ -151,6 +195,19 @@ kubectl -n alpha get pods
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
 kubectl -n argocd port-forward svc/argocd-server 8080:443
 ```
+
+Argo CD не копирует репозиторий на диск сервера: он клонирует его во временный каталог внутри пода `argocd-repo-server`, рендерит чарт и создаёт объекты. Результат виден как поды в namespace `alpha`, а не как файлы.
+
+Если в `alpha` пусто или приложение не `Synced`:
+
+```bash
+kubectl -n argocd get application alpha-hackaton -o jsonpath='{.status.sync.status} {.status.health.status}{"\n"}{.status.conditions}{"\n"}'
+kubectl -n argocd get secret -l argocd.argoproj.io/secret-type=repository   # секрет репозитория есть
+kubectl -n argocd logs deploy/argocd-repo-server --tail=50                  # ошибки клонирования и рендера
+kubectl -n argocd logs statefulset/argocd-application-controller --tail=50  # ошибки синхронизации
+```
+
+Частые причины: Application не создан (`kubectl -n argocd get applications` пустой, см. шаг 7); не работает `argocd-redis` (см. шаг 3); `url` в секрете репозитория не совпадает с `repoURL` в Application буква в букву (`git@github.com:CodeI000I/alpha-hackaton.git`); deploy key не добавлен в репозиторий; в `alpha` нет секретов `dockerhub` и `alpha-secrets` из шага 2 (поды в `ImagePullBackOff` или `CreateContainerConfigError`).
 
 ## Каждый день
 

@@ -41,7 +41,8 @@ ingress:
   enabled: true
   className: ""                 # пусто = класс по умолчанию (traefik в k3s)
   host: alpha.devgit.net     # заменить на свой домен
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
   tls: []
   #  - secretName: alpha-tls
   #    hosts: [alpha.example.local]

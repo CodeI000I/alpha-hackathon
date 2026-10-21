@@ -1,0 +1,280 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--color-page);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  color: inherit;
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+dl,
+dd {
+  margin-block: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 670;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
+h2 {
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-weight: 640;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+h3 {
+  font-size: 1.08rem;
+  font-weight: 620;
+  letter-spacing: -0.015em;
+}
+
+::selection {
+  background: rgba(239, 49, 36, 0.42);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.eyebrow {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: -100px;
+  left: 16px;
+  padding: 11px 15px;
+  border-radius: var(--radius-sm);
+  background: var(--color-brand);
+  color: #fff;
+  font-weight: 650;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* Backward-compatible foundations for the repository's first-pass pages. */
+.layout {
+  width: min(1040px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.header {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.header nav,
+.tabs,
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.header a {
+  color: var(--color-text-muted);
+}
+
+.header a.active {
+  color: var(--color-text);
+}
+
+.logo {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.card,
+.panel {
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field input {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 15px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-control);
+}
+
+.tab {
+  padding: 9px 13px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.tab:hover,
+.tab--on {
+  background: var(--color-control-hover);
+  color: var(--color-text);
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.insight {
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  border-left: 3px solid var(--color-event);
+  background: var(--color-surface);
+}
+
+.insight--risk {
+  border-left-color: var(--color-risk);
+}
+
+.insight--opportunity {
+  border-left-color: var(--color-opportunity);
+}
+
+.insight__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.insight__title {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 1.18rem;
+  font-weight: 620;
+}
+
+.profile {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.profile td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--color-border);
+}

@@ -2,3 +2,4 @@
 frontend/dist
 .git
 *.xlsx
+.local-context/.env.llm

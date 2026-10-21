@@ -13,6 +13,7 @@ import (
 	"github.com/devowt/alpha-hackaton/backend/internal/config"
 	"github.com/devowt/alpha-hackaton/backend/internal/feed"
 	"github.com/devowt/alpha-hackaton/backend/internal/ingest"
+	"github.com/devowt/alpha-hackaton/backend/internal/orchestrator"
 	"github.com/devowt/alpha-hackaton/backend/internal/storage/postgres"
 	"github.com/devowt/alpha-hackaton/backend/migrations"
 )
@@ -39,10 +40,10 @@ func main() {
 	}
 
 	var ranker feed.Ranker = feed.KeywordRanker{}
-	if cfg.JevURL != "" {
-		ranker = feed.NewJevRanker(cfg.JevURL)
+	if cfg.OrchestratorURL != "" {
+		ranker = orchestrator.New(cfg.OrchestratorURL)
 	} else {
-		log.Warn("JEV_URL is empty: using keyword ranker stub")
+		log.Warn("ORCHESTRATOR_URL is empty: using keyword ranker stub")
 	}
 	httpClient := &http.Client{Timeout: 30 * time.Second}
 	p := &ingest.Pipeline{

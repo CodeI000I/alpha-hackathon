@@ -17,7 +17,7 @@ existingSecret: alpha-secrets
 # Несекретные настройки приложения (ConfigMap). S3_ENDPOINT подставляется сам, если включён rustfs.
 config:
   S3_BUCKET: company-files
-  JEV_URL: ""         # адрес Jev (TypeSafe AI); пусто = заглушка по ключевым словам
+  ORCHESTRATOR_URL: "" # адрес AI-оркестратора (LangGraph); пусто = заглушка по ключевым словам
   INGEST_PERIOD: 15m
 
 server:

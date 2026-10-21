@@ -24,7 +24,8 @@ Repository for alpha-future hackaton on course "News analytics for business deci
 │   ├── internal/storage/postgres/  SQL-запросы: пользователи и роли, компании, новости, лента
 │   ├── internal/storage/files/     загрузка файлов компаний в S3 (RustFS)
 │   ├── internal/ingest/     сбор новостей: общий конвейер + адаптеры (rss.go, alfa.go)
-│   ├── internal/feed/       решение «что в ленту»: клиент Jev + заглушка по ключевым словам
+│   ├── internal/feed/       решение «что в ленту»: контракт ранжирования + заглушка по ключевым словам
+│   ├── internal/orchestrator/  HTTP-клиент к AI-оркестратору (LangGraph)
 │   └── migrations/          0001_init.sql — схема БД, 0002_seed.sql — справочники из xlsx
 ├── frontend/                React + Vite + TypeScript
 │   └── src/
@@ -36,7 +37,7 @@ Repository for alpha-future hackaton on course "News analytics for business deci
 │   ├── argocd/              Application для Argo CD, который раскатывает чарт из main
 │   └── secrets.example.yaml шаблон секрета с паролями (создаётся в кластере вручную)
 ├── docs/
-│   ├── architecture.md      компоненты, модель данных, API, контракт с Jev
+│   ├── architecture.md      компоненты, модель данных, API
 │   └── cd-k3s.md            CI/CD: GitHub Actions + Argo CD, пошаговая настройка кластера
 └── scripts/gen_seed.py      company_research.xlsx → backend/migrations/0002_seed.sql
 ```

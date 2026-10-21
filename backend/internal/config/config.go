@@ -8,12 +8,12 @@ import (
 )
 
 type Config struct {
-	HTTPAddr     string
-	DatabaseURL  string
-	StaticDir    string // каталог со сборкой фронтенда; пусто = не отдавать статику
-	S3           S3
-	JevURL       string // адрес Jev (TypeSafe AI) — модели, которая решает, что попадёт в ленту
-	IngestPeriod time.Duration
+	HTTPAddr        string
+	DatabaseURL     string
+	StaticDir       string // каталог со сборкой фронтенда; пусто = не отдавать статику
+	S3              S3
+	OrchestratorURL string // адрес AI-оркестратора (LangGraph), который решает, что попадёт в ленту
+	IngestPeriod    time.Duration
 }
 
 type S3 struct {
@@ -26,10 +26,10 @@ type S3 struct {
 
 func Load() (Config, error) {
 	c := Config{
-		HTTPAddr:    env("HTTP_ADDR", ":8080"),
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		StaticDir:   os.Getenv("STATIC_DIR"),
-		JevURL:      os.Getenv("JEV_URL"),
+		HTTPAddr:        env("HTTP_ADDR", ":8080"),
+		DatabaseURL:     os.Getenv("DATABASE_URL"),
+		StaticDir:       os.Getenv("STATIC_DIR"),
+		OrchestratorURL: os.Getenv("ORCHESTRATOR_URL"),
 		S3: S3{
 			Endpoint:  os.Getenv("S3_ENDPOINT"),
 			AccessKey: os.Getenv("S3_ACCESS_KEY"),

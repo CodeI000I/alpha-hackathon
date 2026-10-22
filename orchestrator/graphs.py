@@ -51,6 +51,12 @@ class State(TypedDict, total=False):
     quality_decision: str
     answer_decision: str
     answer_quality_decision: str
+    request: dict[str, Any]
+    job_ids: list[str]
+    assessment: dict[str, Any]
+    conversation_revision: int
+    retrieval: dict[str, Any]
+    publication: str
 
 
 Node = Callable[[State], dict[str, Any]]
@@ -67,14 +73,13 @@ EDGES = {
     'company': [
         (START, 'load_company_context'),
         ('load_company_context', 'score_relevance'),
-        ('save_feed_card', 'choose_report_priority'),
+        ('enqueue_report', 'save_feed_card'),
+        ('save_feed_card', END),
         ('record_irrelevant', END),
-        ('record_uncertain', END), ('mark_report_deferred', END),
-        ('enqueue_report', END),
+        ('record_uncertain', END),
     ],
     'open': [
         (START, 'authorize'),
-        ('enqueue_report', 'return_pending'),
         ('return_report', END), ('return_pending', END), ('return_denied', END),
     ],
     'report': [
@@ -114,11 +119,9 @@ BRANCHES = {
     },
     'company': {
         'score_relevance': ('relevance_decision', {
-            'relevant': 'save_feed_card', 'irrelevant': 'record_irrelevant',
+            'relevant': 'enqueue_report', 'irrelevant': 'record_irrelevant',
+            'conditional': 'enqueue_report',
             'uncertain': 'record_uncertain',
-        }),
-        'choose_report_priority': ('priority_decision', {
-            'background': 'enqueue_report', 'on_open': 'mark_report_deferred',
         }),
     },
     'open': {
@@ -127,10 +130,7 @@ BRANCHES = {
         }),
         'inspect_report': ('report_decision', {
             'ready': 'return_report', 'running': 'return_pending',
-            'missing': 'ensure_report_job', 'stale': 'ensure_report_job',
-        }),
-        'ensure_report_job': ('job_decision', {
-            'created': 'enqueue_report', 'existing': 'return_pending',
+            'missing': 'return_pending', 'stale': 'return_pending',
         }),
     },
     'report': {
@@ -204,7 +204,7 @@ def build_graphs(handlers: Mapping[str, Node] | None = None, *, checkpointer=Non
     """Собрать графы. handlers — синхронные операции; I/O и политики реализуются снаружи.
 
     company запускается заданием из dispatch_company_jobs для одной компании.
-    report запускается заданием из enqueue_report как из фона, так и при клике.
+    report выполняется из enqueue_report до публикации карточки; open только читает.
     """
     handlers = handlers or {}
     graphs = {}

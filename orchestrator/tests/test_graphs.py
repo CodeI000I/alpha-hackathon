@@ -32,19 +32,16 @@ class GraphTests(unittest.TestCase):
         })
         self.assertNotIn('score_relevance', trace)
 
-    def test_normal_priority_waits_for_click(self):
+    def test_report_is_prepared_before_card_publication(self):
         trace, _ = self.run_flow('company', {
             'score_relevance': {'relevance_decision': 'relevant'},
-            'choose_report_priority': {'priority_decision': 'on_open'},
         })
         self.assertIn('save_feed_card', trace)
-        self.assertIn('mark_report_deferred', trace)
-        self.assertNotIn('enqueue_report', trace)
+        self.assertLess(trace.index('enqueue_report'), trace.index('save_feed_card'))
 
-    def test_top_priority_enqueues_report(self):
+    def test_relevant_company_enqueues_report(self):
         trace, _ = self.run_flow('company', {
             'score_relevance': {'relevance_decision': 'relevant'},
-            'choose_report_priority': {'priority_decision': 'background'},
         })
         self.assertIn('enqueue_report', trace)
 
@@ -74,6 +71,8 @@ class GraphTests(unittest.TestCase):
             'ensure_report_job': {'job_decision': 'existing'},
         })
         self.assertEqual(trace[-1], 'return_pending')
+        self.assertNotIn('ensure_report_job', trace)
+        self.assertNotIn('enqueue_report', trace)
 
     def test_access_denied_stops_before_loading_data(self):
         trace, _ = self.run_flow('chat', {

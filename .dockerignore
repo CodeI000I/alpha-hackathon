@@ -3,3 +3,10 @@ frontend/dist
 .git
 *.xlsx
 .local-context/.env.llm
+.env
+.env.*
+**/.env
+**/.env.*
+**/.venv
+**/__pycache__
+orchestrator/data

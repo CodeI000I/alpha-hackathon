@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { api, ApiError, isDemoMode } from "../api/client";
+import { api, ApiError } from "../api/client";
 import RolePicker from "../components/RolePicker";
 import { Button } from "../signal/components/ui";
 import { AuthInput, AuthShell } from "../auth/AuthShell";
@@ -51,7 +51,6 @@ export default function OnboardingPage({ onComplete }: { onComplete: (userId: nu
   return <AuthShell mode="register">
     <p className="auth-progress">Шаг {step} из 2 · {step === 1 ? "Данные пользователя" : "Компания и роли"}</p>
     <h1 id="registration-heading" tabIndex={-1}>{step === 1 ? "Создать аккаунт" : "Настройте профиль"}</h1>
-    <p className="auth-intro">{step === 1 ? "Сначала укажите имя и почту. На следующем шаге нужно добавить компанию и выбрать роли." : "Добавьте компанию и выберите хотя бы одну роль. Аккаунт будет создан только после завершения этого шага."} {isDemoMode ? "Будет создан локальный демопрофиль без пароля." : "Пароль не нужен: серверный вход пока не подключён."}</p>
     {resumedCompanyId && step === 2 && (company.error instanceof ApiError && company.error.status === 404 ? <div className="auth-problem" role="alert">Сохранённая компания больше не найдена. Можно начать настройку компании заново.<Button type="button" variant="secondary" onClick={() => { clearPendingCompanyId(); setResumedCompanyId(null); submit.reset(); }}>Начать настройку компании заново</Button></div> : <div className="auth-notice" role="status">Компания уже создана: {company.data?.name || `ID ${resumedCompanyId}`}. Завершите создание пользователя. Повторная отправка не создаст компанию заново.</div>)}
     {resumedCompanyId && step === 2 && company.isPending && <p role="status">Проверяем сохранённую компанию…</p>}
     {resumedCompanyId && step === 2 && company.isError && !(company.error instanceof ApiError && company.error.status === 404) && <div className="auth-problem" role="alert"><strong>Не удалось проверить сохранённую компанию</strong>{company.error.message}<Button type="button" variant="secondary" onClick={() => company.refetch()}>Повторить проверку компании</Button></div>}
@@ -70,13 +69,13 @@ export default function OnboardingPage({ onComplete }: { onComplete: (userId: nu
       </> : <>
       <p className="auth-identity">{form.fullName} <span>{form.email}</span></p>
       {!resumedCompanyId && <><AuthInput id="company-name" name="companyName" label="Название компании" value={form.companyName} onChange={(event) => update("companyName", event.target.value)} onBlur={() => blur("companyName")} maxLength={160} error={errors.companyName} required disabled={submit.isPending} /><AuthInput id="inn" name="inn" label="ИНН компании" value={form.inn} onChange={(event) => update("inn", event.target.value.replace(/\D/g, "").slice(0, 12))} onBlur={() => blur("inn")} inputMode="numeric" autoComplete="off" error={errors.inn} required disabled={submit.isPending} /></>}
-      <fieldset className="auth-roles" disabled={roles.isLoading || submit.isPending} aria-describedby={errors.roles ? "auth-roles-error" : undefined}><legend>Ваши роли в компании</legend><p>Можно выбрать несколько. Названия и описание ролей загружаются из каталога.</p>{roles.isLoading && <p role="status">Загружаем роли…</p>}{roles.data && <RolePicker roles={roles.data} selected={selected} onChange={(value) => { setSelected(value); setErrors((current) => ({ ...current, roles: undefined })); }} />}{errors.roles && <span className="auth-field-message is-error" id="auth-roles-error" role="alert">{errors.roles}</span>}</fieldset>
+      <fieldset className="auth-roles" disabled={roles.isLoading || submit.isPending} aria-describedby={errors.roles ? "auth-roles-error" : undefined}><legend>Ваши роли в компании</legend><p>Можно выбрать несколько.</p>{roles.isLoading && <p role="status">Загружаем роли…</p>}{roles.data && <RolePicker roles={roles.data} selected={selected} onChange={(value) => { setSelected(value); setErrors((current) => ({ ...current, roles: undefined })); }} />}{errors.roles && <span className="auth-field-message is-error" id="auth-roles-error" role="alert">{errors.roles}</span>}</fieldset>
       {roles.isError && <div className="auth-problem" role="alert"><strong>Не удалось загрузить роли</strong>{roles.error.message}<Button type="button" variant="secondary" onClick={() => roles.refetch()}>Повторить</Button></div>}
       {!roles.isLoading && !roles.isError && !roles.data?.length && <p className="auth-problem" role="status">В каталоге пока нет ролей. Регистрация станет доступна после заполнения каталога.</p>}
       {submit.error && <div className="auth-problem" role="alert"><strong>Не удалось создать профиль</strong>{submit.error.message}</div>}
       <Button type="submit" disabled={submit.isPending || roles.isLoading || roles.isError || !roles.data?.length || pendingCompanyUnconfirmed}>{submit.isPending ? "Создаём профиль…" : "Завершить настройку"}</Button>
       <Button type="button" variant="secondary" disabled={submit.isPending} onClick={() => changeStep(1)}>Назад к данным пользователя</Button>
       </>}
-    </form><p className="auth-draft-note">Черновик хранится в сессии этой вкладки и очищается после успешной регистрации. Закрытие вкладки может удалить его. {isDemoMode ? "Созданная демокомпания сохраняется локально." : "Ранее созданная компания остаётся на сервере."}</p><div className="auth-announcement" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
+    </form><div className="auth-announcement" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
   </AuthShell>;
 }

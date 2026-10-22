@@ -99,10 +99,10 @@ test('filters, searches, and persists local bookmarks', async ({ page }) => {
 
   const dailySummary = page.getByRole('region', { name: 'Сводка за 24 часа' });
   await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
-  await page.getByRole('combobox', { name: 'Активный ракурс' }).selectOption('cfo');
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await expect(page.locator('.w-event')).toHaveCount(2);
   await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
-  await page.getByRole('combobox', { name: 'Активный ракурс' }).selectOption('');
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('');
   await expect(page.locator('.w-event')).toHaveCount(3);
 
   await page.getByLabel('Поиск по событиям').fill('программа поддержки');
@@ -130,6 +130,8 @@ test('filters, searches, and persists local bookmarks', async ({ page }) => {
 test('removing an assigned role updates the feed and role selection persists', async ({ page }) => {
   await loginDemo(page, 'finance');
   await page.goto('/profile?tab=roles');
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Изменить роли' }).click();
 
   const strategy = page.getByRole('checkbox', { name: /Директор по стратегии и развитию/ });
   const cfo = page.getByRole('checkbox', { name: /^Финансовый директор/ });
@@ -144,6 +146,7 @@ test('removing an assigned role updates the feed and role selection persists', a
   await expect(page.getByRole('heading', { name: 'Расширена программа поддержки технологических компаний' })).toHaveCount(0);
 
   await page.goto('/profile?tab=roles');
+  await page.getByRole('button', { name: 'Изменить роли' }).click();
   await expect(strategy).not.toBeChecked();
   await expect(cfo).toBeChecked();
 });
@@ -151,7 +154,7 @@ test('removing an assigned role updates the feed and role selection persists', a
 test('uploads and restores a browser-local demo document', async ({ page }) => {
   await loginDemo(page, 'operations');
   await page.goto('/profile?tab=documents');
-  await expect(page.getByText(/Демонстрационный список сохраняется в браузере/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Документы компании', exact: true })).toBeVisible();
 
   await page.locator('input[type="file"]').setInputFiles({
     name: 'план-поставок-ноябрь.pdf',
@@ -240,16 +243,16 @@ test('registration validates identity first, restores its draft, and cannot skip
 test('saved items and role-scoped chats never carry into another demo company', async ({ page }) => {
   await loginDemo(page, 'finance');
   await page.locator('.w-event').first().getByRole('button', { name: 'Сохранить в закладки (демо)' }).click();
-  await page.getByRole('combobox', { name: 'Активный ракурс' }).selectOption('cfo');
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await page.getByRole('button', { name: 'Как это влияет на мою роль?' }).click();
   await expect(page.locator('.w-message-user')).toHaveCount(1);
-  await page.getByRole('combobox', { name: 'Активный ракурс' }).selectOption('strategy');
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('strategy');
   await expect(page.locator('.w-message-user')).toHaveCount(0);
   await page.getByRole('button', { name: 'Меню пользователя' }).click();
   await page.getByRole('button', { name: 'Выйти', exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   await loginDemo(page, 'operations');
-  await expect(page.getByRole('combobox', { name: 'Активный ракурс' })).toHaveValue('');
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('');
   await expect(page.locator('.w-message-user')).toHaveCount(0);
   await page.getByRole('link', { name: /Закладки/ }).click();
   await expect(page.locator('.w-event')).toHaveCount(0);
@@ -297,11 +300,102 @@ test('source modal and chat composer remain keyboard reachable in a low window',
   await expect(page.locator('.w-message-user')).toContainText('Что проверить?');
 });
 
-test('published demo credentials remain visible and exact', async ({ page }) => {
+test('test credentials are collapsed by default and remain available on request', async ({ page }) => {
   await page.goto('/login');
+  await expect(page.getByText(DEMO_ACCOUNTS.finance.email, { exact: true })).toBeHidden();
+  await page.getByText('Тестовые аккаунты', { exact: true }).click();
   await expect(page.getByText(DEMO_ACCOUNTS.finance.email, { exact: true })).toBeVisible();
   await expect(page.getByText(DEMO_ACCOUNTS.operations.email, { exact: true })).toBeVisible();
   await expect(page.getByText(DEMO_PASSWORD, { exact: true })).toHaveCount(2);
+});
+
+test('auth screens stay concise and both home links lead to Signal, not the bank demo', async ({ page }) => {
+  for (const path of ['/register', '/login']) {
+    await page.goto(path);
+    await expect(page.locator('.auth-mode, .auth-note, .auth-intro')).toHaveCount(0);
+    await expect(page.getByText('Деморежим', { exact: true })).toHaveCount(0);
+    await expect(page.locator('.auth-box > .w-brand')).toHaveAttribute('href', '/landing');
+    await page.getByRole('link', { name: 'На главную', exact: true }).click();
+    await expect(page).toHaveURL(/\/landing$/);
+    await page.goto(path);
+    await page.locator('.auth-box > .w-brand').click();
+    await expect(page).toHaveURL(/\/landing$/);
+  }
+});
+
+test('avatar restores prototype sections and workspace logo returns to the Signal overview', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  await expect(page.locator('.w-topbar').getByText('Деморежим', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Активный ракурс', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('option', { name: 'Все роли', exact: true })).toBeAttached();
+  const trigger = page.getByRole('button', { name: 'Меню пользователя' });
+  await trigger.click();
+  const menu = page.locator('.w-profile-menu');
+  await expect(menu).toBeVisible();
+  for (const name of ['Личный кабинет', 'Моя роль', 'Компания', 'Ключевые слова', 'Документы']) {
+    await expect(menu.getByRole('link', { name, exact: true })).toBeVisible();
+  }
+  await expect(menu.getByText(DEMO_ACCOUNTS.finance.email, { exact: true })).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+  await expect(trigger).toBeFocused();
+  for (const [name, tab] of [['Моя роль', 'roles'], ['Компания', 'company'], ['Ключевые слова', 'keywords'], ['Документы', 'documents']]) {
+    await trigger.click();
+    await menu.getByRole('link', { name, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp('/profile\\?tab=' + tab + '$'));
+    await expect(menu).toBeHidden();
+  }
+  await page.locator('.w-topbar > .w-brand').click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+});
+
+test('role editor is optional, discards cancelled drafts, and supports keyboard and short screens', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  await page.goto('/profile?tab=roles');
+  const trigger = page.getByRole('button', { name: 'Изменить роли' });
+  const dialog = page.getByRole('dialog', { name: 'Роли в компании', exact: true });
+  const strategy = dialog.getByRole('checkbox', { name: /Директор по стратегии и развитию/ });
+  const cfo = dialog.getByRole('checkbox', { name: /^Финансовый директор/ });
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await strategy.uncheck({ force: true });
+  await dialog.getByRole('button', { name: 'Отмена', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(strategy).toBeChecked();
+  await strategy.uncheck({ force: true });
+  await cfo.uncheck({ force: true });
+  await expect(dialog.getByRole('button', { name: 'Сохранить роли', exact: true })).toBeDisabled();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+
+  for (const viewport of [{ width: 390, height: 520 }, { width: 768, height: 640 }, { width: 1440, height: 500 }]) {
+    await page.setViewportSize(viewport);
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveCSS('padding', '0px');
+    await expect(strategy).toBeChecked();
+    await expect(cfo).toBeChecked();
+    const rect = await dialog.boundingBox();
+    expect(rect).not.toBeNull();
+    expect(rect!.x).toBeGreaterThanOrEqual(0);
+    expect(rect!.y).toBeGreaterThanOrEqual(0);
+    expect(rect!.x + rect!.width).toBeLessThanOrEqual(viewport.width);
+    expect(rect!.y + rect!.height).toBeLessThanOrEqual(viewport.height);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    for (let index = 0; index < 15; index++) {
+      await page.keyboard.press('Tab');
+      // Native dialogs may send one Tab stop to browser chrome (BODY), but never to background controls.
+      expect(await dialog.evaluate(element => element.contains(document.activeElement) || document.activeElement === document.body)).toBe(true);
+    }
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
+  }
 });
 
 test('widget catalog and bank offer dialogs close with Escape and restore their triggers', async ({ page }) => {

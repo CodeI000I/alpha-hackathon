@@ -6,15 +6,14 @@
 .w-main :is(h1,h2,h3) { overflow-wrap: anywhere; }
 .w-main a.w-title-link { display: inline-flex; align-items: baseline; gap: 7px; }
 .w-title-link .action-icon { flex: 0 0 16px; }
-.w-topbar .ui-badge { white-space: nowrap; flex-shrink: 0; }
 .w-nav { text-decoration: none; }
 .w-nav small { color: #c7bdd5; font-size: 10px; }
 .w-sidebar-bottom { display: flex; flex-direction: column; gap: 12px; }
 .w-sidebar-bottom strong { font-size: 13px; line-height: 1.5; }
 .w-sidebar-bottom > span { font-size: 11px; color: #a9a9b2; }
-.w-user-popover { position: absolute; right: 0; top: calc(100% + 10px); width: min(280px, calc(100vw - 32px)); display: grid; gap: 12px; background: #333339; border: 1px solid #ffffff18; padding: 20px; border-radius: 16px; box-shadow: 0 15px 40px #0007; z-index: 80; overflow-wrap: anywhere; }
-.w-user-popover span { font-size: 12px; color: #babbc2; }
-.w-user-popover :is(a,button) { display: flex; align-items: center; gap: 8px; padding: 10px; border: 0; background: #414148; color: white; border-radius: 10px; font-size: 13px; }
+.w-profile-menu { max-width: calc(100vw - 32px); max-height: calc(100dvh - 90px); overflow-y: auto; overflow-wrap: anywhere; }
+.w-profile-menu > a { border: 0; background: none; border-radius: 10px; padding: 10px; text-align: left; font-size: 13px; color: inherit; }
+.w-profile-menu > a:hover { background: #484851; }
 .signal-page-heading { display: flex; gap: 24px; align-items: center; justify-content: space-between; margin: 0 0 28px; }
 .signal-page-heading h1 { font-size: 28px; line-height: 36px; letter-spacing: -.8px; margin-top: 6px; }
 .signal-role-filter { display: grid; gap: 6px; font-size: 11px; color: #babbc2; min-width: 0; max-width: 320px; }
@@ -42,13 +41,13 @@
 .daily-summary .daily-footer { grid-template-columns: 1fr auto; align-items: center; }
 .daily-footer p { font-size: 11px; line-height: 18px; color: #a9a9b2; }
 .daily-focus-link { font-size: 12px; white-space: nowrap; }
-.w-chat-title { display: flex; align-items: center; gap: 8px; padding: 20px 20px 0; }
+.daily-footer .data-note { margin: 0; }
+.w-chat-title { display: flex; align-items: center; gap: 8px; padding: 20px; }
 .w-chat, .general-chat { padding: 0; }
 .w-chat-title h2 { font-size: 18px; line-height: 24px; letter-spacing: -.3px; margin: 0; }
 .w-chat-title > svg { flex-shrink: 0; }
 .w-chat-title .ui-badge { margin-left: auto; padding: 3px 5px; font-size: 9px; white-space: nowrap; flex-shrink: 0; }
-.w-chat-subtitle { padding: 8px 20px 16px; font-size: 12px; color: #a9a9b2; }
-.w-chat .w-chat-title, .w-chat .w-chat-subtitle, .w-chat .chat-about { flex-shrink: 0; }
+.w-chat .w-chat-title, .w-chat .chat-about { flex-shrink: 0; }
 .w-chat .chat-about { margin: 0; padding: 12px 20px 20px; }
 .w-chat-body { min-width: 0; padding: 0 20px 16px; }
 .w-app .chat-quick-questions { margin: 6px 0 12px; }
@@ -82,7 +81,6 @@
   .w-topbar .w-top-service { display: inline-flex; font-size: 18px; }
   .w-topbar .w-header-date { display: none; }
   .w-topbar .w-user-menu { margin-left: auto; }
-  .w-topbar .ui-badge { font-size: 9px; }
   .daily-summary .daily-footer { grid-template-columns: 1fr; gap: 12px; }
   .daily-balance > span { margin: 0; }
   .daily-balance .daily-counts { grid-column: 2; }

@@ -189,7 +189,7 @@ test('API mode exposes no fictitious password login', async ({ page }) => {
   await page.goto('/login');
 
   await expect(page.getByRole('heading', { name: 'Войти в аккаунт', level: 1 })).toBeVisible();
-  await expect(page.getByText('Серверный вход пока не подключён.')).toBeVisible();
+  await expect(page.getByText('Вход в существующий аккаунт пока недоступен. Вы можете зарегистрировать новый профиль.')).toBeVisible();
   await expect(page.getByLabel('Электронная почта')).toHaveCount(0);
   await expect(page.getByLabel('Пароль тестового аккаунта')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Перейти к регистрации' })).toHaveAttribute('href', '/register');
@@ -223,11 +223,55 @@ test('updates assigned roles through the exact PUT contract', async ({ page }) =
   const state = await installApiMocks(page);
   await openApiSession(page, '/profile?tab=roles');
 
+  await page.getByRole('button', { name: 'Изменить роли' }).click();
   await page.getByRole('checkbox', { name: /Директор по стратегии и развитию/ }).check({ force: true });
   await page.getByRole('button', { name: 'Сохранить роли' }).click();
 
   await expect(page.getByRole('status')).toContainText('Роли сохранены');
   expect(state.roleBodies).toEqual([{ roles: ['cfo', 'strategy'] }]);
+  expect(state.unknown).toEqual([]);
+});
+
+test('role cancellation sends no PUT and failed saves retry while honoring the server response', async ({ page }) => {
+  expectedHttpStatuses = [503];
+  const state = await installApiMocks(page);
+  const requests: unknown[] = [];
+  let actualUser = structuredClone(API_USER);
+  await page.route('**/api/v1/users/41', route => json(route, actualUser));
+  await page.route('**/api/v1/users/41/roles', async route => {
+    expect(route.request().method()).toBe('PUT');
+    requests.push(route.request().postDataJSON());
+    if (requests.length === 1) return json(route, { error: 'сохранение временно недоступно' }, 503);
+    actualUser = { ...actualUser, roles: ['strategy'] };
+    return json(route, actualUser);
+  });
+  await openApiSession(page, '/profile?tab=roles');
+  const trigger = page.getByRole('button', { name: 'Изменить роли' });
+  const dialog = page.getByRole('dialog', { name: 'Роли в компании', exact: true });
+  const strategy = dialog.getByRole('checkbox', { name: /Директор по стратегии и развитию/ });
+  await trigger.click();
+  await strategy.check({ force: true });
+  await dialog.getByRole('button', { name: 'Отмена', exact: true }).click();
+  expect(requests).toEqual([]);
+  await trigger.click();
+  await expect(strategy).not.toBeChecked();
+  await strategy.check({ force: true });
+  await dialog.getByRole('button', { name: 'Сохранить роли', exact: true }).click();
+  await expect(dialog.getByRole('alert')).toContainText('сохранение временно недоступно');
+  await expect(strategy).toBeChecked();
+  await dialog.getByRole('button', { name: 'Сохранить роли', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+  expect(requests).toEqual([{ roles: ['cfo', 'strategy'] }, { roles: ['cfo', 'strategy'] }]);
+  await trigger.click();
+  await expect(strategy).toBeChecked();
+  await expect(dialog.getByRole('checkbox', { name: /^Финансовый директор/ })).not.toBeChecked();
+  await page.keyboard.press('Escape');
+  await page.getByRole('link', { name: 'Обзор', exact: true }).click();
+  await expect(page.getByRole('option', { name: 'Финансовый директор', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveCount(0);
+  await expect(page.locator('.w-sidebar-bottom')).toContainText('Директор по стратегии и развитию');
+  await expect(page.getByRole('heading', { name: API_FEED[0].news.title })).toHaveCount(0);
   expect(state.unknown).toEqual([]);
 });
 
@@ -382,7 +426,7 @@ test('handles a user with no company and null roles without requesting company m
   const state = await installApiMocks(page, { feed: null });
   await page.route('**/api/v1/users/41', route => json(route, { ...API_USER, companyId: null, roles: null }));
   await openApiSession(page, '/profile?tab=documents');
-  await expect(page.getByRole('heading', { name: 'Компания не привязана' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Компания не указана' })).toBeVisible();
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
   expect(state.requests.filter(request => request.includes('/companies/'))).toEqual([]);
   expect(state.unknown).toEqual([]);

@@ -18,11 +18,10 @@ export default function LoginPage({ onComplete }: { onComplete: (userId: number)
   const validate = () => ({ email: /^\S+@\S+\.\S+$/.test(email.trim()) ? undefined : "Укажите корректную электронную почту.", password: password ? undefined : "Введите пароль тестового аккаунта." });
   return <AuthShell mode="login"><h1>Войти в аккаунт</h1>
     {!isDemoMode ? <>
-      <p className="auth-intro">Серверный вход пока не подключён. Переход из Альфа-Бизнеса в этой версии показывает пользовательский путь и не передаёт банковскую сессию.</p>
-      <div className="auth-notice">Если профиль создан в этом браузере и вы не выходили из него, он восстановится автоматически. После выхода доступна регистрация нового профиля. Восстановление аккаунта по почте и паролю появится после подключения авторизации.</div>
+      <p className="auth-intro">Вход в существующий аккаунт пока недоступен. Вы можете зарегистрировать новый профиль.</p>
       <Link className="button button--primary" to="/register">Перейти к регистрации</Link>
+      <details className="data-note"><summary>О доступе к профилю</summary><p>Серверный вход пока не подключён. Профиль восстановится в этом браузере, если вы не выходили из него. После выхода доступна регистрация нового профиля.</p></details>
     </> : <>
-      <p className="auth-intro">Используйте один из двух подготовленных тестовых аккаунтов. Произвольные реквизиты не подойдут.</p>
       <form className="w-form" ref={form} noValidate onSubmit={(event) => {
         event.preventDefault(); const next = validate(); setErrors(next);
         const first = next.email ? "email" : next.password ? "password" : null;
@@ -36,7 +35,7 @@ export default function LoginPage({ onComplete }: { onComplete: (userId: number)
         {login.error && <div className="auth-problem" role="alert">{login.error.message}</div>}
         <Button type="submit" disabled={login.isPending}>{login.isPending ? "Проверяем…" : "Войти"}</Button>
       </form>
-      <details className="auth-demo-accounts" open><summary>Тестовые аккаунты</summary>{DEMO_ACCOUNTS.map((account) => <article key={account.userId}><strong>{account.label}</strong><p>{account.description}</p><code>{account.email}</code><code>{account.password}</code><button type="button" onClick={() => { setEmail(account.email); setPassword(account.password); setErrors({}); login.reset(); }}>Подставить реквизиты</button></article>)}</details>
+      <details className="auth-demo-accounts"><summary>Тестовые аккаунты</summary>{DEMO_ACCOUNTS.map((account) => <article key={account.userId}><strong>{account.label}</strong><p>{account.description}</p><code>{account.email}</code><code>{account.password}</code><button type="button" onClick={() => { setEmail(account.email); setPassword(account.password); setErrors({}); login.reset(); }}>Подставить реквизиты</button></article>)}</details>
     </>}
   </AuthShell>;
 }

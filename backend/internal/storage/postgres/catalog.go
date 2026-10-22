@@ -17,7 +17,7 @@ func (s *Store) ListRoles(ctx context.Context) ([]domain.Role, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var out []domain.Role
+	out := []domain.Role{}
 	for rows.Next() {
 		var r domain.Role
 		if err := rows.Scan(&r.ID, &r.Code, &r.Name, &r.Question, &r.Focus, &r.Elements); err != nil {
@@ -34,7 +34,7 @@ func (s *Store) ListProfileElements(ctx context.Context) ([]domain.ProfileElemen
 		return nil, err
 	}
 	defer rows.Close()
-	var out []domain.ProfileElement
+	out := []domain.ProfileElement{}
 	for rows.Next() {
 		var e domain.ProfileElement
 		if err := rows.Scan(&e.Code, &e.Block, &e.Name, &e.Description, &e.Purpose); err != nil {

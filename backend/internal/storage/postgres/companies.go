@@ -25,6 +25,7 @@ func (s *Store) GetCompany(ctx context.Context, id int64) (domain.Company, error
 	return c, err
 }
 
+// CreateCompany создаёт компанию. ErrINNTaken — компания с таким ИНН уже есть.
 func (s *Store) CreateCompany(ctx context.Context, c domain.Company) (domain.Company, error) {
 	if c.Profile == nil {
 		c.Profile = map[string]json.RawMessage{}
@@ -32,10 +33,19 @@ func (s *Store) CreateCompany(ctx context.Context, c domain.Company) (domain.Com
 	err := s.pool.QueryRow(ctx,
 		`INSERT INTO companies (inn, ogrn, name, profile) VALUES ($1, NULLIF($2, ''), $3, $4) RETURNING id`,
 		c.INN, c.OGRN, c.Name, c.Profile).Scan(&c.ID)
+	if pgCode(err) == "23505" {
+		return c, ErrINNTaken
+	}
 	if err != nil {
 		return c, err
 	}
 	return s.GetCompany(ctx, c.ID)
+}
+
+func (s *Store) CompanyExists(ctx context.Context, id int64) (bool, error) {
+	var ok bool
+	err := s.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM companies WHERE id = $1)`, id).Scan(&ok)
+	return ok, err
 }
 
 // PatchProfile сливает переданные элементы профиля с уже сохранёнными (JSONB ||).
@@ -51,15 +61,27 @@ func (s *Store) PatchProfile(ctx context.Context, id int64, patch map[string]jso
 	return s.GetCompany(ctx, id)
 }
 
+// CreateCompanyFile сохраняет метаданные файла. ErrNotFound — компании нет.
 func (s *Store) CreateCompanyFile(ctx context.Context, f domain.CompanyFile) (domain.CompanyFile, error) {
 	err := s.pool.QueryRow(ctx, `
 		INSERT INTO company_files (company_id, object_key, filename, content_type, size_bytes)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`,
 		f.CompanyID, f.ObjectKey, f.Filename, f.ContentType, f.SizeBytes).Scan(&f.ID, &f.CreatedAt)
+	if pgCode(err) == "23503" {
+		return f, ErrNotFound
+	}
 	return f, err
 }
 
+// ListCompanyFiles — файлы компании, новые первыми. ErrNotFound — компании нет.
 func (s *Store) ListCompanyFiles(ctx context.Context, companyID int64) ([]domain.CompanyFile, error) {
+	ok, err := s.CompanyExists(ctx, companyID)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, ErrNotFound
+	}
 	rows, err := s.pool.Query(ctx, `
 		SELECT id, company_id, object_key, filename, content_type, size_bytes, created_at
 		FROM company_files WHERE company_id = $1 ORDER BY created_at DESC`, companyID)

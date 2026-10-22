@@ -47,6 +47,9 @@ func (s *Store) UpsertNews(ctx context.Context, n domain.NewsItem) (int64, bool,
 }
 
 func (s *Store) AddFeedItem(ctx context.Context, userID int64, roleCode string, newsID int64, f domain.FeedItem) error {
+	if f.Elements == nil {
+		f.Elements = []string{} // nil ушёл бы в БД как NULL, а колонка NOT NULL
+	}
 	_, err := s.pool.Exec(ctx, `
 		INSERT INTO feed_items (user_id, role_id, news_id, kind, score, insight, elements)
 		SELECT $1, id, $3, $4, $5, $6, $7 FROM roles WHERE code = $2
@@ -74,7 +77,15 @@ func (s *Store) UsersForFeed(ctx context.Context) ([]domain.User, error) {
 }
 
 // Feed возвращает ленту пользователя; roleCode = "" — по всем его ролям.
+// ErrNotFound — пользователя нет (пустая лента существующего пользователя — пустой срез).
 func (s *Store) Feed(ctx context.Context, userID int64, roleCode string, limit int) ([]domain.FeedItem, error) {
+	ok, err := s.userExists(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, ErrNotFound
+	}
 	rows, err := s.pool.Query(ctx, `
 		SELECT f.id, r.code, f.kind, f.score, f.insight, f.elements, f.created_at, f.read_at,
 		       n.id, n.source_id, n.url, n.title, n.summary, n.published_at

@@ -2,8 +2,10 @@
 package httpapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,13 +13,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/devowt/alpha-hackaton/backend/internal/storage/files"
 	"github.com/devowt/alpha-hackaton/backend/internal/storage/postgres"
 )
 
+// FileStore — объектное хранилище файлов компаний (реализация — files.Store).
+type FileStore interface {
+	Put(ctx context.Context, key string, r io.Reader, size int64, contentType string) error
+}
+
 type Server struct {
 	Store     *postgres.Store
-	Files     *files.Store // nil, если объектное хранилище не настроено
+	Files     FileStore // nil, если объектное хранилище не настроено
 	StaticDir string
 	Log       *slog.Logger
 }
@@ -41,6 +47,11 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("PATCH /api/v1/companies/{id}/profile", s.patchProfile)
 	mux.HandleFunc("GET /api/v1/companies/{id}/files", s.listFiles)
 	mux.HandleFunc("POST /api/v1/companies/{id}/files", s.uploadFile)
+
+	// Неизвестный метод API — JSON 404, а не index.html со статусом 200 из SPA.
+	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusNotFound, apiError{"Метод API не найден"})
+	})
 
 	if s.StaticDir != "" {
 		mux.Handle("/", spa(s.StaticDir))
@@ -89,13 +100,26 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-func (s *Server) fail(w http.ResponseWriter, err error) {
-	if errors.Is(err, postgres.ErrNotFound) {
-		writeJSON(w, http.StatusNotFound, apiError{"not found"})
-		return
+// Тексты ошибок фронтенд показывает пользователю как есть, поэтому они на русском.
+const (
+	msgBadID           = "Некорректный идентификатор"
+	msgUserNotFound    = "Пользователь не найден"
+	msgCompanyNotFound = "Компания не найдена"
+)
+
+// fail переводит ошибку хранилища в HTTP-ответ; notFound — текст для 404.
+func (s *Server) fail(w http.ResponseWriter, err error, notFound string) {
+	switch {
+	case errors.Is(err, postgres.ErrNotFound):
+		writeJSON(w, http.StatusNotFound, apiError{notFound})
+	case errors.Is(err, postgres.ErrEmailTaken):
+		writeJSON(w, http.StatusConflict, apiError{"Пользователь с такой электронной почтой уже зарегистрирован"})
+	case errors.Is(err, postgres.ErrINNTaken):
+		writeJSON(w, http.StatusConflict, apiError{"Компания с таким ИНН уже зарегистрирована"})
+	default:
+		s.Log.Error("request failed", "err", err)
+		writeJSON(w, http.StatusInternalServerError, apiError{"Внутренняя ошибка сервера"})
 	}
-	s.Log.Error("request failed", "err", err)
-	writeJSON(w, http.StatusInternalServerError, apiError{"internal error"})
 }
 
 func badRequest(w http.ResponseWriter, msg string) {

@@ -153,12 +153,17 @@ func (s *Server) createCompany(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, "ОГРН должен содержать 13 или 15 цифр")
 		return
 	}
-	c, err := s.Store.CreateCompany(r.Context(), in)
+	// ИНН уже зарегистрирован — 200 и существующая компания: новый директор присоединяется к ней.
+	c, created, err := s.Store.CreateCompany(r.Context(), in)
 	if err != nil {
 		s.fail(w, err, "")
 		return
 	}
-	writeJSON(w, http.StatusCreated, c)
+	status := http.StatusOK
+	if created {
+		status = http.StatusCreated
+	}
+	writeJSON(w, status, c)
 }
 
 func (s *Server) getCompany(w http.ResponseWriter, r *http.Request) {

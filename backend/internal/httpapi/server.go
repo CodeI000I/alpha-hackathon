@@ -114,8 +114,6 @@ func (s *Server) fail(w http.ResponseWriter, err error, notFound string) {
 		writeJSON(w, http.StatusNotFound, apiError{notFound})
 	case errors.Is(err, postgres.ErrEmailTaken):
 		writeJSON(w, http.StatusConflict, apiError{"Пользователь с такой электронной почтой уже зарегистрирован"})
-	case errors.Is(err, postgres.ErrINNTaken):
-		writeJSON(w, http.StatusConflict, apiError{"Компания с таким ИНН уже зарегистрирована"})
 	default:
 		s.Log.Error("request failed", "err", err)
 		writeJSON(w, http.StatusInternalServerError, apiError{"Внутренняя ошибка сервера"})

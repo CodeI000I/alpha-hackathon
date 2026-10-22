@@ -4,16 +4,27 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 )
 
 type Config struct {
-	HTTPAddr     string
-	DatabaseURL  string
-	StaticDir    string // каталог со сборкой фронтенда; пусто = не отдавать статику
-	S3           S3
-	JevURL       string // адрес Jev (TypeSafe AI) — модели, которая решает, что попадёт в ленту
-	IngestPeriod time.Duration
+	HTTPAddr      string
+	DatabaseURL   string
+	StaticDir     string // каталог со сборкой фронтенда; пусто = не отдавать статику
+	S3            S3
+	Orchestrator  Orchestrator
+	InternalToken string // токен служебных маршрутов /api/v1/internal/...; пусто = маршруты выключены
+	IngestPeriod  time.Duration
+	RankMaxPerRun int           // сколько оценок новостей воркер делает за проход (бережёт суточный бюджет LLM)
+	RankLookback  time.Duration // оцениваются только новости, опубликованные не раньше now - RankLookback
+}
+
+// Orchestrator — AI-оркестратор (LangGraph), который решает, что попадёт в ленту.
+type Orchestrator struct {
+	URL     string // пусто = заглушка по ключевым словам
+	Token   string // совпадает с AI_SERVICE_TOKEN оркестратора
+	Timeout time.Duration
 }
 
 type S3 struct {
@@ -29,7 +40,11 @@ func Load() (Config, error) {
 		HTTPAddr:    env("HTTP_ADDR", ":8080"),
 		DatabaseURL: os.Getenv("DATABASE_URL"),
 		StaticDir:   os.Getenv("STATIC_DIR"),
-		JevURL:      os.Getenv("JEV_URL"),
+		Orchestrator: Orchestrator{
+			URL:   os.Getenv("ORCHESTRATOR_URL"),
+			Token: os.Getenv("ORCHESTRATOR_TOKEN"),
+		},
+		InternalToken: os.Getenv("INTERNAL_API_TOKEN"),
 		S3: S3{
 			Endpoint:  os.Getenv("S3_ENDPOINT"),
 			AccessKey: os.Getenv("S3_ACCESS_KEY"),
@@ -38,11 +53,22 @@ func Load() (Config, error) {
 			UseSSL:    env("S3_USE_SSL", "false") == "true",
 		},
 	}
-	period, err := time.ParseDuration(env("INGEST_PERIOD", "15m"))
-	if err != nil {
-		return c, fmt.Errorf("INGEST_PERIOD: %w", err)
+	var err error
+	for _, d := range []struct {
+		key, def string
+		dst      *time.Duration
+	}{
+		{"INGEST_PERIOD", "15m", &c.IngestPeriod},
+		{"ORCHESTRATOR_TIMEOUT", "5m", &c.Orchestrator.Timeout},
+		{"RANK_LOOKBACK", "168h", &c.RankLookback},
+	} {
+		if *d.dst, err = time.ParseDuration(env(d.key, d.def)); err != nil || *d.dst <= 0 {
+			return c, fmt.Errorf("%s: want a positive duration like 15m, got %q", d.key, env(d.key, d.def))
+		}
 	}
-	c.IngestPeriod = period
+	if c.RankMaxPerRun, err = strconv.Atoi(env("RANK_MAX_PER_RUN", "20")); err != nil || c.RankMaxPerRun < 1 {
+		return c, fmt.Errorf("RANK_MAX_PER_RUN: want a positive integer, got %q", env("RANK_MAX_PER_RUN", "20"))
+	}
 	if c.DatabaseURL == "" {
 		return c, fmt.Errorf("DATABASE_URL is required")
 	}

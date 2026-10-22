@@ -1,4 +1,4 @@
-# Тесты → сборка образа в приватный Docker Hub → новый тег в Helm values.
+# Тесты → сборка образа в приватный Docker Hub → новый тег в Helm values → GitHub Release.
 # Сам деплой делает Argo CD в кластере: он видит коммит с тегом и раскатывает чарт (docs/cd-k3s.md).
 name: CI-CD
 
@@ -152,3 +152,56 @@ jobs:
             git pull --rebase origin main
           done
           exit 1
+
+  release:
+    name: Publish GitHub release
+    needs: update-image-tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write   # тег и релиз
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # вся история и теги: следующая версия считается от последнего тега
+
+      # Семантическая версия по сообщениям коммитов с прошлого релиза (Conventional Commits):
+      # "type!:" или "BREAKING CHANGE" → major, "feat" → minor, остальное → patch.
+      # Первый релиз — 1.0.0. Коммиты бота с тегом образа ("[skip ci]") не считаются.
+      - name: Compute next version
+        id: version
+        run: |
+          if [ -n "$(git tag --points-at "$GITHUB_SHA" --list 'v[0-9]*')" ]; then
+            echo "$GITHUB_SHA is already released"
+            exit 0
+          fi
+          last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+          if [ -z "$last" ]; then
+            next=1.0.0
+          else
+            log=$(git log --format='%s%n%b' --invert-grep --grep='\[skip ci\]' "$last..$GITHUB_SHA")
+            if [ -z "$log" ]; then
+              echo "No changes since $last"
+              exit 0
+            fi
+            IFS=. read -r major minor patch <<<"${last#v}"
+            if grep -qE '^(\* )?[a-z]+(\([^)]*\))?!:|^BREAKING[ -]CHANGE' <<<"$log"; then
+              next="$((major + 1)).0.0"
+            elif grep -qE '^(\* )?feat(\([^)]*\))?:' <<<"$log"; then
+              next="$major.$((minor + 1)).0"
+            else
+              next="$major.$minor.$((patch + 1))"
+            fi
+          fi
+          echo "Next release: v$next"
+          echo "tag=v$next" >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        if: steps.version.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes \
+            --notes "Образ: тег \`$GITHUB_SHA\` в Docker Hub, его же раскатывает Argo CD."

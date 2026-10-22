@@ -5,6 +5,7 @@ go 1.23
 require (
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/minio/minio-go/v7 v7.0.84
+	golang.org/x/net v0.33.0
 )
 
 require (
@@ -20,7 +21,6 @@ require (
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect

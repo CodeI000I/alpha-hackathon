@@ -1,0 +1,281 @@
+/*
+ * Signal's reading hierarchy, mapped to the pinned Core Components type scale.
+ * headline-system-mobile_small 20/28/600; paragraph_primary_medium 16/24;
+ * paragraph_primary_small 14/20; paragraph_secondary_medium 12/16.
+ * Keep the existing system font and dark theme. This is not a full UI Kit import.
+ */
+.w-app {
+  --signal-section-size: 20px;
+  --signal-section-leading: 28px;
+  --signal-section-weight: 600;
+  --signal-body-size: 16px;
+  --signal-body-leading: 24px;
+  --signal-support-size: 14px;
+  --signal-support-leading: 20px;
+  --signal-caption-size: 12px;
+  --signal-caption-leading: 16px;
+  --signal-reading-text: #e0dfe6;
+}
+
+.w-detail > h1 {
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: -.5px;
+  margin-block: 20px 0;
+}
+
+.w-detail > .w-detail-actions {
+  margin-block: 24px 8px;
+}
+
+.w-detail > .w-analysis-section {
+  padding-block: var(--ab-spacing-24);
+}
+
+.w-app .w-analysis-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ab-spacing-8) var(--ab-spacing-12);
+  margin: 0 0 var(--ab-spacing-16);
+}
+
+.w-app .w-analysis-heading > :is(h2, h3),
+.w-detail > .w-bank > .bank-title > h2,
+.w-detail > .bank-expertise > header h2,
+.w-source-dialog .w-source-bank-card h3 {
+  margin: 0;
+  color: #f4f4f6;
+  font-size: var(--signal-section-size);
+  line-height: var(--signal-section-leading);
+  font-weight: var(--signal-section-weight);
+  letter-spacing: -.2px;
+}
+
+.w-app .w-analysis-heading > .w-provenance,
+.w-detail > .bank-expertise > .w-provenance {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border: 1px solid #ffffff0c;
+  border-radius: 6px;
+  background: #ffffff04;
+  color: #b9b9c4;
+  font-size: var(--signal-caption-size);
+  line-height: var(--signal-caption-leading);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.w-detail > .w-analysis-narrative > p:not(.w-small),
+.w-detail .w-scenarios p,
+.w-detail > .w-bank > p,
+.w-detail > .bank-expertise > .expertise-lead,
+.w-detail > .bank-expertise .expertise-conclusions p,
+.w-detail > .w-analysis-narrative > .w-next-steps,
+.w-detail > .bank-offers .bank-offer > .bank-offer-copy,
+.w-source-dialog .w-source-section > p:not(.w-small):not(.w-source-name),
+.w-source-dialog .w-source-bank-card > p {
+  margin: 0;
+  color: var(--signal-reading-text);
+  font-size: var(--signal-body-size);
+  line-height: var(--signal-body-leading);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.w-detail > .w-analysis-narrative > .w-small,
+.w-detail > .w-analysis-disclaimer,
+.w-source-dialog .w-source-content .w-small,
+.w-source-dialog .w-source-name {
+  color: var(--w-muted);
+  font-size: var(--signal-support-size);
+  line-height: var(--signal-support-leading);
+  font-weight: 400;
+}
+
+.w-detail > .w-analysis-narrative > .w-small {
+  margin: var(--ab-spacing-16) 0 0;
+}
+
+.w-detail > .w-personal {
+  padding: var(--ab-spacing-24);
+  margin-block: var(--ab-spacing-8) 0;
+}
+
+.w-detail .w-personal > .w-chips {
+  margin-top: var(--ab-spacing-16);
+}
+
+.w-detail .w-scenarios {
+  gap: var(--ab-spacing-12);
+}
+
+.w-detail .w-scenarios > div {
+  padding: var(--ab-spacing-16);
+}
+
+.w-detail .w-scenarios p {
+  margin-top: var(--ab-spacing-12);
+}
+
+.w-detail .w-source-pill {
+  margin-top: var(--ab-spacing-16);
+  font-size: var(--signal-caption-size) !important;
+  line-height: var(--signal-support-leading);
+  text-align: left;
+}
+
+.w-detail .w-source-pill > span:nth-child(2) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.w-source-prefix {
+  color: #aaaab6;
+}
+
+.w-detail > .w-bank,
+.w-detail > .bank-expertise,
+.w-detail > .bank-offers {
+  padding: var(--ab-spacing-24);
+  margin-block: var(--ab-spacing-24);
+}
+
+.w-detail > .w-bank > .bank-title {
+  margin-bottom: var(--ab-spacing-16);
+}
+
+.w-detail > .bank-expertise > h3 {
+  margin: var(--ab-spacing-16) 0 var(--ab-spacing-12);
+  font-size: var(--signal-section-size);
+  line-height: var(--signal-section-leading);
+  font-weight: var(--signal-section-weight);
+  letter-spacing: -.2px;
+}
+
+.w-detail > .bank-expertise > .w-provenance {
+  margin: var(--ab-spacing-12) 0 0;
+}
+
+.w-detail .expertise-conclusions h4,
+.w-detail > .bank-expertise > .expertise-next strong,
+.w-detail > .bank-offers .bank-offer-name {
+  font-size: var(--signal-body-size);
+  line-height: var(--signal-body-leading);
+  font-weight: 600;
+}
+
+.w-detail > .bank-offers .bank-offer > .bank-offer-copy {
+  margin: var(--ab-spacing-8) 0 var(--ab-spacing-16);
+}
+
+.w-detail > .bank-expertise > .expertise-next > span,
+.w-detail .expertise-documents > span {
+  font-size: var(--signal-caption-size);
+  line-height: var(--signal-caption-leading);
+}
+
+.w-detail .expertise-documents > button {
+  font-size: var(--signal-support-size);
+  line-height: var(--signal-support-leading);
+}
+
+.w-app .bank-offers > .bank-offers-label {
+  margin: 0;
+  font-size: var(--signal-caption-size);
+  line-height: var(--signal-caption-leading);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.w-detail > .bank-offers > .bank-offers-label {
+  color: #f4f4f6;
+  font-size: var(--signal-section-size);
+  line-height: var(--signal-section-leading);
+  font-weight: var(--signal-section-weight);
+}
+
+.w-detail > .bank-offers > .bank-offers-label > .bank-offers-mark {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--w-red);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.w-detail > .w-analysis-narrative > .w-next-steps {
+  padding-left: 24px;
+}
+
+.w-detail .w-next-steps > li + li {
+  margin-top: var(--ab-spacing-12);
+}
+
+.w-detail > .w-source-link {
+  margin-top: var(--ab-spacing-16);
+  font-size: var(--signal-support-size) !important;
+  line-height: var(--signal-support-leading);
+}
+
+.w-detail > .w-analysis-disclaimer {
+  margin: var(--ab-spacing-24) 0 0;
+  padding-top: var(--ab-spacing-16);
+}
+
+.w-source-dialog .w-source-content > h2 {
+  font-size: 24px;
+  line-height: 32px;
+  margin: 0 0 var(--ab-spacing-12);
+}
+
+.w-source-dialog .w-source-section {
+  padding-top: var(--ab-spacing-24);
+  margin-top: var(--ab-spacing-24);
+  border-top: 1px solid var(--w-line);
+}
+
+.w-source-dialog .w-source-section > p + p {
+  margin-top: var(--ab-spacing-12);
+}
+
+.w-source-dialog .w-source-section > .w-source-name {
+  margin: 0 0 var(--ab-spacing-8);
+}
+
+.w-source-dialog .w-source-documents {
+  padding-left: 20px;
+  margin-bottom: 0;
+  font-size: var(--signal-support-size);
+  line-height: var(--signal-support-leading);
+}
+
+.w-source-dialog .w-source-documents p {
+  font-size: var(--signal-support-size);
+  line-height: var(--signal-support-leading);
+  margin: var(--ab-spacing-8) 0 0;
+}
+
+.w-source-dialog .w-source-documents span {
+  font-size: var(--signal-caption-size);
+  line-height: var(--signal-caption-leading);
+}
+
+@media (max-width: 760px) {
+  .w-detail > h1 {
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .w-detail > .w-personal,
+  .w-detail > .w-bank,
+  .w-detail > .bank-expertise,
+  .w-detail > .bank-offers {
+    padding: 20px;
+  }
+}

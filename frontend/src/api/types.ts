@@ -1,5 +1,7 @@
 // Типы повторяют JSON-модели из backend/internal/domain/models.go.
 
+export type DataMode = "api" | "demo";
+
 export interface Role {
   id: number;
   code: string;
@@ -66,4 +68,18 @@ export interface CompanyFile {
   contentType: string;
   sizeBytes: number;
   createdAt: string;
+}
+
+export type CreateUserInput = Pick<User, "email" | "fullName" | "companyId" | "roles">;
+
+export type CreateCompanyInput = Pick<Company, "inn" | "name">;
+
+export interface DemoAccount {
+  userId: number;
+  companyId: number;
+  email: string;
+  password: string;
+  scenario: "technology" | "industrial";
+  label: string;
+  description: string;
 }

@@ -1,0 +1,52 @@
+.bank-offers{margin-top:16px;padding-top:14px;border-top:1px solid #ffffff10}
+.bank-offers-label{display:flex;align-items:center;gap:7px;font-size:10px;line-height:1.5;color:#b7b7c1}
+.bank-offers-mark{font-size:15px;color:#ff766c;font-weight:700;line-height:1.1}
+.bank-offer{position:relative;min-width:0;margin-top:12px;padding:14px 12px 12px;border:1px solid #ffffff08;border-radius:12px;background:#ffffff03}
+.bank-offer-name{display:block;padding-right:28px;font-size:12px;line-height:1.5;font-weight:600;color:#ecebf0;overflow-wrap:break-word}
+.bank-offer .bank-offer-copy{font-size:12px;line-height:1.6;margin:7px 0 12px;color:#b7b7c1;overflow-wrap:break-word}
+.bank-offers .bank-offer-hide,.bank-solution-dialog .bank-solution-close{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:28px;height:28px;min-height:0;padding:0;border:0;border-radius:8px;background:none;color:#92929f;line-height:1;cursor:pointer;transition:background-color 150ms ease,color 150ms ease}
+.bank-offers .bank-offer-hide{position:absolute;right:6px;top:8px}
+.bank-solution-dialog .bank-solution-close{width:32px;height:32px}
+.bank-offers .bank-offer-hide:hover,.bank-solution-dialog .bank-solution-close:hover{background:#414148;color:#ecebf0}
+.bank-offer-hide>svg,.bank-solution-close>svg{display:block;width:16px;height:16px;margin:0;flex-shrink:0}
+.bank-offers .bank-offer-action{display:inline-block;width:fit-content;max-width:100%;text-align:left;white-space:nowrap;background:none;border:0;padding:0;font-size:11px;line-height:1.65;font-weight:500;color:#ff9c94;cursor:pointer;transition:color 150ms ease}
+.bank-offers .bank-offer-action:hover,.bank-offers .bank-offer-action:focus-visible{color:#ffc5c0}
+.bank-offer-action>.bank-action-text{white-space:nowrap}
+.bank-action-text{display:inline;white-space:normal}
+/* Keep the arrow with the last word, including when the CTA wraps. */
+.bank-action-tail{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;vertical-align:baseline}
+.bank-action-tail>svg{display:block;width:16px;height:16px;margin:0;flex-shrink:0}
+.bank-restore{border:0;background:none;font-size:10px!important;color:#a9a9b2!important;padding:0;margin-top:12px;text-align:left}
+.bank-restore:hover{color:white!important}
+.bank-solution-dialog{width:min(640px,calc(100% - 32px));max-height:calc(100dvh - 48px);padding:28px;border:1px solid #ffffff12;border-radius:24px;background:#29292e;color:#f4f4f6;color-scheme:dark;box-shadow:0 32px 100px #0008}
+.bank-solution-dialog::backdrop{background:#08080caa;backdrop-filter:blur(5px)}
+.bank-solution-dialog>header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+.bank-solution-dialog h2{font-size:26px;line-height:1.25}
+.bank-context{color:#b7b7c1;font-size:12px;line-height:1.6;margin:14px 0}
+.bank-description{font-size:14px;line-height:1.8;margin:16px 0 24px}
+.bank-steps-heading{font-size:16px!important;margin:24px 0 16px!important}
+.bank-solution-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:14px}
+.bank-solution-steps li{display:flex;align-items:start;gap:12px;color:#ceced6;font-size:12px;line-height:1.7}
+.bank-solution-steps li span{width:24px;height:24px;flex-shrink:0;display:grid;place-items:center;background:#414148;color:#f4f4f6;border-radius:50%;font-size:11px}
+.bank-solution-dialog>footer{border-top:1px solid #ffffff12;margin-top:26px;padding-top:18px}
+.bank-solution-dialog>footer p{font-size:11px;line-height:1.7;color:#a9a9b2;margin:0 0 16px}
+.bank-official-link{display:block;text-align:center;background:#ef3124;padding:13px 16px;border-radius:12px;font-size:13px;line-height:1.6;color:#fff}
+.bank-official-link:hover{background:#d9281c}
+.deposit-calculator{padding:20px;background:#333339;border-radius:16px}
+.deposit-calculator h3{font-size:16px;margin:0 0 16px}
+.deposit-fields{display:grid;grid-template-columns:1.4fr 1fr 1.3fr;gap:12px}
+.deposit-fields label{display:flex;flex-direction:column;gap:8px;font-size:10px;color:#b7b7c1}
+.deposit-fields input{width:100%;min-width:0;padding:10px;border:1px solid #ffffff18;border-radius:9px;background:#29292e;color:#f4f4f6;font-size:13px}
+.deposit-calculator output{display:block;font-size:30px;letter-spacing:-.5px;margin-top:20px}
+.deposit-calculator output span{display:block;font-size:11px;color:#a9a9b2;letter-spacing:0}
+.deposit-calculator>p{font-size:10px;color:#a9a9b2;line-height:1.65;margin:14px 0 0}
+.w-detail .bank-offers{margin:28px 0;padding:24px;background:#303036;border:0;border-radius:18px}
+.w-detail .bank-offers-label{font-size:12px}
+.w-detail .bank-offer{padding:16px}
+.w-detail .bank-offer-name{font-size:14px}
+.w-detail .bank-offer .bank-offer-copy{font-size:14px}
+.w-detail .bank-offer-action{font-size:12px}
+.bank-offers button:focus-visible,.bank-solution-dialog a:focus-visible{outline:2px solid #b7b7c1;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.bank-offers .bank-offer-hide,.bank-solution-dialog .bank-solution-close,.bank-offers .bank-offer-action{transition:none}}
+@media(max-width:600px){.bank-solution-dialog{padding:22px}.bank-solution-dialog h2{font-size:22px}.deposit-fields{grid-template-columns:1fr 1fr}.deposit-fields label:first-child{grid-column:1/-1}.bank-official-link{font-size:12px}.bank-description{font-size:13px}}
+.bank-expertise{padding:26px;background:#303036;border-radius:20px;margin:28px 0}.bank-expertise>header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.bank-expertise h2{font-size:15px;letter-spacing:-.2px;margin:0}.bank-expertise>h3{font-size:23px;line-height:1.35;margin:22px 0 12px;letter-spacing:-.4px}.expertise-context-status{display:flex;align-items:center;gap:6px;font-size:10px;color:#b5c8bf}.expertise-context-status i{width:5px;height:5px;border-radius:50%;background:#86c7ad}.expertise-lead{font-size:14px;color:#d1d1da;line-height:1.85}.expertise-timeline{margin:24px 0;padding:20px;border-radius:14px;background:#252529;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px}.expertise-timeline>div:not(.expertise-timeline-bar):not(.expertise-timeline-labels){display:flex;flex-direction:column;gap:6px}.expertise-timeline span{font-size:10px;color:#a9a9b2}.expertise-timeline strong{font-size:19px;font-weight:500;white-space:nowrap}.expertise-timeline .expertise-gap strong{color:#ffaaa3}.expertise-timeline-bar{grid-column:1/-1;display:flex;gap:4px;margin-top:18px}.expertise-timeline-bar i{height:8px;background:#868691;border-radius:3px;flex:9}.expertise-timeline-bar i+i{background:#e78b82;flex:5}.expertise-timeline-labels{grid-column:1/-1;position:relative;display:flex;justify-content:space-between}.expertise-timeline-labels span:nth-child(2){position:absolute;left:64%;transform:translateX(-50%)}.expertise-conclusions{display:grid;grid-template-columns:1fr 1fr;gap:24px}.expertise-conclusions h4{font-size:12px;font-weight:600;margin:0 0 8px}.expertise-conclusions p{font-size:12px;color:#b7b7c1;line-height:1.8}.expertise-next{display:flex;flex-direction:column;gap:7px;margin:22px 0;padding:16px 18px;background:#ffffff05;border-radius:12px}.expertise-next>span{font-size:10px;color:#a9a9b2}.expertise-next strong{font-size:13px;line-height:1.7;font-weight:500}.expertise-documents{display:flex;flex-direction:column;align-items:start;gap:8px;border-top:1px solid #ffffff10;padding-top:18px}.expertise-documents>span{font-size:10px;color:#a9a9b2;margin-bottom:4px}.expertise-documents button{display:flex;align-items:center;gap:8px;padding:8px 10px;border:0;border-radius:8px;background:#3a3a41;font-size:10px;text-align:left;max-width:100%;overflow-wrap:anywhere}.expertise-documents button>span{color:#a9a9b2;margin-left:8px}.expertise-documents button:hover{background:#47474f}.expertise-documents svg{flex-shrink:0}@media(max-width:600px){.bank-expertise{padding:20px}.bank-expertise>h3{font-size:20px}.expertise-timeline{padding:16px 12px;gap:6px 8px}.expertise-timeline strong{font-size:15px}.expertise-timeline span{font-size:9px}.expertise-conclusions{grid-template-columns:1fr;gap:16px}}

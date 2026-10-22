@@ -13,7 +13,6 @@ import (
 var (
 	ErrNotFound   = errors.New("not found")
 	ErrEmailTaken = errors.New("email is already registered")
-	ErrINNTaken   = errors.New("inn is already registered")
 )
 
 // pgCode — код ошибки PostgreSQL (23505 unique_violation, 23503 foreign_key_violation, ...).

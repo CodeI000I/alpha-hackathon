@@ -100,8 +100,9 @@ func TestOnboarding(t *testing.T) {
 	var company domain.Company
 	json.Unmarshal(body, &company)
 
+	// Второй директор с тем же ИНН присоединяется к уже созданной компании, её данные не меняются.
 	status, body = call(t, "POST", srv.URL+"/api/v1/companies", map[string]string{"inn": inn, "name": "ООО Юг"})
-	expect(t, status, body, 409, "ИНН уже зарегистрирована")
+	expect(t, status, body, 200, fmt.Sprintf(`{"id":%d,"inn":"%s","ogrn":"","name":"ООО Север"`, company.ID, inn))
 
 	for _, bad := range []string{"123", "12345678901", "1234567890123", "12345abcde"} {
 		status, body = call(t, "POST", srv.URL+"/api/v1/companies", map[string]string{"inn": bad, "name": "ООО"})
@@ -160,7 +161,7 @@ func TestFeed(t *testing.T) {
 	srv, store := newTestServer(t, nil)
 	ctx := context.Background()
 	inn, email := unique()
-	company, err := store.CreateCompany(ctx, domain.Company{INN: inn, Name: "ООО Лента"})
+	company, _, err := store.CreateCompany(ctx, domain.Company{INN: inn, Name: "ООО Лента"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,7 +219,7 @@ func TestFiles(t *testing.T) {
 	files := &memFiles{}
 	srv, store = newTestServer(t, files)
 	inn, _ := unique()
-	company, err := store.CreateCompany(context.Background(), domain.Company{INN: inn, Name: "ООО Файлы"})
+	company, _, err := store.CreateCompany(context.Background(), domain.Company{INN: inn, Name: "ООО Файлы"})
 	if err != nil {
 		t.Fatal(err)
 	}

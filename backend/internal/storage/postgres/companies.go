@@ -25,21 +25,25 @@ func (s *Store) GetCompany(ctx context.Context, id int64) (domain.Company, error
 	return c, err
 }
 
-// CreateCompany создаёт компанию. ErrINNTaken — компания с таким ИНН уже есть.
-func (s *Store) CreateCompany(ctx context.Context, c domain.Company) (domain.Company, error) {
+// CreateCompany создаёт компанию, а если компания с таким ИНН уже есть, возвращает её
+// без изменений (created = false): в одной компании регистрируются несколько директоров.
+func (s *Store) CreateCompany(ctx context.Context, c domain.Company) (_ domain.Company, created bool, err error) {
 	if c.Profile == nil {
 		c.Profile = map[string]json.RawMessage{}
 	}
-	err := s.pool.QueryRow(ctx,
-		`INSERT INTO companies (inn, ogrn, name, profile) VALUES ($1, NULLIF($2, ''), $3, $4) RETURNING id`,
+	err = s.pool.QueryRow(ctx, `
+		INSERT INTO companies (inn, ogrn, name, profile) VALUES ($1, NULLIF($2, ''), $3, $4)
+		ON CONFLICT (inn) DO NOTHING RETURNING id`,
 		c.INN, c.OGRN, c.Name, c.Profile).Scan(&c.ID)
-	if pgCode(err) == "23505" {
-		return c, ErrINNTaken
+	created = err == nil
+	if errors.Is(err, pgx.ErrNoRows) {
+		err = s.pool.QueryRow(ctx, `SELECT id FROM companies WHERE inn = $1`, c.INN).Scan(&c.ID)
 	}
 	if err != nil {
-		return c, err
+		return c, false, err
 	}
-	return s.GetCompany(ctx, c.ID)
+	c, err = s.GetCompany(ctx, c.ID)
+	return c, created, err
 }
 
 func (s *Store) CompanyExists(ctx context.Context, id int64) (bool, error) {

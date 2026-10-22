@@ -2,7 +2,7 @@
 # Argo CD видит новый коммит и раскатывает его. Руками менять только для отката.
 image:
   repository: devowt/alpha-hackaton
-  tag: "a0370c4881fe87652c91daf8acf402ed3b6303c1"
+  tag: "f77788164a4cd301199b7833f9c797e0a4c2f19c"
   pullPolicy: IfNotPresent
 
 # Секрет для pull из приватного Docker Hub, создаётся вручную (см. docs/cd-k3s.md).

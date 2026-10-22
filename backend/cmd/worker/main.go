@@ -40,8 +40,11 @@ func main() {
 	}
 
 	var ranker feed.Ranker = feed.KeywordRanker{}
-	if cfg.OrchestratorURL != "" {
-		ranker = orchestrator.New(cfg.OrchestratorURL)
+	if o := cfg.Orchestrator; o.URL != "" {
+		if o.Token == "" {
+			log.Warn("ORCHESTRATOR_TOKEN is empty: the orchestrator will answer 401")
+		}
+		ranker = orchestrator.New(o.URL, o.Token, o.Timeout)
 	} else {
 		log.Warn("ORCHESTRATOR_URL is empty: using keyword ranker stub")
 	}
@@ -53,19 +56,42 @@ func main() {
 			"alfa": ingest.AlfaFetcher{},
 			"rss":  ingest.RSSFetcher{Client: httpClient},
 		},
-		Log: log,
+		Log:       log,
+		MaxPerRun: cfg.RankMaxPerRun,
+		Lookback:  cfg.RankLookback,
 	}
+
+	// Импорт новостей и новые директора будят воркер: карточки появляются сразу, а не через INGEST_PERIOD.
+	wake := make(chan struct{}, 1)
+	go func() {
+		for {
+			err := store.ListenFeedRefresh(ctx, wake)
+			if ctx.Err() != nil {
+				return
+			}
+			log.Warn("listen feed_refresh", "err", err)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(30 * time.Second):
+			}
+		}
+	}()
 
 	ticker := time.NewTicker(cfg.IngestPeriod)
 	defer ticker.Stop()
+	run := p.RunOnce
 	for {
-		if err := p.RunOnce(ctx); err != nil {
+		if err := run(ctx); err != nil {
 			log.Error("ingest run failed", "err", err)
 		}
 		select {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
+			run = p.RunOnce
+		case <-wake:
+			run = p.Rank
 		}
 	}
 }

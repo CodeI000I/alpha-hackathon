@@ -3,12 +3,13 @@ package orchestrator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/devowt/alpha-hackaton/backend/internal/domain"
 	"github.com/devowt/alpha-hackaton/backend/internal/feed"
 )
 
@@ -17,16 +18,25 @@ func TestRank(t *testing.T) {
 		if r.Method != http.MethodPost || r.URL.Path != "/rank" {
 			t.Errorf("got %s %s", r.Method, r.URL.Path)
 		}
-		var req feed.Request
+		if got := r.Header.Get("Authorization"); got != "Bearer secret" {
+			t.Errorf("Authorization = %q", got)
+		}
+		var req map[string]json.RawMessage
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			t.Fatal(err)
 		}
-		json.NewEncoder(w).Encode([]feed.Match{{Role: req.Roles[0], Kind: "risk", Score: 0.9, Insight: req.News.Title}})
+		// Полный текст новости нужен оркестратору, хотя во фронтенд он не уходит.
+		var news feed.News
+		json.Unmarshal(req["news"], &news)
+		if !strings.Contains(string(req["news"]), `"body":"Полный текст"`) {
+			t.Errorf("news without body: %s", req["news"])
+		}
+		json.NewEncoder(w).Encode([]feed.Match{{Role: "procurement", Kind: "risk", Score: 0.9, Insight: news.Title}})
 	}))
 	defer srv.Close()
 
-	got, err := New(srv.URL+"/").Rank(context.Background(), feed.Request{
-		News:  domain.NewsItem{Title: "Санкции против поставщика"},
+	got, err := New(srv.URL+"/", "secret", time.Minute).Rank(context.Background(), feed.Request{
+		News:  feed.News{Title: "Санкции против поставщика", Body: "Полный текст"},
 		Roles: []string{"procurement"},
 	})
 	if err != nil {
@@ -37,14 +47,43 @@ func TestRank(t *testing.T) {
 	}
 }
 
-func TestRankError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "Budget has been exceeded", http.StatusTooManyRequests)
-	}))
-	defer srv.Close()
+func TestRankErrors(t *testing.T) {
+	for _, tc := range []struct {
+		status     int
+		retryAfter string
+		permanent  bool
+		wait       time.Duration
+	}{
+		{http.StatusTooManyRequests, "3600", false, time.Hour},
+		{http.StatusServiceUnavailable, "", false, 0},
+		{http.StatusUnauthorized, "", false, 0},
+		{http.StatusUnprocessableEntity, "", true, 0},
+	} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if tc.retryAfter != "" {
+				w.Header().Set("Retry-After", tc.retryAfter)
+			}
+			http.Error(w, `{"error":{"code":"budget_exceeded"}}`, tc.status)
+		}))
+		_, err := New(srv.URL, "", time.Minute).Rank(context.Background(), feed.Request{})
+		srv.Close()
 
-	_, err := New(srv.URL).Rank(context.Background(), feed.Request{})
-	if err == nil || !strings.Contains(err.Error(), "Budget has been exceeded") {
-		t.Fatalf("want error with response body, got %v", err)
+		var fe *feed.Error
+		if !errors.As(err, &fe) {
+			t.Fatalf("%d: want *feed.Error, got %v", tc.status, err)
+		}
+		if fe.Permanent != tc.permanent || fe.RetryAfter != tc.wait || !strings.Contains(err.Error(), "budget_exceeded") {
+			t.Errorf("%d: got permanent=%v retryAfter=%v err=%v", tc.status, fe.Permanent, fe.RetryAfter, err)
+		}
+	}
+}
+
+func TestRetryAfterDate(t *testing.T) {
+	now := time.Date(2026, 10, 22, 12, 0, 0, 0, time.UTC)
+	if got := retryAfter("Thu, 22 Oct 2026 12:30:00 GMT", now); got != 30*time.Minute {
+		t.Fatalf("got %v", got)
+	}
+	if got := retryAfter("soon", now); got != 0 {
+		t.Fatalf("got %v", got)
 	}
 }

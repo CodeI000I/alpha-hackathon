@@ -43,7 +43,7 @@ func run(log *slog.Logger) error {
 		return err
 	}
 
-	srv := &httpapi.Server{Store: store, StaticDir: cfg.StaticDir, Log: log}
+	srv := &httpapi.Server{Store: store, StaticDir: cfg.StaticDir, InternalToken: cfg.InternalToken, Log: log}
 	if cfg.S3.Endpoint != "" {
 		if srv.Files, err = files.New(ctx, cfg.S3); err != nil {
 			return err

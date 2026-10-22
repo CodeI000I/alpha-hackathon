@@ -22,10 +22,11 @@ type FileStore interface {
 }
 
 type Server struct {
-	Store     *postgres.Store
-	Files     FileStore // nil, если объектное хранилище не настроено
-	StaticDir string
-	Log       *slog.Logger
+	Store         *postgres.Store
+	Files         FileStore // nil, если объектное хранилище не настроено
+	StaticDir     string
+	InternalToken string // токен служебных маршрутов; пусто = выключены
+	Log           *slog.Logger
 }
 
 func (s *Server) Handler() http.Handler {
@@ -47,6 +48,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("PATCH /api/v1/companies/{id}/profile", s.patchProfile)
 	mux.HandleFunc("GET /api/v1/companies/{id}/files", s.listFiles)
 	mux.HandleFunc("POST /api/v1/companies/{id}/files", s.uploadFile)
+
+	mux.HandleFunc("POST /api/v1/internal/news", s.internalOnly(s.importNews))
 
 	// Неизвестный метод API — JSON 404, а не index.html со статусом 200 из SPA.
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
@@ -117,6 +120,14 @@ func (s *Server) fail(w http.ResponseWriter, err error, notFound string) {
 	default:
 		s.Log.Error("request failed", "err", err)
 		writeJSON(w, http.StatusInternalServerError, apiError{"Внутренняя ошибка сервера"})
+	}
+}
+
+// refreshFeed будит воркер: директор получит уже готовые карточки по своим ролям сразу,
+// а не через INGEST_PERIOD. Ошибка не мешает ответу — карточки появятся на следующем проходе.
+func (s *Server) refreshFeed(r *http.Request) {
+	if err := s.Store.RequestFeedRefresh(r.Context()); err != nil {
+		s.Log.Warn("request feed refresh", "err", err)
 	}
 }
 

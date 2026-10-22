@@ -68,6 +68,7 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, err, msgCompanyNotFound) // 404 здесь возможен только из-за companyId
 		return
 	}
+	s.refreshFeed(r)
 	writeJSON(w, http.StatusCreated, u)
 }
 
@@ -102,6 +103,7 @@ func (s *Server) setUserRoles(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, err, msgUserNotFound)
 		return
 	}
+	s.refreshFeed(r)
 	u, err := s.Store.GetUser(r.Context(), id)
 	if err != nil {
 		s.fail(w, err, msgUserNotFound)

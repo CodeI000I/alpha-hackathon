@@ -37,14 +37,16 @@ func (s *Store) EnabledSources(ctx context.Context) ([]SourceConfig, error) {
 func (s *Store) UpsertNews(ctx context.Context, n domain.NewsItem) (int64, bool, error) {
 	var id int64
 	var inserted bool
-	err := s.pool.QueryRow(ctx, `
-		INSERT INTO news_items (source_id, external_id, url, title, summary, body, published_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		ON CONFLICT (source_id, external_id) DO UPDATE SET title = EXCLUDED.title
-		RETURNING id, (xmax = 0)`,
+	err := s.pool.QueryRow(ctx, upsertNews,
 		n.SourceID, n.ExternalID, n.URL, n.Title, n.Summary, n.Body, n.PublishedAt).Scan(&id, &inserted)
 	return id, inserted, err
 }
+
+const upsertNews = `
+	INSERT INTO news_items (source_id, external_id, url, title, summary, body, published_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
+	ON CONFLICT (source_id, external_id) DO UPDATE SET title = EXCLUDED.title
+	RETURNING id, (xmax = 0)`
 
 func (s *Store) AddFeedItem(ctx context.Context, userID int64, roleCode string, newsID int64, f domain.FeedItem) error {
 	if f.Elements == nil {
@@ -56,24 +58,6 @@ func (s *Store) AddFeedItem(ctx context.Context, userID int64, roleCode string, 
 		ON CONFLICT (user_id, role_id, news_id) DO NOTHING`,
 		userID, roleCode, newsID, f.Kind, f.Score, f.Insight, f.Elements)
 	return err
-}
-
-// UsersForFeed — все пользователи с их ролями (для построения лент).
-func (s *Store) UsersForFeed(ctx context.Context) ([]domain.User, error) {
-	rows, err := s.pool.Query(ctx, userSelect+` GROUP BY u.id ORDER BY u.id`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []domain.User
-	for rows.Next() {
-		var u domain.User
-		if err := rows.Scan(&u.ID, &u.CompanyID, &u.Email, &u.FullName, &u.CreatedAt, &u.Roles); err != nil {
-			return nil, err
-		}
-		out = append(out, u)
-	}
-	return out, rows.Err()
 }
 
 // Feed возвращает ленту пользователя; roleCode = "" — по всем его ролям.

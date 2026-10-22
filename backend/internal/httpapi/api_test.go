@@ -41,7 +41,7 @@ func newTestServer(t *testing.T, files FileStore) (*httptest.Server, *postgres.S
 	if err := store.Migrate(ctx, migrations.FS); err != nil {
 		t.Fatal(err)
 	}
-	s := &Server{Store: store, Files: files, Log: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	s := &Server{Store: store, Files: files, InternalToken: testToken, Log: slog.New(slog.NewTextHandler(io.Discard, nil))}
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
 	return srv, store
@@ -184,6 +184,46 @@ func TestFeed(t *testing.T) {
 	}
 	status, body = call(t, "GET", feedURL+"?role=cfo&limit=1000", nil)
 	expect(t, status, body, 200, `"elements":[]`)
+}
+
+const testToken = "test-internal-token"
+
+func TestImportNews(t *testing.T) {
+	srv, store := newTestServer(t, nil)
+	url := srv.URL + "/api/v1/internal/news"
+	post := func(token string, body any) (int, []byte) {
+		b, _ := json.Marshal(body)
+		req, _ := http.NewRequest("POST", url, bytes.NewReader(b))
+		if token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		return do(t, req)
+	}
+	_, email := unique()
+	news := []map[string]any{{"title": " Ставка ЦБ " + email, "body": "Полный текст", "publishedAt": "2026-10-22T10:30:00Z"}}
+
+	status, body := post("", news)
+	expect(t, status, body, 401, "Нужен служебный токен")
+	status, body = post("wrong", news)
+	expect(t, status, body, 401, "Нужен служебный токен")
+	status, body = post(testToken, map[string]any{"title": "не массив"})
+	expect(t, status, body, 400, "Ожидается JSON-массив")
+	status, body = post(testToken, []map[string]any{{"title": "  "}})
+	expect(t, status, body, 400, "Новость 1: укажите title")
+	status, body = post(testToken, []map[string]any{{"title": "x", "sourceId": "S999"}})
+	expect(t, status, body, 404, "Источник не найден")
+
+	status, body = post(testToken, news)
+	expect(t, status, body, 200, `"created":true`)
+	// Без externalId и url повтор того же текста — та же новость.
+	status, body = post(testToken, news)
+	expect(t, status, body, 200, `"created":false`)
+
+	// Без INTERNAL_API_TOKEN маршрут выключен.
+	off := httptest.NewServer((&Server{Store: store, Log: slog.New(slog.NewTextHandler(io.Discard, nil))}).Handler())
+	defer off.Close()
+	status, body = call(t, "POST", off.URL+"/api/v1/internal/news", news)
+	expect(t, status, body, 404, "Метод API не найден")
 }
 
 type memFiles struct {

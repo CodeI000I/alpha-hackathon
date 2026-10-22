@@ -14,6 +14,7 @@ import LoginPage from './pages/LoginPage';
 import { localKey, useStoredState } from './localState';
 import { clearCurrentUserId, currentUserId } from './session';
 import { legacyTarget } from './legacyRoutes';
+import { resolveActiveRole } from './roleSelection';
 
 function LegacyRedirect() { const location = useLocation(); return <Navigate to={legacyTarget(location.pathname + location.search)} replace />; }
 function LegacyHashRedirect({ target }: { target: string }) {
@@ -27,8 +28,8 @@ function AuthenticatedLayout({ userId, onLogout }: { userId: number; onLogout: (
   const company = useQuery({ queryKey: ['company', companyId], queryFn: ({ signal }) => api.company(companyId!, signal), enabled: companyId !== null });
   const [saved, setSaved] = useStoredState<number[]>(localKey(userId, 'saved', companyId), []);
   const [storedRole, setActiveRole] = useStoredState<string>(localKey(userId, 'activeRole', companyId), '');
-  const activeRole = user.data?.roles.includes(storedRole) ? storedRole : '';
-  useEffect(() => { if (user.data && storedRole && !user.data.roles.includes(storedRole)) setActiveRole(''); }, [user.data, storedRole, setActiveRole]);
+  const activeRole = resolveActiveRole(user.data?.roles ?? [], storedRole);
+  useEffect(() => { if (user.data && storedRole && !user.data.roles.includes(storedRole)) setActiveRole(activeRole); }, [user.data, storedRole, activeRole, setActiveRole]);
   if (user.isPending) return <div className="fatal-state" role="status">Открываем Сигнал…</div>;
   if (user.isError && !user.data) return <div className="fatal-state"><StatePanel tone="error" title="Не удалось восстановить сессию" text={user.error.message} action={<><Button onClick={() => user.refetch()}>Повторить</Button> <Button onClick={onLogout}>Начать заново</Button></>} /></div>;
   const toggleSaved = (id: number) => setSaved(current => current.includes(id) ? current.filter(value => value !== id) : [...current, id]);

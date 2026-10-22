@@ -47,7 +47,7 @@ for (const account of ['finance', 'operations'] as const) {
     const expected = await loginDemo(page, account);
 
     await expect(page.getByText(expected.company, { exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: expected.event })).toBeVisible();
+    await expect(page.getByRole('heading', { name: account === 'finance' ? 'Расширена программа поддержки технологических компаний' : 'Производитель представил локальную замену импортным комплектующим' })).toBeVisible();
     const storedUserId = await page.evaluate(() => localStorage.getItem('signal.session.v2.demo.userId'));
     expect(storedUserId).toBe(account === 'finance' ? '1' : '2');
   });
@@ -95,21 +95,22 @@ test('restores and then clears the local demo session', async ({ page }) => {
 
 test('filters, searches, and persists local bookmarks', async ({ page }) => {
   await loginDemo(page, 'finance');
-  await expect(page.locator('.w-event')).toHaveCount(3);
+  await expect(page.locator('.w-event')).toHaveCount(1);
 
   const dailySummary = page.getByRole('region', { name: 'Сводка за 24 часа' });
   await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
   await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await expect(page.locator('.w-event')).toHaveCount(2);
   await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
-  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('');
-  await expect(page.locator('.w-event')).toHaveCount(3);
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('strategy');
+  await expect(page.locator('.w-event')).toHaveCount(1);
 
   await page.getByLabel('Поиск по событиям').fill('программа поддержки');
   await expect(page.locator('.w-event')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: 'Расширена программа поддержки технологических компаний' })).toBeVisible();
 
   await page.getByLabel('Поиск по событиям').fill('');
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await page.getByRole('button', { name: 'Риски', exact: true }).click();
   await expect(page.locator('.w-event')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: DEMO_ACCOUNTS.finance.event })).toBeVisible();
@@ -207,7 +208,7 @@ test('key pages have no horizontal overflow at desktop, tablet, mobile, and low 
       await page.goto(path);
       if (path === '/bank.html') await expect(page.getByText('Демонстрационный прототип', { exact: true })).toBeVisible();
       else await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
-      if (path === '/dashboard') await expect(page.locator('.w-event')).toHaveCount(3);
+      if (path === '/dashboard') await expect(page.locator('.w-event')).toHaveCount(1);
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
         `${path} should fit ${viewport.width}×${viewport.height}`,
@@ -252,7 +253,7 @@ test('saved items and role-scoped chats never carry into another demo company', 
   await page.getByRole('button', { name: 'Выйти', exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   await loginDemo(page, 'operations');
-  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('');
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('procurement');
   await expect(page.locator('.w-message-user')).toHaveCount(0);
   await page.getByRole('link', { name: /Закладки/ }).click();
   await expect(page.locator('.w-event')).toHaveCount(0);
@@ -327,7 +328,7 @@ test('avatar restores prototype sections and workspace logo returns to the Signa
   await loginDemo(page, 'finance');
   await expect(page.locator('.w-topbar').getByText('Деморежим', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Активный ракурс', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('option', { name: 'Все роли', exact: true })).toBeAttached();
+  await expect(page.getByRole('option', { name: 'Все роли', exact: true })).toHaveCount(0);
   const trigger = page.getByRole('button', { name: 'Меню пользователя' });
   await trigger.click();
   const menu = page.locator('.w-profile-menu');
@@ -347,6 +348,81 @@ test('avatar restores prototype sections and workspace logo returns to the Signa
   }
   await page.locator('.w-topbar > .w-brand').click();
   await expect(page).toHaveURL(/\/dashboard$/);
+});
+
+test('header shows a named role, preserves its choice, and falls back after that role is removed', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  const header = page.locator('.w-topbar');
+  const selector = header.getByRole('combobox', { name: 'Ваша роль' });
+  await expect(selector).toHaveValue('strategy');
+  await expect(selector.getByRole('option')).toHaveText(['Директор по стратегии и развитию', 'Финансовый директор']);
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveCount(1);
+  await expect(page.getByRole('option', { name: 'Все роли', exact: true })).toHaveCount(0);
+  await expect(page.locator('.signal-page-heading select')).toHaveCount(0);
+  await expect(page.locator('.w-sidebar-bottom').getByRole('link', { name: /роли/ })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Сводка за 24 часа' }).getByRole('link', { name: 'Мои роли' })).toHaveCount(0);
+
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 520 }]) {
+    await page.setViewportSize(viewport);
+    await expect(selector).toBeVisible();
+    const roleBox = await selector.boundingBox();
+    const avatarBox = await header.getByRole('button', { name: 'Меню пользователя' }).boundingBox();
+    const headerBox = await header.boundingBox();
+    expect(roleBox!.x + roleBox!.width).toBeLessThanOrEqual(avatarBox!.x);
+    expect(roleBox!.y).toBeGreaterThanOrEqual(headerBox!.y);
+    expect(roleBox!.y + roleBox!.height).toBeLessThanOrEqual(headerBox!.y + headerBox!.height);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await page.screenshot({ path: `node_modules/.cache/header-role-${viewport.width}.png` });
+  }
+
+  await selector.selectOption('cfo');
+  await expect(page.locator('.w-event')).toHaveCount(2);
+  await expect(page.locator('.daily-balance > strong')).toHaveText('3');
+  await page.reload();
+  await expect(selector).toHaveValue('cfo');
+  await page.goto('/profile?tab=roles');
+  await expect(selector).toHaveValue('cfo');
+  await page.getByRole('button', { name: 'Изменить роли' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Роли в компании', exact: true });
+  await dialog.getByRole('checkbox', { name: /^Финансовый директор/ }).uncheck({ force: true });
+  await dialog.getByRole('button', { name: 'Сохранить роли' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(selector).toHaveCount(0);
+  await expect(header).toContainText('Директор по стратегии и развитию');
+  await page.goto('/dashboard');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.locator('.daily-balance > strong')).toHaveText('1');
+  await expect(page.getByRole('heading', { name: DEMO_ACCOUNTS.finance.event })).toHaveCount(0);
+  await page.reload();
+  await expect(header).toContainText('Директор по стратегии и развитию');
+  expect(await page.evaluate(() => localStorage.getItem('alpha.insights.v2.demo.company.1.user.1.activeRole'))).toBe('"strategy"');
+});
+
+test('profile role editing is a small gray pencil action beside the role heading', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  await page.goto('/profile?tab=roles');
+  const row = page.locator('.profile-role-summary-heading');
+  const trigger = row.getByRole('button', { name: 'Изменить роли' });
+  await expect(trigger).toHaveText('Изменить');
+  await expect(trigger.locator('svg')).toBeVisible();
+  await expect(trigger).toHaveCSS('font-size', '12px');
+  await expect(trigger).toHaveCSS('color', 'rgb(170, 170, 180)');
+  await expect(trigger).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 520 }]) {
+    await page.setViewportSize(viewport);
+    const heading = await row.getByRole('heading').boundingBox();
+    const action = await trigger.boundingBox();
+    expect(action!.height).toBeGreaterThanOrEqual(32);
+    expect(action!.width).toBeLessThan(120);
+    expect(Math.abs(action!.y - heading!.y)).toBeLessThan(55);
+    await row.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `node_modules/.cache/compact-role-action-${viewport.width}.png` });
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('dialog', { name: 'Роли в компании', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(trigger).toBeFocused();
+  }
 });
 
 test('role editor is optional, discards cancelled drafts, and supports keyboard and short screens', async ({ page }) => {

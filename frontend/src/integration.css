@@ -11,13 +11,19 @@
 .w-sidebar-bottom { display: flex; flex-direction: column; gap: 12px; }
 .w-sidebar-bottom strong { font-size: 13px; line-height: 1.5; }
 .w-sidebar-bottom > span { font-size: 11px; color: #a9a9b2; }
+.w-topbar { gap: 24px; }
+.w-topbar > .w-brand, .w-topbar > .w-top-service, .w-topbar > .w-user-menu { flex-shrink: 0; }
+.w-header-role { position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-width: 0; max-width: 320px; min-height: 36px; padding: 6px 8px; color: #babbc2; font-size: 12px; line-height: 18px; border-radius: 8px; }
+.w-header-role-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-header-role > svg { flex-shrink: 0; }
+.w-header-role > select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.w-header-role:has(select):hover { color: #f3f1f5; background: #ffffff08; }
+.w-header-role:focus-within { outline: 2px solid #b7b7c1; outline-offset: 2px; }
 .w-profile-menu { max-width: calc(100vw - 32px); max-height: calc(100dvh - 90px); overflow-y: auto; overflow-wrap: anywhere; }
 .w-profile-menu > a { border: 0; background: none; border-radius: 10px; padding: 10px; text-align: left; font-size: 13px; color: inherit; }
 .w-profile-menu > a:hover { background: #484851; }
 .signal-page-heading { display: flex; gap: 24px; align-items: center; justify-content: space-between; margin: 0 0 28px; }
 .signal-page-heading h1 { font-size: 28px; line-height: 36px; letter-spacing: -.8px; margin-top: 6px; }
-.signal-role-filter { display: grid; gap: 6px; font-size: 11px; color: #babbc2; min-width: 0; max-width: 320px; }
-.signal-role-filter select { border: 1px solid #ffffff20; border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0; background: #29292e; color: white; font-size: 13px; }
 .integration-warning { padding: 16px; border: 1px solid #c59c5d; border-radius: 12px; margin-bottom: 16px; font-size: 14px; color: #ffe2b0; background: #423522; overflow-wrap: anywhere; }
 .integration-warning button { background: none; border: 0; color: inherit; text-decoration: underline; }
 .signal-muted, .signal-detail-meta { color: #a9a9b2; font-size: 14px; line-height: 22px; margin-top: 12px; }
@@ -38,9 +44,8 @@
 .daily-dot { width: 6px; height: 6px; border-radius: 50%; background: #b7b7c1; }
 .daily-dot.risk { background: #e78b82; }.daily-dot.opportunity { background: #86c7ad; }
 .daily-story > span { color: #a9a9b2; font-size: 12px; margin-bottom: 8px; }
-.daily-summary .daily-footer { grid-template-columns: 1fr auto; align-items: center; }
+.daily-summary .daily-footer { grid-template-columns: 1fr; align-items: center; }
 .daily-footer p { font-size: 11px; line-height: 18px; color: #a9a9b2; }
-.daily-focus-link { font-size: 12px; white-space: nowrap; }
 .daily-footer .data-note { margin: 0; }
 .w-chat-title { display: flex; align-items: center; gap: 8px; padding: 20px; }
 .w-chat, .general-chat { padding: 0; }
@@ -73,14 +78,19 @@
 .w-main .state-panel { margin-block: 18px; }
 .signal-keyword-matches { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 11px; color: #a9a9b2; margin-top: 12px; }
 .signal-keyword-matches mark { background: #4b3c2a; color: #ffdcad; padding: 3px 7px; border-radius: 6px; }
+@media (max-width: 1000px) {
+  .w-topbar .w-header-date { display: none; }
+  .w-header-role { margin-left: auto; }
+}
 @media (max-width: 760px) {
   .signal-page-heading { flex-direction: column; align-items: stretch; gap: 16px; }
-  .signal-role-filter { max-width: none; }
+  .w-topbar { gap: 12px; }
+  .w-header-role { flex: 1 1 0; max-width: 260px; font-size: 11px; padding-inline: 4px; }
   .w-topbar .w-brand { font-size: 0; gap: 0; }
   .w-topbar .w-brand .w-alfa { font-size: 22px; }
   .w-topbar .w-top-service { display: inline-flex; font-size: 18px; }
   .w-topbar .w-header-date { display: none; }
-  .w-topbar .w-user-menu { margin-left: auto; }
+  .w-topbar .w-user-menu { margin-left: 0; }
   .daily-summary .daily-footer { grid-template-columns: 1fr; gap: 12px; }
   .daily-balance > span { margin: 0; }
   .daily-balance .daily-counts { grid-column: 2; }

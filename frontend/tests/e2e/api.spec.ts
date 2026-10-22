@@ -270,7 +270,7 @@ test('role cancellation sends no PUT and failed saves retry while honoring the s
   await page.getByRole('link', { name: 'Обзор', exact: true }).click();
   await expect(page.getByRole('option', { name: 'Финансовый директор', exact: true })).toHaveCount(0);
   await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveCount(0);
-  await expect(page.locator('.w-sidebar-bottom')).toContainText('Директор по стратегии и развитию');
+  await expect(page.locator('.w-topbar')).toContainText('Директор по стратегии и развитию');
   await expect(page.getByRole('heading', { name: API_FEED[0].news.title })).toHaveCount(0);
   expect(state.unknown).toEqual([]);
 });

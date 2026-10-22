@@ -103,11 +103,10 @@ export default function CompanyPage({ userId }: { userId: number }) {
     <div className="w-profile-grid"><section className="w-panel w-profile-panel">
       {tab === "roles" && <div className="w-form">
         <h2>Моя роль</h2><dl className="profile-person"><div><dt>Имя</dt><dd>{user.data.fullName}</dd></div><div><dt>Электронная почта</dt><dd>{user.data.email}</dd></div></dl>
-        <section className="profile-role-summary"><h3>{user.data.roles.length > 1 ? "Ваши роли в компании" : "Ваша роль в компании"}</h3>
+        <section className="profile-role-summary"><div className="profile-role-summary-heading"><h3>{user.data.roles.length > 1 ? "Ваши роли в компании" : "Ваша роль в компании"}</h3><button ref={roleTrigger} className="profile-role-edit" type="button" aria-label={user.data.roles.length ? "Изменить роли" : "Выбрать роли"} disabled={roles.isError || roles.isLoading || !roles.data?.length} onClick={() => { setSelectedRoles(user.data.roles.filter((code) => roles.data?.some((role) => role.code === code))); saveRoles.reset(); setRoleDialogOpen(true); }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6 5-2" /></svg>{user.data.roles.length ? "Изменить" : "Выбрать"}</button></div>
         {roles.isLoading && <p role="status">Загружаем роли…</p>}
         {roles.isError && <StatePanel tone="error" title="Роли не загрузились" text={roles.error.message} action={<Button onClick={() => roles.refetch()}>Повторить</Button>} />}
         {roles.data && <>{user.data.roles.length ? <ul className="profile-current-roles">{user.data.roles.map((code) => <li key={code}>{roles.data.find((role) => role.code === code)?.name || "Название роли недоступно"}</li>)}</ul> : <p className="w-muted">Роль пока не выбрана.</p>}</>}
-        <Button ref={roleTrigger} variant="secondary" disabled={roles.isError || roles.isLoading || !roles.data?.length} onClick={() => { setSelectedRoles(user.data.roles.filter((code) => roles.data?.some((role) => role.code === code))); saveRoles.reset(); setRoleDialogOpen(true); }}>{user.data.roles.length ? "Изменить роли" : "Выбрать роли"}</Button>
         </section>
         <section className="profile-demo-section"><span className="w-demo">Демо</span><Directions values={directions} onChange={setDirections} editable /></section>
       </div>}

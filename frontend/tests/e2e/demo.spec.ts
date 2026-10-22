@@ -408,6 +408,21 @@ test('profile role editing is a small gray pencil action beside the role heading
   await expect(trigger).toHaveCSS('font-size', '12px');
   await expect(trigger).toHaveCSS('color', 'rgb(170, 170, 180)');
   await expect(trigger).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  const chips = page.locator('.profile-current-roles');
+  const chip = chips.getByRole('listitem').first();
+  await expect(chips).toHaveCSS('margin-top', '8px');
+  await expect(chips).toHaveCSS('margin-bottom', '0px');
+  await expect(page.locator('.profile-role-summary')).toHaveCSS('padding-top', '16px');
+  await expect(chip.locator('button, a, input, [tabindex]')).toHaveCount(0);
+  await expect(chip).not.toHaveAttribute('tabindex');
+  await expect(chip).toHaveCSS('cursor', 'default');
+  const selectedRole = await page.getByRole('combobox', { name: 'Ваша роль' }).inputValue();
+  await chip.click();
+  await expect(page.getByRole('dialog', { name: 'Роли в компании', exact: true })).toBeHidden();
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue(selectedRole);
+  await chip.hover();
+  await expect(chip).toHaveCSS('background-color', 'rgb(77, 51, 54)');
+  await expect(chip).toHaveCSS('color', 'rgb(255, 170, 163)');
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 520 }]) {
     await page.setViewportSize(viewport);
     const heading = await row.getByRole('heading').boundingBox();
@@ -415,8 +430,13 @@ test('profile role editing is a small gray pencil action beside the role heading
     expect(action!.height).toBeGreaterThanOrEqual(32);
     expect(action!.width).toBeLessThan(120);
     expect(Math.abs(action!.y - heading!.y)).toBeLessThan(55);
+    const chipsBox = await chips.boundingBox();
+    const nextSectionBox = await page.locator('.profile-demo-section').boundingBox();
+    expect(nextSectionBox!.y - chipsBox!.y - chipsBox!.height).toBeCloseTo(22, 0);
     await row.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `node_modules/.cache/compact-role-action-${viewport.width}.png` });
+    await chip.hover();
+    await expect(chip).toHaveCSS('background-color', 'rgb(77, 51, 54)');
+    await page.screenshot({ path: `node_modules/.cache/role-spacing-hover-${viewport.width}.png` });
     await trigger.focus();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('dialog', { name: 'Роли в компании', exact: true })).toBeVisible();

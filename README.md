@@ -5,17 +5,18 @@ Repository for alpha-future hackaton on course "News analytics for business deci
 
 * Архитектура: [docs/architecture.md](docs/architecture.md)
 * Деплой в k3s и CI: [docs/cd-k3s.md](docs/cd-k3s.md)
+* API backend: [backend/API.md](backend/API.md), изменения и выпуск версий: [backend/CHANGELOG.md](backend/CHANGELOG.md)
 
 ## Что где лежит
 
 ```
 .
-├── .github/workflows/ci-cd.yaml  тесты → образ в приватный Docker Hub → новый тег в values.yaml
+├── .github/workflows/ci-cd.yaml  тесты → образ в приватный Docker Hub → новый тег в values.yaml → GitHub Release
 ├── Dockerfile               сборка одного образа: фронтенд + два Go-бинарника (server, worker)
 ├── docker-compose.yml       Postgres и RustFS (S3) для локальной разработки
 ├── Makefile                 make up / server / worker / web / build / seed / chart
 ├── .env.example             переменные окружения (скопировать в .env)
-├── backend/                 Go-модуль
+├── backend/                 Go-модуль; API.md — контракт API, CHANGELOG.md — изменения
 │   ├── cmd/server/main.go   точка входа API: читает конфиг, применяет миграции, слушает :8080
 │   ├── cmd/worker/main.go   точка входа воркера: по таймеру собирает новости и строит ленты
 │   ├── internal/config/     настройки из переменных окружения

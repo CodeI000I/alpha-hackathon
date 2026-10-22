@@ -1,161 +1,53 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
-import { api } from "../api/client";
-import EventCard from "../components/EventCard";
-import { DemoChat } from "../components/DemoChat";
-import { TrendChart } from "../components/Charts";
-import { Badge, Button, DemoBadge, SearchField, StatePanel } from "../components/ui";
-import { filterFeedItems } from "../feedFilters";
-import type { FeedFilter } from "../feedFilters";
-import { localKey, useStoredState } from "../localState";
-
-const filters: Array<{ value: FeedFilter; label: string }> = [
-  { value: "all", label: "Все события" },
-  { value: "risk", label: "Риски" },
-  { value: "opportunity", label: "Возможности" },
-  { value: "event", label: "События" },
-  { value: "saved", label: "Сохранённые · Демо" },
-];
-
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link, useSearchParams } from 'react-router-dom';
+import { api, isDemoMode } from '../api/client';
+import { DEMO_NOW } from '../api/mocks';
+import { useWorkspace } from '../appContext';
+import EventCard from '../components/EventCard';
+import { DemoChat } from '../components/DemoChat';
+import { Button, StatePanel } from '../components/ui';
+import { Icon } from '../components/Icon';
+import { filterFeedItems, type FeedFilter } from '../feedFilters';
+import { localKey, useStoredState } from '../localState';
+import { WidgetBoard } from '../signal/DashboardOverview';
+import { ActionIcon } from '../signal/components/ActionIcon';
+import { assignedFeed, dailySummary, KIND_LABELS } from '../report';
+const filters: Array<[FeedFilter, string]> = [['all', 'Все'], ['risk', 'Риски'], ['opportunity', 'Возможности'], ['event', 'События'], ['saved', 'Закладки · Демо']];
 export default function FeedPage({ userId }: { userId: number }) {
-  const user = useQuery({ queryKey: ["user", userId], queryFn: () => api.user(userId) });
-  const roles = useQuery({ queryKey: ["roles"], queryFn: api.roles });
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [role, setRole] = useState("");
-  const [filter, setFilter] = useState<FeedFilter>("all");
-  const [query, setQuery] = useState("");
-  const [saved, setSaved] = useStoredState<number[]>(localKey(userId, "saved"), []);
-  const feed = useQuery({
-    queryKey: ["feed", userId, role],
-    queryFn: ({ signal }) => api.feed(userId, role || undefined, 200, signal),
-  });
-  const activeFilter: FeedFilter = searchParams.get("saved") === "1" ? "saved" : filter;
-
-  const roleName = (code: string) => roles.data?.find((item) => item.code === code)?.name ?? code;
-  const visibleItems = useMemo(
-    () => filterFeedItems(feed.data ?? [], { filter: activeFilter, query, savedIds: saved }),
-    [activeFilter, feed.data, query, saved],
-  );
-
-  const selectFilter = (next: FeedFilter) => {
-    setFilter(next === "saved" ? "all" : next);
-    const params = new URLSearchParams(searchParams);
-    if (next === "saved") params.set("saved", "1");
-    else params.delete("saved");
-    setSearchParams(params, { replace: true });
-  };
-
-  const toggleSaved = (id: number) => {
-    setSaved((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
-  };
-
-  const now = new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "long",
-    weekday: "long",
-  }).format(new Date());
-
-  return (
-    <div className="dashboard-page">
-      <header className="page-heading page-heading--dashboard">
-        <div>
-          <span className="eyebrow">{now}</span>
-          <h1>Обзор событий</h1>
-          <p>Новости и объяснения, отобранные с учётом вашей компании и ролей.</p>
-        </div>
-        <div className="heading-metrics" aria-label="Сводка ленты">
-          <div><strong>{feed.data?.length ?? "—"}</strong><span>в ленте</span></div>
-          <div><strong>{saved.length}</strong><span>сохранено</span></div>
-        </div>
-      </header>
-
-      <div className="role-tabs" role="tablist" aria-label="Фильтр по роли">
-        <button className={!role ? "is-active" : ""} type="button" onClick={() => setRole("")}>
-          Все роли
-        </button>
-        {user.data?.roles.map((code) => (
-          <button key={code} className={role === code ? "is-active" : ""} type="button" onClick={() => setRole(code)}>
-            {roleName(code)}
-          </button>
-        ))}
+  const { user, roles, activeRole, setActiveRole, saved, toggleSaved } = useWorkspace();
+  const [params, setParams] = useSearchParams(); const [filter, setFilter] = useState<FeedFilter>('all'); const [query, setQuery] = useState('');
+  const [keywords] = useStoredState<string[]>(localKey(userId, 'keywords', user.companyId), []);
+  useEffect(() => {
+    const requestedRole = params.get('role');
+    if (requestedRole === null) return;
+    if (user.roles.includes(requestedRole)) setActiveRole(requestedRole);
+    const changed = new URLSearchParams(params); changed.delete('role'); setParams(changed, { replace: true });
+  }, [params, user.roles, setActiveRole, setParams]);
+  const feed = useQuery({ queryKey: ['feed', userId, user.roles], queryFn: ({ signal }) => api.feed(userId, undefined, 200, signal) });
+  const allItems = assignedFeed(feed.data, user.roles);
+  const activeFilter = params.get('saved') === '1' ? 'saved' : filter;
+  const visibleItems = filterFeedItems(allItems.filter(item => !activeRole || item.role === activeRole), { filter: activeFilter, query, savedIds: saved });
+  const summary = dailySummary(allItems, isDemoMode ? Date.parse(DEMO_NOW) : Date.now());
+  const roleName = (code: string) => roles.find(role => role.code === code)?.name ?? code;
+  const selectFilter = (next: FeedFilter) => { setFilter(next === 'saved' ? 'all' : next); const changed = new URLSearchParams(params); if (next === 'saved') changed.set('saved', '1'); else changed.delete('saved'); setParams(changed, { replace: true }); };
+  return <>
+    <div className="signal-page-heading"><div><span className="w-eyebrow">Сигнал для вашей компании</span><h1>Обзор событий</h1></div><label className="signal-role-filter">Активный ракурс<select value={activeRole} onChange={event => setActiveRole(event.target.value)}><option value="">Все назначенные роли</option>{user.roles.map(code => <option key={code} value={code}>{roleName(code)}</option>)}</select></label></div>
+    {feed.isRefetchError && <p className="integration-warning" role="alert">Обновление ленты не удалось. Показаны ранее полученные данные. <button onClick={() => feed.refetch()}>Повторить</button></p>}
+    {feed.data && <section className="daily-summary" aria-label="Сводка за 24 часа">
+      <header className="daily-header"><div><span className="daily-kicker">Последние 24 часа{isDemoMode ? ' · демонстрационный период' : ''}</span><h2>{summary.items.length ? 'Что важно сегодня' : 'За сутки новых событий нет'}</h2></div></header>
+      <div className="daily-body"><div className="daily-balance"><strong>{summary.items.length}</strong><span>событий в выборке</span><div className="daily-counts">{(['risk', 'opportunity', 'event'] as const).map(kind => <button key={kind} onClick={() => selectFilter(kind)}><span className={'daily-dot ' + kind} />{KIND_LABELS[kind]}: {summary.counts[kind]}</button>)}</div></div>
+        {summary.items.slice().sort((a, b) => b.score - a.score).slice(0, 2).map(item => <div className="daily-story" key={item.id}><span>{KIND_LABELS[item.kind]}</span><strong>{item.news.title}</strong><p>{item.news.summary}</p><Link className="daily-story-link action-link" to={'/news/' + item.id}>К разбору <ActionIcon /></Link></div>)}
       </div>
-
-      <div className="dashboard-grid">
-        <section className="feed-column" aria-label="Лента событий">
-          <div className="feed-toolbar">
-            <SearchField
-              id="feed-search"
-              label="Поиск по событиям"
-              hideLabel
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Поиск по событиям и темам"
-            />
-            <div className="filter-pills" aria-label="Фильтр событий">
-              {filters.map((item) => (
-                <button
-                  className={activeFilter === item.value ? "is-active" : ""}
-                  type="button"
-                  key={item.value}
-                  onClick={() => selectFilter(item.value)}
-                >
-                  {item.label}
-                  {item.value === "saved" && saved.length > 0 && <span>{saved.length}</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {feed.isLoading && <div className="feed-skeleton" aria-label="Загрузка ленты"><i /><i /><i /></div>}
-          {feed.isError && (
-            <StatePanel
-              tone="error"
-              title="Лента не загрузилась"
-              text={feed.error.message}
-              action={<Button onClick={() => feed.refetch()}>Повторить</Button>}
-            />
-          )}
-          {!feed.isLoading && !feed.isError && visibleItems.length === 0 && (
-            <StatePanel
-              title={feed.data?.length ? "Ничего не найдено" : "В ленте пока нет событий"}
-              text={
-                feed.data?.length
-                  ? "Измените поисковый запрос или сбросьте фильтры."
-                  : "События появятся после того, как backend соберёт новости и сформирует рекомендации."
-              }
-              action={
-                feed.data?.length ? (
-                  <Button variant="secondary" onClick={() => { selectFilter("all"); setQuery(""); }}>
-                    Сбросить фильтры
-                  </Button>
-                ) : undefined
-              }
-            />
-          )}
-
-          <div className="event-list">
-            {visibleItems.map((item) => (
-              <EventCard
-                item={item}
-                key={item.id}
-                roleName={roleName(item.role)}
-                saved={saved.includes(item.id)}
-                onToggleSave={() => toggleSaved(item.id)}
-              />
-            ))}
-          </div>
-        </section>
-
-        <aside className="dashboard-rail">
-          <section className="panel activity-panel">
-            <div className="panel-heading"><div><span className="eyebrow">Динамика</span><h2>События за неделю</h2></div><DemoBadge /></div>
-            <TrendChart compact />
-            <div className="legend-row"><Badge tone="risk">Риски</Badge><Badge tone="opportunity">Возможности</Badge></div>
-          </section>
-          <DemoChat itemTitle="события в вашей ленте" roleName={role ? roleName(role) : "все ваши роли"} compact />
-        </aside>
-      </div>
-    </div>
-  );
+      <footer className="daily-footer"><p>Сводка рассчитана по времени публикации из полученных записей, максимум 200. Это не резюме ИИ. Период: {new Date(summary.start).toLocaleString('ru-RU')} — {new Date(summary.end).toLocaleString('ru-RU')}.</p><Link className="daily-focus-link" to="/profile?tab=roles">Настроить фокус</Link></footer>
+    </section>}
+    <div className="w-dashboard-grid"><section aria-label="Лента событий"><header className="w-feed-heading"><h2>События для вас</h2><span>{visibleItems.length} из {allItems.length}</span></header>
+      <div className="w-filterbar">{filters.map(([value, label]) => <button key={value} className={activeFilter === value ? 'active' : ''} aria-pressed={activeFilter === value} onClick={() => selectFilter(value)}>{label}</button>)}</div>
+      <label className="w-search"><Icon name="search" size={18} /><span className="sr-only">Поиск по событиям</span><input type="search" placeholder="Поиск по событиям и темам" value={query} onChange={event => setQuery(event.target.value)} />{query && <button aria-label="Очистить поиск" onClick={() => setQuery('')}><Icon name="close" size={16} /></button>}</label>
+      {feed.isPending && <StatePanel title="Загружаем события…" text="Получаем ленту для ваших ролей." />}
+      {feed.isError && !feed.data && <StatePanel tone="error" title="Лента не загрузилась" text={feed.error.message} action={<Button onClick={() => feed.refetch()}>Повторить</Button>} />}
+      {!feed.isPending && !feed.isError && !visibleItems.length && <StatePanel title={allItems.length ? 'Ничего не найдено' : 'В ленте пока нет событий'} text={allItems.length ? 'Попробуйте другой запрос или фильтр.' : 'События появятся после обработки новостей сервером для назначенных ролей.'} action={allItems.length ? <Button onClick={() => { selectFilter('all'); setQuery(''); }}>Сбросить фильтры</Button> : undefined} />}
+      <div className="w-feed">{visibleItems.map(item => <EventCard key={item.id} item={item} keywords={keywords} roleName={roleName(item.role)} saved={saved.includes(item.id)} onToggleSave={() => toggleSaved(item.id)} />)}</div>
+    </section><aside className="w-context-column"><WidgetBoard storageKey={localKey(userId, 'widgets', user.companyId)} /><DemoChat userId={userId} companyId={user.companyId} itemTitle="события в вашей ленте" roleName={activeRole ? roleName(activeRole) : 'все назначенные роли'} compact /></aside></div>
+  </>;
 }

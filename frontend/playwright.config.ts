@@ -11,19 +11,36 @@ export default defineConfig({
   reporter: "line",
   outputDir: "node_modules/.cache/playwright-results",
   use: {
-    baseURL: "http://127.0.0.1:4173",
     ...devices["Desktop Chrome"],
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  webServer: {
-    command: "npm run dev -- --host 127.0.0.1 --port 4173 --strictPort",
-    env: {
-      ...process.env,
-      VITE_DATA_MODE: "demo",
+  projects: [
+    {
+      name: "demo",
+      testMatch: /demo\.spec\.ts/,
+      use: { baseURL: "http://127.0.0.1:4173" },
     },
-    url: "http://127.0.0.1:4173",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+    {
+      name: "api",
+      testMatch: /api\.spec\.ts/,
+      use: { baseURL: "http://127.0.0.1:4174" },
+    },
+  ],
+  webServer: [
+    {
+      command: "npm run dev -- --host 127.0.0.1 --port 4173 --strictPort",
+      env: { ...process.env, VITE_DATA_MODE: "demo" },
+      url: "http://127.0.0.1:4173",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: "npm run dev -- --host 127.0.0.1 --port 4174 --strictPort",
+      env: { ...process.env, VITE_DATA_MODE: "api" },
+      url: "http://127.0.0.1:4174",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

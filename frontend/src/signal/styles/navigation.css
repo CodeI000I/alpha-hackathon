@@ -1,0 +1,479 @@
+/* Shared offsets keep the sticky workspace and news controls in separate rows. */
+:root {
+  --w-topbar-height: 80px;
+  --w-primary-nav-height: 0px;
+  --w-news-toolbar-height: 48px;
+  --w-news-rail-height: 0px;
+  --w-sticky-gap: 12px;
+  --w-workspace-top: calc(var(--w-topbar-height) + var(--w-primary-nav-height));
+  --w-news-panels-top: calc(var(--w-workspace-top) + var(--w-news-toolbar-height) + var(--w-sticky-gap));
+  --w-news-content-top: var(--w-news-panels-top);
+}
+
+html:has(.w-layout) {
+  scroll-padding-top: calc(var(--w-workspace-top) + var(--w-sticky-gap));
+}
+
+html:has(.w-main-news) {
+  scroll-padding-top: var(--w-news-content-top);
+}
+
+/* Only the panels themselves scroll. Their ancestors must not capture sticky. */
+.w-app:has(> .w-layout),
+.w-layout,
+.w-layout > .w-main,
+.w-main-news .w-detail-grid {
+  overflow: visible;
+}
+
+.w-layout > .w-main {
+  margin-block: 0;
+}
+
+.w-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-sizing: border-box;
+  height: var(--w-topbar-height);
+  min-height: var(--w-topbar-height);
+  background: #222225;
+}
+
+.w-layout > .w-sidebar {
+  position: sticky;
+  top: var(--w-topbar-height);
+  z-index: 30;
+  align-self: start;
+  box-sizing: border-box;
+  min-height: 0;
+  height: calc(100vh - var(--w-topbar-height));
+  height: calc(100dvh - var(--w-topbar-height));
+  max-height: calc(100dvh - var(--w-topbar-height));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  background: var(--w-page);
+}
+
+.w-sidebar > .w-company,
+.w-sidebar > nav,
+.w-sidebar > .w-sidebar-bottom {
+  flex-shrink: 0;
+}
+
+.w-sidebar > .w-sidebar-bottom {
+  padding-top: 32px;
+}
+
+.w-news-toolbar {
+  position: sticky;
+  top: var(--w-workspace-top);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--w-news-toolbar-height);
+  margin-bottom: var(--w-sticky-gap);
+  background: var(--w-page);
+  border-bottom: 1px solid var(--w-line);
+}
+
+.w-news-toolbar > .w-back {
+  min-height: 32px;
+  margin: 0;
+  padding: 6px 0;
+}
+
+.w-main-news .w-news-list {
+  position: sticky;
+  top: var(--w-news-panels-top);
+  z-index: 20;
+  align-self: start;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(100vh - var(--w-news-panels-top) - 16px);
+  max-height: calc(100dvh - var(--w-news-panels-top) - 16px);
+  padding-right: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  background: var(--w-page);
+}
+
+.w-main-news .w-news-list > button {
+  flex-shrink: 0;
+}
+
+.w-news-list > button:focus-visible {
+  outline: 2px solid #b7b7c1;
+  outline-offset: -2px;
+}
+
+.w-main-news .w-chat {
+  position: sticky;
+  top: var(--w-news-content-top);
+  align-self: start;
+  min-height: 0;
+  max-height: calc(100vh - var(--w-news-content-top) - 16px);
+  max-height: calc(100dvh - var(--w-news-content-top) - 16px);
+}
+
+.w-main-news .w-chat-body {
+  min-height: 0;
+  overscroll-behavior-y: contain;
+}
+
+.w-main-news .w-chat-head,
+.w-main-news .w-chat-form {
+  flex-shrink: 0;
+}
+
+.w-main-news .w-detail,
+.w-main-news .w-detail :is([id], button, a, input, textarea, select) {
+  /* The root scroll padding already reserves the complete sticky stack. */
+  scroll-margin-top: var(--w-sticky-gap);
+}
+
+/* The native dialog stays hidden until opened; its return controls never scroll away. */
+.w-dialog.w-source-dialog {
+  box-sizing: border-box;
+  width: min(640px, calc(100% - 32px));
+  height: min(760px, calc(100vh - 48px));
+  height: min(760px, calc(100dvh - 48px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: hidden;
+}
+
+.w-dialog.w-source-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.w-source-dialog > .w-source-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ffffff12;
+  background: #29292e;
+}
+
+.w-source-dialog .w-source-header .w-source-return {
+  min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.w-source-header > .w-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  line-height: 1;
+}
+
+.w-source-header > .w-icon > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.w-source-dialog > .w-source-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 24px 28px 28px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scroll-padding-block: 24px;
+  overflow-wrap: anywhere;
+}
+
+.w-source-content > h2 {
+  margin: 0 0 20px;
+}
+
+.w-source-content > p {
+  margin: 10px 0 18px;
+}
+
+.w-source-content > .w-provenance {
+  margin-top: 24px;
+}
+
+.w-source-content .w-source-bank-card {
+  margin-top: 26px;
+  padding: 20px;
+  border: 1px solid #ffffff12;
+  border-radius: 16px;
+  background: #323238;
+}
+
+.w-source-bank-card > .bank-title {
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+.w-source-bank-card .w-bank-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  font-size: 21px;
+}
+
+.w-source-bank-card h3 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.w-source-bank-card p {
+  margin: 0;
+  color: #c7c7d0;
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+@media (max-width: 1250px) {
+  :root {
+    --w-news-rail-height: 104px;
+    --w-news-content-top: calc(var(--w-news-panels-top) + var(--w-news-rail-height) + var(--w-sticky-gap));
+  }
+
+  .w-main-news .w-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-rows: var(--w-news-rail-height) auto;
+    row-gap: 16px;
+  }
+
+  .w-main-news .w-news-list {
+    /* Span the article row so the sticky rail is not confined to its own short row. */
+    grid-column: 1 / -1;
+    grid-row: 1 / 3;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 204px;
+    grid-template-rows: 16px minmax(0, 1fr);
+    gap: 6px 8px;
+    width: 100%;
+    height: var(--w-news-rail-height);
+    max-height: none;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--w-line);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 4px;
+  }
+
+  .w-main-news .w-news-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .w-main-news .w-news-list > .w-eyebrow {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    grid-column: 1;
+    grid-row: 1;
+    display: block;
+    width: max-content;
+    padding: 0 4px;
+    font-size: 9px;
+    line-height: 16px;
+    background: var(--w-page);
+  }
+
+  .w-main-news .w-news-list > button {
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    gap: 3px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .w-main-news .w-news-list > button > span {
+    font-size: 9px;
+    line-height: 12px;
+  }
+
+  .w-main-news .w-news-list strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 15px;
+  }
+
+  .w-main-news .w-news-list em {
+    display: none;
+  }
+
+  .w-main-news .w-detail {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .w-main-news .w-chat {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --w-primary-nav-height: 56px;
+  }
+
+  .w-layout {
+    display: block;
+  }
+
+  .w-layout > .w-sidebar {
+    height: var(--w-primary-nav-height);
+    max-height: none;
+    padding: 6px 18px;
+    border-right: 0;
+    border-bottom: 1px solid var(--w-line);
+    overflow: visible;
+  }
+
+  .w-sidebar > .w-company,
+  .w-sidebar > .w-sidebar-bottom {
+    display: none;
+  }
+
+  .w-sidebar > nav {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .w-sidebar > nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .w-sidebar .w-nav {
+    flex: 1 0 auto;
+    width: auto;
+    min-width: max-content;
+    min-height: 40px;
+    justify-content: center;
+    padding: 8px 10px;
+    line-height: 20px;
+    white-space: nowrap;
+  }
+
+  .w-sidebar .w-count {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --w-topbar-height: 68px;
+    --w-primary-nav-height: 52px;
+    --w-news-toolbar-height: 44px;
+    --w-news-rail-height: 92px;
+    --w-sticky-gap: 8px;
+  }
+
+  .w-layout > .w-sidebar {
+    padding-inline: 16px;
+  }
+
+  .w-sidebar .w-nav {
+    min-height: 38px;
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .w-main-news .w-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--w-news-rail-height) auto auto;
+  }
+
+  .w-main-news .w-news-list {
+    grid-row: 1 / 4;
+    grid-auto-columns: 170px;
+    grid-template-rows: 14px minmax(0, 1fr);
+    row-gap: 4px;
+    padding-block: 6px;
+  }
+
+  .w-main-news .w-news-list > .w-eyebrow {
+    line-height: 14px;
+  }
+
+  .w-main-news .w-chat {
+    position: static;
+    grid-column: 1;
+    grid-row: 3;
+    max-height: none;
+  }
+
+  .w-main-news .w-chat-body {
+    overflow: visible;
+  }
+
+  .w-dialog.w-source-dialog {
+    width: calc(100% - 24px);
+    height: calc(100vh - 32px);
+    height: calc(100dvh - 32px);
+    border-radius: 20px;
+  }
+
+  .w-source-dialog > .w-source-header {
+    padding: 12px;
+  }
+
+  .w-source-dialog > .w-source-content {
+    padding: 20px;
+  }
+
+  .w-source-content .w-source-bank-card {
+    padding: 16px;
+  }
+}
+
+/* In landscape/short windows the composer needs more height than the sticky slot. */
+@media (max-height: 700px) {
+  .w-main-news .w-chat {
+    position: static;
+    max-height: none;
+  }
+}

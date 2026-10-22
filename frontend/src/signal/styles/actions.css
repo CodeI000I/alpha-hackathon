@@ -1,0 +1,17 @@
+:is(.w-app,.landing-v3){--action-icon-size:16px;--action-icon-gap:7px}
+:is(.w-app,.landing-v3) .action-icon{width:var(--action-icon-size);height:var(--action-icon-size);flex-shrink:0;vertical-align:middle}
+:is(.w-app,.landing-v3) .action-back{display:inline-flex;align-items:center;justify-content:flex-start;gap:var(--action-icon-gap);font-size:12px;line-height:20px;text-align:left}
+:is(.w-app,.landing-v3) .action-back>.action-icon{display:block;margin:0}
+:is(.w-app,.landing-v3) .action-back:focus-visible{outline:2px solid #b7b7c1;outline-offset:3px}
+.w-app .w-text-btn,.w-app .w-source-link,.w-app .w-detail-actions>button,.w-app .w-nav{gap:var(--action-icon-gap)}
+.w-app .w-source-link>.action-icon,.w-app .w-back>.action-icon,.w-app .w-detail-actions>button>svg{width:16px;height:16px}
+.w-app .bank-action-tail{gap:var(--action-icon-gap)}
+.w-app .daily-action-tail>.action-icon{margin-left:var(--action-icon-gap);vertical-align:-3px}
+.w-app .widget-back.action-back{margin-block:20px}
+.w-app .widget-dialog-footer .widget-back.action-back{margin:0}
+.w-app .auth-back.action-back{font-size:14px}
+.w-app .expertise-documents button{gap:var(--action-icon-gap)}
+.w-app .expertise-documents button>svg{width:16px;height:16px}
+.w-app .widget-catalog-card>div{justify-content:flex-start;gap:var(--action-icon-gap)}
+.w-app .w-title-link::after{content:none}
+.w-app .w-title-link>.action-icon{display:inline-block;margin-left:var(--action-icon-gap);vertical-align:-1px;color:#8b8b95}

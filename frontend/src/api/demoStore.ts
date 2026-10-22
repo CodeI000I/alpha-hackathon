@@ -1,7 +1,9 @@
 import {
   DEMO_COMPANIES,
   DEMO_FEED,
+  DEMO_FEED_ITEM_IDS_BY_COMPANY,
   DEMO_FILES,
+  DEMO_NOW,
   DEMO_PROFILE_ELEMENTS,
   DEMO_ROLES,
   DEMO_USERS,
@@ -17,11 +19,11 @@ import type {
   User,
 } from "./types";
 
-const STORAGE_KEY = "alpha.demoApi.v1";
-const FIXED_TIME = Date.parse("2026-10-21T09:00:00Z");
+const STORAGE_KEY = "signal.demo-api.v2";
+const FIXED_TIME = Date.parse(DEMO_NOW);
 
 interface DemoState {
-  version: 1;
+  version: 2;
   companies: Company[];
   users: User[];
   files: CompanyFile[];
@@ -43,7 +45,7 @@ function clone<T>(value: T): T {
 
 function initialState(): DemoState {
   return {
-    version: 1,
+    version: 2,
     companies: clone(DEMO_COMPANIES),
     users: clone(DEMO_USERS),
     files: clone(DEMO_FILES),
@@ -55,7 +57,7 @@ let memoryState = initialState();
 function isDemoState(value: unknown): value is DemoState {
   if (typeof value !== "object" || value === null) return false;
   const state = value as Partial<DemoState>;
-  return state.version === 1 && Array.isArray(state.companies) && Array.isArray(state.users) && Array.isArray(state.files);
+  return state.version === 2 && Array.isArray(state.companies) && Array.isArray(state.users) && Array.isArray(state.files);
 }
 
 function readState(): DemoState {
@@ -152,8 +154,13 @@ export const demoStore = {
     const state = readState();
     const user = requireUser(state, id);
     const allowedRoles = new Set(user.roles);
+    const companyFeedIds = new Set(
+      user.companyId === null ? [] : (DEMO_FEED_ITEM_IDS_BY_COMPANY[user.companyId] ?? []),
+    );
     return clone(
-      DEMO_FEED.filter((item) => allowedRoles.has(item.role) && (!role || item.role === role)).slice(0, limit),
+      DEMO_FEED.filter(
+        (item) => companyFeedIds.has(item.id) && allowedRoles.has(item.role) && (!role || item.role === role),
+      ).slice(0, limit),
     );
   },
 

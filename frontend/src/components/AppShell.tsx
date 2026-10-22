@@ -1,181 +1,44 @@
-import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { Icon } from "./Icon";
-import { DemoBadge } from "./ui";
-
-export interface AppShellProps {
-  children: ReactNode;
-  userName?: string;
-  companyName?: string;
-  rolesLabel?: string;
-  savedCount?: number;
-  onLogout: () => void;
-  demoMode?: boolean;
-}
-
-function initials(value: string, fallback: string) {
-  const letters = value
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toLocaleUpperCase("ru-RU");
-  return letters || fallback;
-}
-
-function todayLabel() {
-  const value = new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "long",
-    weekday: "long",
-  }).format(new Date());
-  return value.replace(" г.", "").replace(/^./, (letter) => letter.toLocaleUpperCase("ru-RU"));
-}
-
-export default function AppShell({
-  children,
-  userName = "Пользователь",
-  companyName = "Компания",
-  rolesLabel = "Роль не указана",
-  savedCount = 0,
-  onLogout,
-  demoMode = false,
-}: AppShellProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
-  const savedActive = location.pathname === "/feed" && new URLSearchParams(location.search).get("saved") === "1";
-
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { isDemoMode } from '../api/client';
+import { useWorkspace } from '../appContext';
+import { Icon } from './Icon';
+import { DemoBadge } from './ui';
+export default function AppShell({ children, onLogout }: { children: ReactNode; onLogout: () => void }) {
+  const { user, company, roles, activeRole } = useWorkspace(); const location = useLocation();
+  const [open, setOpen] = useState(false); const menu = useRef<HTMLDivElement>(null); const trigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => { setOpen(false); }, [location.pathname, location.search]);
   useEffect(() => {
-    if (!menuOpen) return undefined;
-    const closeOnOutsideClick = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
-    };
-    document.addEventListener("pointerdown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [menuOpen]);
-
-  const logout = () => {
-    setMenuOpen(false);
-    onLogout();
-  };
-
-  return (
-    <div className="app-shell">
-      <a className="skip-link" href="#main-content">
-        К основному содержимому
-      </a>
-      <header className="app-topbar">
-        <Link to="/feed" className="product-brand" aria-label="Альфа Инсайты — обзор событий">
-          <span className="product-brand__mark" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </span>
-          <span>Альфа Инсайты</span>
-        </Link>
-        {demoMode && <DemoBadge className="app-topbar__demo" />}
-        <time className="app-topbar__date">{todayLabel()}</time>
-        <div className="profile-menu" ref={menuRef}>
-          <button
-            type="button"
-            className="avatar avatar--button"
-            aria-label="Открыть меню профиля"
-            aria-expanded={menuOpen}
-            aria-controls="profile-menu-popover"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {initials(userName, "П")}
-          </button>
-          {menuOpen && (
-            <div className="profile-menu__popover" id="profile-menu-popover">
-              <strong>{userName}</strong>
-              <span>{rolesLabel}</span>
-              <NavLink to="/company" onClick={() => setMenuOpen(false)}>
-                Личный кабинет
-              </NavLink>
-              <button type="button" onClick={logout}>
-                <Icon name="logout" size={18} />
-                Выйти
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <div className="app-shell__body">
-        <aside className="app-sidebar">
-          <div className="company-lockup">
-            <span className="avatar">{initials(companyName, "АИ")}</span>
-            <div>
-              <strong>{companyName}</strong>
-              <span>{rolesLabel}</span>
-            </div>
-          </div>
-          <nav className="app-nav" aria-label="Основная навигация">
-            <NavLink
-              to="/feed"
-              end
-              className={({ isActive }) => `app-nav__link${isActive && !savedActive ? " active" : ""}`}
-            >
-              <Icon name="home" />
-              <span>Обзор событий</span>
-            </NavLink>
-            <Link to="/feed?saved=1" className={`app-nav__link${savedActive ? " active" : ""}`}>
-              <Icon name="bookmark" />
-              <span>Сохранённые</span>
-              <span className="app-nav__count" aria-label={`${savedCount} сохранённых`}>
-                {savedCount}
-              </span>
-            </Link>
-            <NavLink to="/company" className={({ isActive }) => `app-nav__link${isActive ? " active" : ""}`}>
-              <Icon name="user" />
-              <span>Личный кабинет</span>
-            </NavLink>
-          </nav>
-          <div className="app-sidebar__footer">
-            <span>Ваш ракурс</span>
-            <strong>{rolesLabel}</strong>
-            <NavLink to="/company?tab=roles">Изменить роли</NavLink>
-          </div>
-        </aside>
-
-        <main id="main-content" className="app-main" tabIndex={-1}>
-          {children}
-        </main>
+    if (!open) return;
+    const pointer = (event: PointerEvent) => { if (!menu.current?.contains(event.target as Node)) setOpen(false); };
+    const key = (event: KeyboardEvent) => { if (event.key === 'Escape') { setOpen(false); trigger.current?.focus(); } };
+    document.addEventListener('pointerdown', pointer); document.addEventListener('keydown', key);
+    return () => { document.removeEventListener('pointerdown', pointer); document.removeEventListener('keydown', key); };
+  }, [open]);
+  const initials = (user.fullName || user.email).split(/\s/).slice(0, 2).map(word => word[0]).join('').toUpperCase();
+  const isDashboard = location.pathname === '/dashboard'; const saved = location.search.includes('saved=1');
+  return <div className="w-app">
+    <a className="skip-link" href="#main-content">Перейти к содержимому</a>
+    <header className="w-topbar">
+      <a className="w-brand" href="/bank.html"><span className="w-alfa">A</span>Альфа-Бизнес</a>
+      <Link className="w-top-service" to="/dashboard">Сигнал</Link>{isDemoMode && <DemoBadge>Деморежим</DemoBadge>}
+      <time className="w-header-date" dateTime={new Date().toISOString()}>{new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</time>
+      <div className="w-user-menu" ref={menu}>
+        <button ref={trigger} className="w-user" aria-label="Меню пользователя" aria-expanded={open} aria-controls="user-menu" onClick={() => setOpen(!open)}>{initials}</button>
+        {open && <div className="w-user-popover" id="user-menu"><strong>{user.fullName || 'Пользователь'}</strong><span>{user.email}</span><Link to="/profile?tab=roles">Личный кабинет</Link><button onClick={onLogout}><Icon name="logout" size={16} /> Выйти</button></div>}
       </div>
-
-      <nav className="mobile-nav" aria-label="Мобильная навигация">
-        <NavLink
-          to="/feed"
-          end
-          className={({ isActive }) => (isActive && !savedActive ? "active" : "")}
-          aria-label="Обзор событий"
-        >
-          <Icon name="home" />
-          <span>События</span>
-        </NavLink>
-        <Link to="/feed?saved=1" className={savedActive ? "active" : ""} aria-label={`Сохранённые, ${savedCount}`}>
-          <span className="mobile-nav__icon">
-            <Icon name="bookmark" />
-            {savedCount > 0 && <b>{savedCount > 9 ? "9+" : savedCount}</b>}
-          </span>
-          <span>Сохранённые</span>
-        </Link>
-        <NavLink to="/company" className={({ isActive }) => (isActive ? "active" : "")} aria-label="Личный кабинет">
-          <Icon name="user" />
-          <span>Кабинет</span>
-        </NavLink>
-      </nav>
+    </header>
+    <div className="w-layout">
+      <aside className="w-sidebar">
+        <div className="w-company"><span className="w-avatar"><Icon name="building" /></span><strong>{company?.name ?? (user.companyId === null ? 'Компания не указана' : 'Компания')}</strong><span>{company?.inn ? 'ИНН ' + company.inn : 'Профиль компании'}</span></div>
+        <nav aria-label="Основная навигация">
+          <Link className={'w-nav ' + (isDashboard && !saved ? 'active' : '')} to="/dashboard"><Icon name="home" />Обзор</Link>
+          <Link className={'w-nav ' + (isDashboard && saved ? 'active' : '')} to="/dashboard?saved=1"><Icon name="bookmark" />Закладки <small>Демо</small></Link>
+          <Link className={'w-nav ' + (location.pathname === '/profile' ? 'active' : '')} to="/profile?tab=roles"><Icon name="user" />Личный кабинет</Link>
+        </nav>
+        <div className="w-sidebar-bottom"><span>Активный ракурс</span><strong>{roles.find(role => role.code === activeRole)?.name ?? 'Все назначенные роли'}</strong><Link className="action-link" to="/profile?tab=roles">Настроить роли</Link><Link to="/landing">О сервисе</Link></div>
+      </aside>
+      <main id="main-content" tabIndex={-1} className={'w-main' + (location.pathname.startsWith('/news/') ? ' w-main-news' : '')}>{children}</main>
     </div>
-  );
+  </div>;
 }

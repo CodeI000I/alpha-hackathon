@@ -1,0 +1,33 @@
+.daily-counts button svg{flex-shrink:0;color:#e78b82}
+.daily-counts .daily-opportunities svg{color:#86c7ad}
+.daily-counts .daily-opportunities:hover,.daily-counts .daily-opportunities:focus-visible{color:#86c7ad}
+.daily-story .daily-story-link{align-self:flex-start;justify-content:center;border:1px solid #ffffff20;background:#ffffff06;border-radius:9px;padding:9px 12px;line-height:1.4;color:#e1e1e8;text-align:left;font-size:11px!important;max-width:100%}
+.daily-story:hover .daily-story-link{color:#e1e1e8}
+.daily-story .daily-story-link:hover{background:#ffffff10;border-color:#ffffff40}
+.daily-footer .daily-focus-link,.daily-footer>.daily-next-action strong{display:block;text-align:left;color:#f4f4f6;font-size:12px;font-weight:500;line-height:1.6;text-decoration:none;transition:color .15s}
+.daily-footer .daily-focus-link{align-self:flex-start}
+.daily-footer .daily-focus-link:hover,.daily-footer .daily-focus-link:focus-visible,.daily-footer>.daily-next-action:hover strong,.daily-footer>.daily-next-action:focus-visible strong{color:#ff9e95;text-decoration:none}
+.daily-footer .daily-focus-link:focus-visible,.daily-footer>.daily-next-action:focus-visible{outline:2px solid #b7b7c1;outline-offset:4px;border-radius:2px}
+.daily-footer>.daily-next-action{align-items:flex-start}
+.daily-footer .daily-action-tail{display:inline;white-space:nowrap;font:inherit;color:inherit;margin:0}
+.daily-footer .daily-action-tail svg{display:inline-block;width:16px;height:16px;margin-left:7px;vertical-align:-3px}
+@media(prefers-reduced-motion:reduce){.daily-footer .daily-focus-link,.daily-footer>.daily-next-action strong{transition:none}}
+.widget-board-heading h2{margin:0}
+.widget-board-heading>.widget-count{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 7px;border-radius:8px;background:#ffffff0d;color:#dddde5;font-size:12px;font-variant-numeric:tabular-nums}
+.widget-add-icon{margin-left:auto;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid #ffffff16;border-radius:9px;background:#ffffff06;color:#dddde5}
+.widget-add-icon:hover{background:#ffffff14}
+.widget-add-icon:disabled{opacity:.4;cursor:not-allowed}
+.widget-period,.widget-settings select{appearance:none;background-image:url('/assets/chevron.svg');background-repeat:no-repeat;background-size:16px 16px;background-position:right 10px center;padding-right:34px}
+.w-event-origin{display:flex;flex-wrap:wrap;align-items:center;gap:8px;line-height:1.5}
+.w-event-origin>span:first-child{color:#dddde5}
+.w-source-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none!important}
+.w-source-link svg{width:16px;height:16px;flex-shrink:0}
+.company-analytics{border-top:1px solid #ffffff14;margin-top:32px;padding-top:28px}
+.company-analytics>h3{margin-bottom:20px}
+.w-provenance{display:block;font-size:10px;line-height:1.5;color:#aaaab6;letter-spacing:.1px}
+.bank-expertise>.w-provenance{margin:18px 0 8px}
+.w-analysis-disclaimer{font-size:11px;line-height:1.75;color:#aaaab6;border-top:1px solid #ffffff0c;padding-top:18px;margin:22px 0 0}
+.w-source-documents{padding-left:18px;font-size:12px;line-height:1.7;color:#c2c2cc}
+.w-source-documents li+li{margin-top:16px}
+.w-source-documents strong,.w-source-documents span{display:block}
+.w-source-documents span{font-size:11px;color:#aaaab6}

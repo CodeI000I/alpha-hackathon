@@ -1,4 +1,5 @@
 import { demoStore, DemoStoreError } from "./demoStore";
+import { DEMO_ACCOUNTS } from "./mocks";
 import type {
   Company,
   CompanyFile,
@@ -21,9 +22,11 @@ export function resolveDataMode(value: unknown): DataMode {
   return value === "demo" ? "demo" : "api";
 }
 
-const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
+const configuredDataMode = (
+  import.meta as ImportMeta & { env?: { readonly VITE_DATA_MODE?: string } }
+).env?.VITE_DATA_MODE;
 
-export const dataMode: DataMode = resolveDataMode(env?.VITE_DATA_MODE);
+export const dataMode: DataMode = resolveDataMode(configuredDataMode);
 export const isDemoMode = dataMode === "demo";
 
 export class ApiError extends Error {
@@ -36,6 +39,35 @@ export class ApiError extends Error {
     this.status = status;
     this.body = body;
   }
+}
+
+type WireRole = Omit<Role, "elements"> & { elements: string[] | null };
+type WireUser = Omit<User, "roles"> & { roles: string[] | null };
+type WireFeedItem = Omit<FeedItem, "elements"> & { elements: string[] | null };
+type WireCompany = Omit<Company, "profile"> & { profile: Record<string, unknown> | null };
+
+function normalizeCollection<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeRole(role: WireRole | Role): Role {
+  return { ...role, elements: normalizeCollection(role.elements) };
+}
+
+function normalizeRoles(roles: Array<WireRole | Role> | null | undefined): Role[] {
+  return normalizeCollection(roles).map(normalizeRole);
+}
+
+function normalizeUser(user: WireUser | User): User {
+  return { ...user, roles: normalizeCollection(user.roles) };
+}
+
+function normalizeFeed(items: Array<WireFeedItem | FeedItem> | null | undefined): FeedItem[] {
+  return normalizeCollection(items).map((item) => ({ ...item, elements: normalizeCollection(item.elements) }));
+}
+
+function normalizeCompany(company: WireCompany | Company): Company {
+  return { ...company, profile: company.profile ?? {} };
 }
 
 function toAbortSignal(input?: SignalInput): AbortSignal | undefined {
@@ -105,92 +137,114 @@ export function normalizeFeedLimit(limit: number | undefined): number {
   return Math.min(MAX_FEED_LIMIT, Math.max(1, Math.floor(limit)));
 }
 
+export async function demoLogin(email: string, password: string, signalInput?: SignalInput): Promise<User> {
+  const signal = toAbortSignal(signalInput);
+  const normalizedEmail = email.trim().toLocaleLowerCase("en-US");
+  const account = DEMO_ACCOUNTS.find(
+    (candidate) => candidate.email.toLocaleLowerCase("en-US") === normalizedEmail && candidate.password === password,
+  );
+  return demoCall(() => {
+    if (!account) throw new DemoStoreError(401, "Неверная электронная почта или пароль");
+    return normalizeUser(demoStore.user(account.userId));
+  }, signal);
+}
+
 function feedPath(userId: number, role: string | undefined, limit: number): string {
   const params = new URLSearchParams({ limit: String(limit) });
   if (role) params.set("role", role);
   return `/users/${userId}/feed?${params.toString()}`;
 }
 
-export const api = {
-  roles(signalInput?: SignalInput): Promise<Role[]> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo" ? demoCall(() => demoStore.roles(), signal) : request<Role[]>("/roles", { signal });
-  },
+export function createApiClient(mode: DataMode = dataMode) {
+  return {
+    roles(signalInput?: SignalInput): Promise<Role[]> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeRoles(demoStore.roles()), signal)
+        : request<WireRole[] | null>("/roles", { signal }).then(normalizeRoles);
+    },
 
-  profileElements(signalInput?: SignalInput): Promise<ProfileElement[]> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.profileElements(), signal)
-      : request<ProfileElement[]>("/profile-elements", { signal });
-  },
+    profileElements(signalInput?: SignalInput): Promise<ProfileElement[]> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeCollection(demoStore.profileElements()), signal)
+        : request<ProfileElement[] | null>("/profile-elements", { signal }).then(normalizeCollection);
+    },
 
-  user(id: number, signalInput?: SignalInput): Promise<User> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo" ? demoCall(() => demoStore.user(id), signal) : request<User>(`/users/${id}`, { signal });
-  },
+    user(id: number, signalInput?: SignalInput): Promise<User> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeUser(demoStore.user(id)), signal)
+        : request<WireUser>(`/users/${id}`, { signal }).then(normalizeUser);
+    },
 
-  createUser(input: CreateUserInput, signalInput?: SignalInput): Promise<User> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.createUser(input), signal)
-      : request<User>("/users", { method: "POST", body: JSON.stringify(input), signal });
-  },
+    createUser(input: CreateUserInput, signalInput?: SignalInput): Promise<User> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeUser(demoStore.createUser(input)), signal)
+        : request<WireUser>("/users", { method: "POST", body: JSON.stringify(input), signal }).then(normalizeUser);
+    },
 
-  setRoles(id: number, roles: string[], signalInput?: SignalInput): Promise<User> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.setRoles(id, roles), signal)
-      : request<User>(`/users/${id}/roles`, {
-          method: "PUT",
-          body: JSON.stringify({ roles }),
-          signal,
-        });
-  },
+    setRoles(id: number, roles: string[], signalInput?: SignalInput): Promise<User> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeUser(demoStore.setRoles(id, roles)), signal)
+        : request<WireUser>(`/users/${id}/roles`, {
+            method: "PUT",
+            body: JSON.stringify({ roles }),
+            signal,
+          }).then(normalizeUser);
+    },
 
-  feed(id: number, role?: string, limit?: number, signal?: AbortSignal): Promise<FeedItem[]> {
-    const normalizedLimit = normalizeFeedLimit(limit);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.feed(id, role, normalizedLimit), signal)
-      : request<FeedItem[]>(feedPath(id, role, normalizedLimit), { signal });
-  },
+    feed(id: number, role?: string, limit?: number, signal?: AbortSignal): Promise<FeedItem[]> {
+      const normalizedLimit = normalizeFeedLimit(limit);
+      return mode === "demo"
+        ? demoCall(() => normalizeFeed(demoStore.feed(id, role, normalizedLimit)), signal)
+        : request<WireFeedItem[] | null>(feedPath(id, role, normalizedLimit), { signal }).then(normalizeFeed);
+    },
 
-  company(id: number, signalInput?: SignalInput): Promise<Company> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.company(id), signal)
-      : request<Company>(`/companies/${id}`, { signal });
-  },
+    company(id: number, signalInput?: SignalInput): Promise<Company> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeCompany(demoStore.company(id)), signal)
+        : request<WireCompany>(`/companies/${id}`, { signal }).then(normalizeCompany);
+    },
 
-  createCompany(input: CreateCompanyInput, signalInput?: SignalInput): Promise<Company> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.createCompany(input), signal)
-      : request<Company>("/companies", { method: "POST", body: JSON.stringify(input), signal });
-  },
+    createCompany(input: CreateCompanyInput, signalInput?: SignalInput): Promise<Company> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeCompany(demoStore.createCompany(input)), signal)
+        : request<WireCompany>("/companies", { method: "POST", body: JSON.stringify(input), signal }).then(
+            normalizeCompany,
+          );
+    },
 
-  patchProfile(id: number, patch: Record<string, unknown>, signalInput?: SignalInput): Promise<Company> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.patchProfile(id, patch), signal)
-      : request<Company>(`/companies/${id}/profile`, {
-          method: "PATCH",
-          body: JSON.stringify(patch),
-          signal,
-        });
-  },
+    patchProfile(id: number, patch: Record<string, unknown>, signalInput?: SignalInput): Promise<Company> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeCompany(demoStore.patchProfile(id, patch)), signal)
+        : request<WireCompany>(`/companies/${id}/profile`, {
+            method: "PATCH",
+            body: JSON.stringify(patch),
+            signal,
+          }).then(normalizeCompany);
+    },
 
-  files(id: number, signalInput?: SignalInput): Promise<CompanyFile[]> {
-    const signal = toAbortSignal(signalInput);
-    return dataMode === "demo"
-      ? demoCall(() => demoStore.files(id), signal)
-      : request<CompanyFile[]>(`/companies/${id}/files`, { signal });
-  },
+    files(id: number, signalInput?: SignalInput): Promise<CompanyFile[]> {
+      const signal = toAbortSignal(signalInput);
+      return mode === "demo"
+        ? demoCall(() => normalizeCollection(demoStore.files(id)), signal)
+        : request<CompanyFile[] | null>(`/companies/${id}/files`, { signal }).then(normalizeCollection);
+    },
 
-  uploadFile(id: number, file: File, signalInput?: SignalInput): Promise<CompanyFile> {
-    const signal = toAbortSignal(signalInput);
-    if (dataMode === "demo") return demoCall(() => demoStore.uploadFile(id, file), signal);
-    const form = new FormData();
-    form.append("file", file);
-    return request<CompanyFile>(`/companies/${id}/files`, { method: "POST", body: form, signal });
-  },
-};
+    uploadFile(id: number, file: File, signalInput?: SignalInput): Promise<CompanyFile> {
+      const signal = toAbortSignal(signalInput);
+      if (mode === "demo") return demoCall(() => demoStore.uploadFile(id, file), signal);
+      const form = new FormData();
+      form.append("file", file);
+      return request<CompanyFile>(`/companies/${id}/files`, { method: "POST", body: form, signal });
+    },
+  };
+}
+
+export const api = createApiClient();

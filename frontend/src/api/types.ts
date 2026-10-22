@@ -73,3 +73,13 @@ export interface CompanyFile {
 export type CreateUserInput = Pick<User, "email" | "fullName" | "companyId" | "roles">;
 
 export type CreateCompanyInput = Pick<Company, "inn" | "name">;
+
+export interface DemoAccount {
+  userId: number;
+  companyId: number;
+  email: string;
+  password: string;
+  scenario: "technology" | "industrial";
+  label: string;
+  description: string;
+}

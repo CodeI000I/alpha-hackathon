@@ -1,6 +1,14 @@
+import { dataMode } from "./api/client";
+import type { DataMode } from "./api/types";
+
 // До появления серверной авторизации идентификаторы хранятся только в браузере.
-const USER_KEY = "alpha.userId";
-const PENDING_COMPANY_KEY = "alpha.pendingCompanyId";
+// v2 намеренно не читает старые alpha.userId/alpha.pendingCompanyId: API и демо
+// используют разные пространства и не могут случайно восстановить чужую сессию.
+const SESSION_NAMESPACE = "signal.session.v2";
+
+function sessionKey(mode: DataMode, name: "userId" | "pendingCompanyId"): string {
+  return `${SESSION_NAMESPACE}.${mode}.${name}`;
+}
 
 function readPositiveId(key: string): number | null {
   try {
@@ -25,26 +33,26 @@ function writePositiveId(key: string, id: number | null): void {
   }
 }
 
-export function currentUserId(): number | null {
-  return readPositiveId(USER_KEY);
+export function currentUserId(mode: DataMode = dataMode): number | null {
+  return readPositiveId(sessionKey(mode, "userId"));
 }
 
-export function setCurrentUserId(id: number | null): void {
-  writePositiveId(USER_KEY, id);
+export function setCurrentUserId(id: number | null, mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "userId"), id);
 }
 
-export function clearCurrentUserId(): void {
-  writePositiveId(USER_KEY, null);
+export function clearCurrentUserId(mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "userId"), null);
 }
 
-export function pendingCompanyId(): number | null {
-  return readPositiveId(PENDING_COMPANY_KEY);
+export function pendingCompanyId(mode: DataMode = dataMode): number | null {
+  return readPositiveId(sessionKey(mode, "pendingCompanyId"));
 }
 
-export function setPendingCompanyId(id: number | null): void {
-  writePositiveId(PENDING_COMPANY_KEY, id);
+export function setPendingCompanyId(id: number | null, mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "pendingCompanyId"), id);
 }
 
-export function clearPendingCompanyId(): void {
-  writePositiveId(PENDING_COMPANY_KEY, null);
+export function clearPendingCompanyId(mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "pendingCompanyId"), null);
 }

@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"net/http"
-	"time"
+	"net/mail"
+	"strings"
 
 	"github.com/devowt/alpha-hackaton/backend/internal/domain"
 	"github.com/devowt/alpha-hackaton/backend/internal/storage/postgres"
@@ -17,7 +19,8 @@ type RSSFetcher struct {
 }
 
 type rssDoc struct {
-	Items []struct {
+	XMLName xml.Name `xml:"rss"`
+	Items   []struct {
 		GUID        string `xml:"guid"`
 		Link        string `xml:"link"`
 		Title       string `xml:"title"`
@@ -25,6 +28,8 @@ type rssDoc struct {
 		PubDate     string `xml:"pubDate"`
 	} `xml:"channel>item"`
 }
+
+const maxRSSBytes = 8 << 20
 
 func (f RSSFetcher) Fetch(ctx context.Context, src postgres.SourceConfig) ([]domain.NewsItem, error) {
 	feedURL, _ := src.Config["feed_url"].(string)
@@ -44,18 +49,36 @@ func (f RSSFetcher) Fetch(ctx context.Context, src postgres.SourceConfig) ([]dom
 		return nil, fmt.Errorf("rss %s: %s", feedURL, resp.Status)
 	}
 	var doc rssDoc
-	if err := xml.NewDecoder(resp.Body).Decode(&doc); err != nil {
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxRSSBytes+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(body) > maxRSSBytes {
+		return nil, fmt.Errorf("rss source %s: feed exceeds %d bytes", src.ID, maxRSSBytes)
+	}
+	if err := xml.Unmarshal(body, &doc); err != nil {
 		return nil, err
 	}
 	out := make([]domain.NewsItem, 0, len(doc.Items))
 	for _, it := range doc.Items {
-		id := it.GUID
+		id := strings.TrimSpace(it.GUID)
 		if id == "" {
-			id = it.Link
+			id = strings.TrimSpace(it.Link)
 		}
-		published, err := time.Parse(time.RFC1123Z, it.PubDate)
+		if id == "" || strings.TrimSpace(it.Title) == "" {
+			return nil, fmt.Errorf("rss source %s: item has no stable identity or title", src.ID)
+		}
+		published, err := mail.ParseDate(strings.TrimSpace(it.PubDate))
 		if err != nil {
-			published = time.Now()
+			return nil, fmt.Errorf("rss source %s: item has no valid publication date", src.ID)
+		}
+		parts := strings.Fields(it.PubDate)
+		zone := parts[len(parts)-1]
+		numericZone := len(zone) == 5 && (zone[0] == '+' || zone[0] == '-')
+		// mail.ParseDate may resolve abbreviations using time.Local. Require an
+		// explicit numeric offset or UTC name so the worker host cannot change it.
+		if !numericZone && zone != "UTC" && zone != "GMT" && zone != "UT" {
+			return nil, fmt.Errorf("rss source %s: ambiguous publication timezone", src.ID)
 		}
 		out = append(out, domain.NewsItem{
 			ExternalID: id, URL: it.Link, Title: it.Title, Summary: it.Description, PublishedAt: published,

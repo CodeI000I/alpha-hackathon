@@ -1,4 +1,4 @@
-import type { Company, CompanyFile, FeedItem, ProfileElement, Role, User } from "./types";
+import type { Company, CompanyFile, FeedItem, OnboardingRequest, OnboardingResponse, ProfileElement, Role, User } from "./types";
 
 const BASE = "/api/v1";
 
@@ -19,16 +19,16 @@ export const api = {
   profileElements: () => request<ProfileElement[]>("/profile-elements"),
 
   user: (id: number) => request<User>(`/users/${id}`),
-  createUser: (u: Pick<User, "email" | "fullName" | "companyId" | "roles">) =>
-    request<User>("/users", { method: "POST", body: JSON.stringify(u) }),
+  onboard: (body: OnboardingRequest, idempotencyKey: string) =>
+    request<OnboardingResponse>("/onboarding", {
+      method: "POST", headers: { "Idempotency-Key": idempotencyKey }, body: JSON.stringify(body),
+    }),
   setRoles: (id: number, roles: string[]) =>
     request<User>(`/users/${id}/roles`, { method: "PUT", body: JSON.stringify({ roles }) }),
   feed: (id: number, role?: string) =>
     request<FeedItem[]>(`/users/${id}/feed${role ? `?role=${encodeURIComponent(role)}` : ""}`),
 
   company: (id: number) => request<Company>(`/companies/${id}`),
-  createCompany: (c: Pick<Company, "inn" | "name">) =>
-    request<Company>("/companies", { method: "POST", body: JSON.stringify(c) }),
   patchProfile: (id: number, patch: Record<string, unknown>) =>
     request<Company>(`/companies/${id}/profile`, { method: "PATCH", body: JSON.stringify(patch) }),
   files: (id: number) => request<CompanyFile[]>(`/companies/${id}/files`),

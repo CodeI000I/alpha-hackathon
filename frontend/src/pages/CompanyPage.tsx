@@ -21,7 +21,13 @@ export default function CompanyPage({ userId }: { userId: number }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["files", companyId] }),
   });
 
-  if (!company.data) return <p>Загрузка…</p>;
+  const errorText = (error: unknown) => error instanceof Error ? error.message : "Не удалось загрузить данные.";
+  if (user.isLoading) return <p role="status">Загрузка пользователя…</p>;
+  if (user.isError) return <p className="error" role="alert">Не удалось загрузить пользователя: {errorText(user.error)} <button onClick={() => user.refetch()}>Повторить</button></p>;
+  if (companyId === null) return <p>К пользователю не привязана компания.</p>;
+  if (company.isLoading) return <p role="status">Загрузка компании…</p>;
+  if (company.isError) return <p className="error" role="alert">Не удалось загрузить компанию: {errorText(company.error)} <button onClick={() => company.refetch()}>Повторить</button></p>;
+  if (!company.data) return <p className="error" role="alert">Данные компании недоступны.</p>;
 
   return (
     <section className="card">
@@ -29,6 +35,8 @@ export default function CompanyPage({ userId }: { userId: number }) {
       <p className="muted">ИНН {company.data.inn}</p>
 
       <h2>Профиль</h2>
+      {elements.isLoading && <p role="status">Загрузка элементов профиля…</p>}
+      {elements.isError && <p className="error" role="alert">Не удалось загрузить элементы профиля: {errorText(elements.error)} <button onClick={() => elements.refetch()}>Повторить</button></p>}
       <table className="profile">
         <tbody>
           {elements.data?.map((el) => (
@@ -44,6 +52,8 @@ export default function CompanyPage({ userId }: { userId: number }) {
       <h2>Документы</h2>
       <input type="file" onChange={(e) => e.target.files?.[0] && upload.mutate(e.target.files[0])} />
       {upload.error && <p className="error">{upload.error.message}</p>}
+      {files.isLoading && <p role="status">Загрузка документов…</p>}
+      {files.isError && <p className="error" role="alert">Не удалось загрузить документы: {errorText(files.error)} <button onClick={() => files.refetch()}>Повторить</button></p>}
       <ul>
         {files.data?.map((f) => (
           <li key={f.id}>

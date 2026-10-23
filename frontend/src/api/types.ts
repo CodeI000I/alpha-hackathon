@@ -36,6 +36,16 @@ export interface Company {
   updatedAt: string;
 }
 
+export interface OnboardingRequest {
+  company: Pick<Company, "inn" | "name"> & { ogrn?: string };
+  user: Pick<User, "email" | "fullName" | "roles">;
+}
+
+export interface OnboardingResponse {
+  company: Company;
+  user: User;
+}
+
 export interface NewsItem {
   id: number;
   sourceId: string;

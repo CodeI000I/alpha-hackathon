@@ -22,74 +22,77 @@ type Pipeline struct {
 	Log      *slog.Logger
 }
 
-// RunOnce — один проход: собрать новости со всех включённых источников и
-// для каждой новой новости построить элементы лент.
+// RunOnce собирает источники и обрабатывает ограниченную пачку устойчивых заданий.
 func (p *Pipeline) RunOnce(ctx context.Context) error {
+	if err := p.processDeliveries(ctx); err != nil {
+		return err
+	}
 	sources, err := p.Store.EnabledSources(ctx)
 	if err != nil {
 		return err
 	}
-	users, err := p.Store.UsersForFeed(ctx)
-	if err != nil {
-		return err
-	}
-	companies := map[int64]domain.Company{}
-	for _, u := range users {
-		if u.CompanyID == nil {
-			continue
-		}
-		if _, ok := companies[*u.CompanyID]; !ok {
-			c, err := p.Store.GetCompany(ctx, *u.CompanyID)
-			if err != nil {
-				return err
-			}
-			companies[c.ID] = c
-		}
-	}
-
 	for _, src := range sources {
 		f, ok := p.Fetchers[src.Adapter]
 		if !ok {
-			p.Log.Warn("no fetcher for adapter", "source", src.ID, "adapter", src.Adapter)
+			p.logger().Warn("no fetcher for adapter", "source", src.ID, "adapter", src.Adapter)
 			continue
 		}
 		items, err := f.Fetch(ctx, src)
 		if err != nil {
-			p.Log.Error("fetch failed", "source", src.ID, "err", err)
+			p.logger().Error("fetch failed", "source", src.ID, "err", err)
 			continue
 		}
 		for _, n := range items {
 			n.SourceID = src.ID
-			id, isNew, err := p.Store.UpsertNews(ctx, n)
-			if err != nil {
+			if _, _, err := p.Store.UpsertNews(ctx, n); err != nil {
 				return err
 			}
-			if !isNew {
-				continue
-			}
-			n.ID = id
-			p.distribute(ctx, n, users, companies)
 		}
-		p.Log.Info("source processed", "source", src.ID, "items", len(items))
+		p.logger().Info("source processed", "source", src.ID, "items", len(items))
+	}
+	return p.processDeliveries(ctx)
+}
+
+func (p *Pipeline) processDeliveries(ctx context.Context) error {
+	for range 100 {
+		deliveries, err := p.Store.ClaimNewsDeliveries(ctx, 1)
+		if err != nil {
+			return err
+		}
+		if len(deliveries) == 0 {
+			return nil
+		}
+		d := deliveries[0]
+		var matches []feed.Match
+		var rankErr error
+		if d.User.ID != 0 && d.User.CompanyID != nil && d.HasCompany && len(d.User.Roles) > 0 {
+			matches, rankErr = p.Ranker.Rank(ctx, feed.Request{News: d.News, Roles: d.User.Roles, Company: d.Company})
+		}
+		if rankErr != nil {
+			p.logger().Error("rank failed", "news", d.NewsID, "user", d.UserID, "err", rankErr)
+			if retryErr := p.Store.RetryNewsDelivery(ctx, d, "rank_failed"); retryErr != nil {
+				return retryErr
+			}
+			continue
+		}
+		completed, completeErr := p.Store.CompleteNewsDelivery(ctx, d, matches)
+		if completeErr != nil {
+			p.logger().Error("complete feed delivery", "news", d.NewsID, "user", d.UserID, "err", completeErr)
+			if retryErr := p.Store.RetryNewsDelivery(ctx, d, "persistence_failed"); retryErr != nil {
+				return retryErr
+			}
+			continue
+		}
+		if !completed {
+			p.logger().Info("stale news delivery ignored", "news", d.NewsID, "user", d.UserID)
+		}
 	}
 	return nil
 }
 
-func (p *Pipeline) distribute(ctx context.Context, n domain.NewsItem, users []domain.User, companies map[int64]domain.Company) {
-	for _, u := range users {
-		if len(u.Roles) == 0 || u.CompanyID == nil {
-			continue
-		}
-		matches, err := p.Ranker.Rank(ctx, feed.Request{News: n, Roles: u.Roles, Company: companies[*u.CompanyID]})
-		if err != nil {
-			p.Log.Error("rank failed", "news", n.ID, "user", u.ID, "err", err)
-			continue
-		}
-		for _, m := range matches {
-			item := domain.FeedItem{Kind: m.Kind, Score: m.Score, Insight: m.Insight, Elements: m.Elements}
-			if err := p.Store.AddFeedItem(ctx, u.ID, m.Role, n.ID, item); err != nil {
-				p.Log.Error("add feed item", "err", err)
-			}
-		}
+func (p *Pipeline) logger() *slog.Logger {
+	if p.Log != nil {
+		return p.Log
 	}
+	return slog.Default()
 }

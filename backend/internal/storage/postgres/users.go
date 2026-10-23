@@ -46,6 +46,13 @@ func (s *Store) CreateUser(ctx context.Context, u domain.User) (domain.User, err
 // SetUserRoles заменяет набор ролей пользователя (роли передаются кодами: sales, procurement, ...).
 func (s *Store) SetUserRoles(ctx context.Context, userID int64, codes []string) error {
 	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		var lockedID int64
+		if err := tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 FOR UPDATE`, userID).Scan(&lockedID); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return ErrNotFound
+			}
+			return err
+		}
 		if _, err := tx.Exec(ctx, `DELETE FROM user_roles WHERE user_id = $1`, userID); err != nil {
 			return err
 		}

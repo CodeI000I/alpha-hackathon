@@ -51,4 +51,4 @@ make web       # фронтенд на :5173
 make worker    # по желанию: сбор новостей
 ```
 
-Нужны Go 1.23+, Node 20+, Docker.
+Нужны Go 1.27.3+, Node 22+, Docker.

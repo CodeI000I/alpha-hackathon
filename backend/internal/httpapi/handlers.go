@@ -11,6 +11,8 @@ import (
 	"github.com/devowt/alpha-hackaton/backend/internal/domain"
 )
 
+const maxJSONBody = 1 << 20
+
 func (s *Server) listRoles(w http.ResponseWriter, r *http.Request) {
 	roles, err := s.Store.ListRoles(r.Context())
 	if err != nil {
@@ -30,6 +32,7 @@ func (s *Server) listProfileElements(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	var in domain.User
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil || in.Email == "" || in.FullName == "" {
 		badRequest(w, "email and fullName are required")
@@ -58,6 +61,7 @@ func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) setUserRoles(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	id, ok := pathID(r)
 	if !ok {
 		badRequest(w, "bad id")
@@ -101,6 +105,7 @@ func (s *Server) getFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) createCompany(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	var in domain.Company
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil || in.INN == "" || in.Name == "" {
 		badRequest(w, "inn and name are required")
@@ -130,6 +135,7 @@ func (s *Server) getCompany(w http.ResponseWriter, r *http.Request) {
 
 // patchProfile принимает {"Б1": {...}, "Г3": {...}} и сливает с текущим профилем.
 func (s *Server) patchProfile(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	id, ok := pathID(r)
 	if !ok {
 		badRequest(w, "bad id")

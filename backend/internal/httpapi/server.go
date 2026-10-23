@@ -32,6 +32,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/v1/profile-elements", s.listProfileElements)
 
 	mux.HandleFunc("POST /api/v1/users", s.createUser)
+	mux.HandleFunc("POST /api/v1/onboarding", s.createOnboarding)
 	mux.HandleFunc("GET /api/v1/users/{id}", s.getUser)
 	mux.HandleFunc("PUT /api/v1/users/{id}/roles", s.setUserRoles)
 	mux.HandleFunc("GET /api/v1/users/{id}/feed", s.getFeed)

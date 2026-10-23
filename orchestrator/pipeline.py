@@ -84,12 +84,12 @@ class Pipeline:
         job = self.store.get_job(job_id)
         payload = job['payload']
         attempt = job['attempts']
-        if not self.store.current(job):
-            self.store.finish(job_id, 'superseded', attempt=attempt)
-            return self.store.get_job(job_id)
         if payload['policy'] != self.policy:
             self.store.finish(job_id, 'failed', error={'code': 'policy_changed',
                                                      'message': 'Submit inputs under the current policy.'}, attempt=attempt)
+            return self.store.get_job(job_id)
+        if not self.store.current(job, self.policy):
+            self.store.finish(job_id, 'superseded', attempt=attempt)
             return self.store.get_job(job_id)
         try:
             result = self.graphs['company'].invoke({
@@ -121,7 +121,8 @@ class Pipeline:
                 raise AIError(error['code'], error['message'], error.get('retry_at', 0))
             if job['status'] in {'pending', 'running'}:
                 raise AIError('pending', 'Разбор готовится; повторите чтение задания позже.')
-        return [self.match(job) for job in jobs if job['status'] == 'ready' and self.store.current(job)]
+        return [self.match(job) for job in jobs
+                if job['status'] == 'ready' and self.store.current(job, self.policy)]
 
     def match(self, job):
         result = job['result']
@@ -145,7 +146,7 @@ class Pipeline:
         public = None if result is None else {key: result[key] for key in (
             'report', 'assessment', 'evidence', 'missing_facts', 'retrieval', 'publication',
             'event_version', 'company_version', 'report_version', 'role') if key in result}
-        return dict(id=job_id, status=state['status'], current=self.store.current(job),
+        return dict(id=job_id, status=state['status'], current=self.store.current(job, self.policy),
                     result=public, error=job['error'], history=self.store.history(job),
                     changes=self.store.changes(job), user_state=self.store.user_state(job, principal.user_id))
 
@@ -182,7 +183,7 @@ class Pipeline:
             'messages': messages, 'question': question, 'report_version': job_id,
         })
         last_message = result['messages'][-1]
-        return dict(answer=result['answer'], report_version=job_id, current=self.store.current(job),
+        return dict(answer=result['answer'], report_version=job_id, current=self.store.current(job, self.policy),
                     evidence=last_message.get('evidence', []), missing_facts=result.get('missing_facts', []))
 
     # event graph: validation is structural; bank trust is an ingestion/auth contract.

@@ -29,6 +29,10 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
+  pipeline-tests:
+    name: Go and Python quality gates
+    uses: ./.github/workflows/pipeline-tests.yml
+
   test-and-validate:
     name: Test and validate Helm chart
     runs-on: ubuntu-latest
@@ -85,7 +89,7 @@ jobs:
 
   build-and-push:
     name: Build and publish Docker image
-    needs: test-and-validate
+    needs: [test-and-validate, pipeline-tests]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20

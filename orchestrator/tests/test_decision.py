@@ -1,7 +1,12 @@
 import json
+import hashlib
+import runpy
 import os
+import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,6 +22,7 @@ from orchestrator.decision import (
     build_decision_router,
 )
 from orchestrator.config import Settings, load_settings
+from orchestrator.storage import Store
 
 
 DECISION = RoutingDecision(relevance='relevant', kind='risk', priority='high')
@@ -111,6 +117,176 @@ class SystemOneDecisionProviderTests(unittest.TestCase):
                 self.assertEqual(caught.exception.code, 'unavailable')
                 self.assertFalse(caught.exception.permanent)
 
+    def test_injected_http_client_still_uses_configured_timeout(self):
+        observed = []
+
+        def respond(request):
+            observed.append(request.extensions['timeout'])
+            return httpx.Response(200, json={'models': [
+                {'name': 'jev-latest', 'description': 'Jev', 'release_date': '2026-09-15'},
+            ]})
+
+        client = httpx.Client(timeout=None, transport=httpx.MockTransport(respond))
+        provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+            SecretStr('ts-test'), timeout_seconds=0.25, http_client=client)
+        self.addCleanup(provider.close)
+
+        provider.probe()
+
+        self.assertEqual(observed[0]['read'], 0.25)
+
+    def test_injected_client_cannot_follow_redirect_with_credentials(self):
+        requests = []
+
+        def respond(request):
+            requests.append(request)
+            return httpx.Response(302, headers={'location': 'https://attacker.example/collect'},
+                                  json={'models': [{'name': 'jev-latest'}]})
+
+        client = httpx.Client(follow_redirects=True, transport=httpx.MockTransport(respond))
+        provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+            SecretStr('ts-test'), http_client=client)
+        self.addCleanup(provider.close)
+
+        with self.assertRaises(SystemOneUnavailable) as caught:
+            provider.probe()
+
+        self.assertEqual(caught.exception.code, 'invalid_response')
+        self.assertEqual(len(requests), 1)
+        self.assertEqual(str(requests[0].url), 'https://api.typesafe.ai/v1/models')
+        self.assertEqual(requests[0].headers['authorization'], 'Bearer ts-test')
+
+    def test_decision_validates_required_usage_and_answer_shape_but_accepts_model_alias_resolution(self):
+        good = {
+            'model': 'jev-2026-09-15',
+            'answers': {
+                'relevance': {'type': 'choice', 'choice': 'relevant'},
+                'kind': {'type': 'choice', 'choice': 'risk'},
+                'priority': {'type': 'choice', 'choice': 'high'},
+            },
+            'usage': {'input_tokens': 11, 'output_tokens': 3},
+        }
+        client = httpx.Client(transport=httpx.MockTransport(
+            lambda request: httpx.Response(200, json=good)))
+        provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+                                             SecretStr('ts-test'), http_client=client)
+        self.addCleanup(provider.close)
+        self.assertEqual(provider.decide({'news': 1}), DECISION)
+
+        for invalid in (
+            {**good, 'usage': {'input_tokens': '11', 'output_tokens': 3}},
+            {**good, 'usage': {'input_tokens': -1, 'output_tokens': 3}},
+            {**good, 'answers': {**good['answers'], 'kind': None}},
+            {key: value for key, value in good.items() if key != 'model'},
+        ):
+            with self.subTest(invalid=invalid):
+                bad_client = httpx.Client(transport=httpx.MockTransport(
+                    lambda request, body=invalid: httpx.Response(200, json=body)))
+                bad_provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+                    SecretStr('ts-test'), http_client=bad_client)
+                self.addCleanup(bad_provider.close)
+                with self.assertRaises(SystemOneUnavailable) as caught:
+                    bad_provider.decide({'news': 1})
+                self.assertEqual(caught.exception.code, 'invalid_response')
+
+    def test_success_records_usage_in_existing_call_ledger(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(Path(directory) / 'calls.sqlite3')
+            response = {'model': 'jev-2026-09-15', 'answers': {
+                'relevance': {'type': 'choice', 'choice': 'relevant'},
+                'kind': {'type': 'choice', 'choice': 'risk'},
+                'priority': {'type': 'choice', 'choice': 'high'},
+            }, 'usage': {'input_tokens': 11, 'output_tokens': 3}}
+            client = httpx.Client(transport=httpx.MockTransport(
+                lambda request: httpx.Response(200, json=response)))
+            provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+                SecretStr('ts-test'), http_client=client, store=store, requests_per_minute=5)
+            self.addCleanup(provider.close)
+
+            self.assertEqual(provider.decide({'news': 1}), DECISION)
+
+            with store.connect() as db:
+                call = db.execute('SELECT account,stage,model,status,prompt_tokens,completion_tokens FROM calls').fetchone()
+            self.assertIsNotNone(call)
+            self.assertEqual(call['account'], hashlib.sha256(
+                b'https://api.typesafe.ai\0ts-test').hexdigest())
+            self.assertEqual(tuple(call[name] for name in ('stage', 'model', 'status', 'prompt_tokens',
+                                                              'completion_tokens')),
+                             ('systemone', 'jev-latest', 'ok', 11, 3))
+
+    def test_rate_limit_skips_decision_post_and_uses_fallback(self):
+        class LimitedStore:
+            def __init__(self):
+                self.reservations = []
+                self.recorded = []
+
+            def reserve_call(self, *args):
+                self.reservations.append(args)
+                return None, 123.0
+
+            def record_call(self, *args):
+                self.recorded.append(args)
+
+        requests, store = [], LimitedStore()
+
+        def respond(request):
+            requests.append(request)
+            return httpx.Response(200, json={'models': [
+                {'name': 'jev-latest', 'description': 'Jev', 'release_date': '2026-09-15'},
+            ]})
+
+        client = httpx.Client(transport=httpx.MockTransport(respond))
+        provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+            SecretStr('ts-test'), http_client=client, store=store, requests_per_minute=7)
+        self.addCleanup(provider.close)
+        fallback = FakeProvider('llm', [DECISION])
+        router = DecisionRouter(provider, fallback)
+
+        outcome = router.decide({'news': 1})
+
+        self.assertEqual(outcome.provider, 'llm')
+        self.assertEqual([request.url.path for request in requests], ['/v1/models'])
+        self.assertEqual(fallback.calls, 1)
+        account, stage, model, rpm, now = store.reservations[0]
+        self.assertNotIn('ts-test', account)
+        self.assertEqual((stage, model, rpm), ('systemone', 'jev-latest', 7))
+        self.assertIsInstance(now, float)
+        self.assertEqual(store.recorded, [])
+
+    def test_failure_status_is_recorded_without_provider_body_or_secret(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(Path(directory) / 'calls.sqlite3')
+            client = httpx.Client(transport=httpx.MockTransport(
+                lambda request: httpx.Response(503, json={'detail': 'private vendor response'})))
+            provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+                SecretStr('ts-test'), http_client=client, store=store)
+            self.addCleanup(provider.close)
+
+            with self.assertRaises(SystemOneUnavailable) as caught:
+                provider.decide({'news': 1})
+
+            self.assertNotIn('private vendor response', str(caught.exception))
+            with store.connect() as db:
+                call = db.execute('SELECT status FROM calls').fetchone()
+            self.assertEqual(call['status'], 'http_503')
+
+    def test_invalid_response_is_recorded_in_existing_call_ledger(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(Path(directory) / 'calls.sqlite3')
+            client = httpx.Client(transport=httpx.MockTransport(
+                lambda request: httpx.Response(200, json={'model': 'jev-latest', 'answers': {}})))
+            provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+                SecretStr('ts-test'), http_client=client, store=store)
+            self.addCleanup(provider.close)
+
+            with self.assertRaises(SystemOneUnavailable) as caught:
+                provider.decide({'news': 1})
+
+            self.assertEqual(caught.exception.code, 'invalid_response')
+            with store.connect() as db:
+                call = db.execute('SELECT status FROM calls').fetchone()
+            self.assertEqual(call['status'], 'invalid_response')
+
     def test_external_endpoint_requires_https_even_without_credentials(self):
         with self.assertRaises(ValueError):
             SystemOneDecisionProvider('http://systemone.internal', 'jev-latest',
@@ -150,6 +326,18 @@ class SystemOneConfigTests(unittest.TestCase):
         self.assertEqual(settings.systemone_timeout_seconds, 8)
         self.assertEqual(settings.systemone_cooldown_seconds, 45)
         self.assertNotIn('ts-test-secret', repr(settings))
+
+    def test_builder_passes_store_and_systemone_rate_limit_to_primary(self):
+        settings = Settings(systemone_url='https://api.typesafe.ai', requests_per_minute=9)
+        store, client = object(), object()
+        with patch('orchestrator.decision.SystemOneDecisionProvider') as provider_class:
+            build_decision_router(settings, FakeProvider('llm', []), store=store,
+                                  http_client=client)
+
+        provider_class.assert_called_once_with(settings.systemone_url, settings.systemone_model,
+            settings.systemone_api_key, timeout_seconds=settings.systemone_timeout_seconds,
+            max_input_chars=settings.max_input_chars, http_client=client, store=store,
+            requests_per_minute=9)
 
 
 class FakeProvider:
@@ -287,6 +475,23 @@ class DecisionCLITests(unittest.TestCase):
         provider_class.return_value.probe.assert_called_once_with()
         provider_class.return_value.close.assert_called_once_with()
         self.assertNotIn('ts-test-secret', str(output.call_args_list))
+
+    def test_check_systemone_failure_is_a_clean_cli_error(self):
+        settings = Settings(systemone_url='https://api.typesafe.ai',
+                            systemone_model='jev-latest',
+                            systemone_api_key=SecretStr('ts-test-secret'))
+        stderr = StringIO()
+        with patch('orchestrator.config.load_settings', return_value=settings), \
+             patch('orchestrator.decision.SystemOneDecisionProvider.probe',
+                   side_effect=SystemOneUnavailable('unavailable', 'Safe provider error')), \
+             patch.object(sys, 'argv', ['orchestrator', 'check-systemone']), \
+             redirect_stderr(stderr):
+            with self.assertRaises(SystemExit) as caught:
+                runpy.run_module('orchestrator.__main__', run_name='__main__')
+
+        self.assertEqual(caught.exception.code, 1)
+        self.assertEqual(stderr.getvalue().strip(), 'Safe provider error')
+        self.assertNotIn('Traceback', stderr.getvalue())
 
 
 if __name__ == '__main__':

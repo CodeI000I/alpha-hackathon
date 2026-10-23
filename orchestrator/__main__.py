@@ -10,7 +10,7 @@ import httpx
 from pydantic import SecretStr, ValidationError
 
 from .config import ConfigurationError, Settings, load_settings
-from .decision import SystemOneDecisionProvider
+from .decision import SystemOneDecisionProvider, SystemOneUnavailable
 from .llm import AIError, LLMClient
 from .models import RankRequest
 from .pipeline import Pipeline
@@ -99,7 +99,7 @@ def main(argv=None):
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except (AIError, ConfigurationError) as exc:
+    except (AIError, ConfigurationError, SystemOneUnavailable) as exc:
         print(str(exc), file=sys.stderr)
         sys.exit(1)
     except (ValidationError, ValueError, OSError):

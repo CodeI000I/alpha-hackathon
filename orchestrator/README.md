@@ -38,6 +38,42 @@ python3 -m venv .venv
 .venv/bin/python -m orchestrator submit --file orchestrator/examples/bank-request.json
 ```
 
+## Jev / Clef System One adapter
+
+`orchestrator.decision` предоставляет один контракт триажа для hosted Jev,
+локального Clef и fallback на существующий `LLMClient`. Результат содержит только
+`relevance`, `kind` и `priority`; полный evidence-grounded `ImpactAssessment` и
+текст разбора остаются отдельным аналитическим этапом. Нерелевантная новость —
+обычный результат primary provider, а не ошибка.
+
+Для Jev добавьте в локальный `.env.local`:
+
+```dotenv
+AI_SYSTEMONE_URL=https://api.typesafe.ai
+AI_SYSTEMONE_MODEL=jev-latest
+AI_SYSTEMONE_API_KEY=<ключ TypeSafe>
+```
+
+Для совместимого локального Clef укажите адрес его System One server и имя модели,
+например `http://127.0.0.1:30000` и `Cloudflare/clef-flash`; ключ можно оставить
+пустым. Любой внешний URL разрешён только по HTTPS, redirects отключены.
+
+После настройки доступ проверяется через список моделей; решение при этом не
+вызывается и модельные токены не расходуются:
+
+```bash
+.venv/bin/python -m orchestrator check-systemone
+```
+
+`DecisionRouter` один раз проверяет primary, использует LLM при ошибке доступа или
+недоступности, временно открывает circuit после сетевых/5xx/429 ошибок и повторяет
+проверку после `AI_SYSTEMONE_COOLDOWN_SECONDS`. Ошибки 401/403 и отсутствие модели
+отключают primary до пересоздания процесса после исправления конфигурации. В лог
+попадают только provider и код отказа — без ключа и текста новости.
+
+Адаптер пока не меняет действующий `ImpactAssessment` workflow: его подключение к
+маршрутизации требует отдельной проверки качества и порогов на размеченном корпусе.
+
 Следующие команды обращаются к реальному API и расходуют общий бюджет:
 
 ```bash
@@ -55,7 +91,7 @@ python3 -m venv .venv
 
 ## Модели и ограничения расходов
 
-Jev не используется. `LLMClient.structured()` вызывает Chat Completions шлюза
+Основной `ImpactAssessment` пока выполняет `LLMClient.structured()` через Chat Completions шлюз
 `https://changellenge.up.railway.app/v1` и проверяет JSON через Pydantic.
 Шесть допустимых имён моделей перечислены в `.env.example`; по умолчанию выбран
 `deepseek/deepseek-v4.1-flash`. `AI_DECISION_MODEL`, `AI_ANALYSIS_MODEL`, `AI_CHAT_MODEL`

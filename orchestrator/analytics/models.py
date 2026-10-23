@@ -6,6 +6,7 @@ from typing import Any, Literal
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 from orchestrator.models import Answer, Claim, canonical, digest
+from orchestrator.decision import RoutingDecision
 
 
 def utcnow():
@@ -230,6 +231,22 @@ class ImpactAssessment(Model):
     exposure: str = Field(default='', max_length=300)
 
 
+class TriageResult(Model):
+    status: Literal['completed', 'skipped_input_limit']
+    decision: RoutingDecision | None = None
+    provider: str | None = None
+    policy_version: str
+    context_version: str
+    latency_ms: int = Field(ge=0)
+    generated_at: AwareDatetime
+
+    @model_validator(mode='after')
+    def completed_result(self):
+        if self.status == 'completed' and (self.decision is None or not self.provider):
+            raise ValueError('completed triage requires a decision and provider')
+        return self
+
+
 class CompanyImpact(Model):
     schema_version: str = '1.0'
     impact_id: str
@@ -242,6 +259,7 @@ class CompanyImpact(Model):
     policy_version: str
     context_version: str = ''
     generated_at: AwareDatetime
+    triage: TriageResult | None = None
 
 
 class IssueSynthesis(Model):

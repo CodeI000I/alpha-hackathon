@@ -10,7 +10,7 @@ from langgraph.graph import END, START, StateGraph
 from orchestrator.llm import AIError
 from orchestrator.models import Answer, canonical, digest
 from .models import (BusinessIssue, CompanyImpact, CompanyProfile, Event, EventDraft,
-                     ImpactAssessment, NewsArticle, Scope, SituationSnapshot, utcnow)
+                     ImpactAssessment, NewsArticle, Scope, SituationSnapshot, TriageResult, utcnow)
 from .store import RevisionConflict
 
 
@@ -25,7 +25,9 @@ IMPACT_PROMPT = (
     'Оцени воздействие события на компанию. Путь графа не доказывает причинность. '
     'Учитывай фиксированные цены, исключения и смягчающие условия. '
     'exposure копируй только из supporting facts; при неизвестности оставь пустым. '
-    'Риск и возможность могут сосуществовать; event_probability всегда null.'
+    'Риск и возможность могут сосуществовать; event_probability всегда null. '
+    'preliminary_triage, если передан, — непроверенная подсказка. Проверяй его по полному evidence: '
+    'он не доказывает влияние, не исключает новость и не задаёт urgency.'
 )
 CHAT_PROMPT = (
     'Ответь на вопрос по закреплённой версии ситуации. Гипотетические условия '
@@ -41,6 +43,7 @@ class FlowState(TypedDict, total=False):
     impact: dict
     route: str
     cached: bool
+    triage: dict | None
 
 
 def _normalized(text):
@@ -49,17 +52,22 @@ def _normalized(text):
 
 class AnalyticsService:
     def __init__(self, store, llm, *, retriever=None, knowledge=None, checkpointer=None,
-                 clock=utcnow, debounce_seconds=30, max_job_attempts=3, policy_version='analytics-v1'):
+                 clock=utcnow, debounce_seconds=30, max_job_attempts=3, policy_version='analytics-v1',
+                 decision_router=None, triage_version=None):
         from .knowledge import HybridRetriever, KnowledgeService
         self.store, self.llm, self.clock = store, llm, clock
         self.retriever = retriever or HybridRetriever(store)
         self.knowledge = knowledge or KnowledgeService(store, llm)
         self.debounce_seconds, self.max_job_attempts = debounce_seconds, max_job_attempts
         self.checkpointer = checkpointer
+        if decision_router is not None and not triage_version:
+            raise ValueError('triage_version is required with a decision router')
+        self.decision_router, self.triage_version = decision_router, triage_version
         settings = getattr(llm, 'settings', None)
         from .synthesis import ISSUE_PROMPT, SNAPSHOT_PROMPT
         self.policy = digest(dict(version=policy_version, retrieval=getattr(self.retriever, 'version', 'hybrid-v1'),
                                   configured_version=getattr(settings, 'policy_version', ''),
+                                  triage_version=triage_version,
                                   prompts=[DATA_INSTRUCTION, IMPACT_PROMPT, ISSUE_PROMPT, SNAPSHOT_PROMPT, CHAT_PROMPT],
                                   models={stage: settings.model_for(stage) if settings else type(llm).__name__
                                           for stage in ('decision', 'analysis', 'chat')},
@@ -67,11 +75,13 @@ class AnalyticsService:
                                            (ImpactAssessment, BusinessIssue, SituationSnapshot, Answer)]))
         graph = StateGraph(FlowState)
         graph.add_node('retrieve', self._retrieve)
+        graph.add_node('triage', self._triage)
         graph.add_node('assess', self._assess)
         graph.add_node('save', self._save_impact)
         graph.add_edge(START, 'retrieve')
         graph.add_conditional_edges('retrieve', lambda state: 'cached' if state.get('cached') else 'new',
-                                    {'cached': END, 'new': 'assess'})
+                                    {'cached': END, 'new': 'triage'})
+        graph.add_edge('triage', 'assess')
         graph.add_edge('assess', 'save')
         graph.add_edge('save', END)
         self.impact_graph = graph.compile(checkpointer=checkpointer)
@@ -270,6 +280,32 @@ class AnalyticsService:
             return 'inactive'
         return 'upcoming' if event.effective_from and self.clock() < event.effective_from else 'effective'
 
+    def _triage(self, state):
+        from .models import EvidencePack
+        pack = EvidencePack.model_validate(state['evidence'])
+        if not self.triage_version or not pack.company_facts or not self._event_active(pack.event):
+            return {'triage': None}
+        scope = Scope.model_validate(state['scope'])
+        context_version = state['impact']['context_version']
+        key = digest([pack.event.event_id, context_version])
+        cached = self.store.get('triage', key, **scope.db())
+        if cached:
+            return {'triage': TriageResult.model_validate(cached.payload).model_dump(mode='json')}
+        if self.decision_router is None:
+            raise RuntimeError('This runtime cannot perform triage')
+        # Preserve complete facts and their qualifiers; skip oversized advisory input instead of truncating it.
+        context = pack.model_dump(mode='json', exclude={'chunks', 'retrieval'})
+        settings = getattr(self.llm, 'settings', None)
+        limit = max(0, getattr(settings, 'max_input_chars', 32000) - 4000)
+        started = time.monotonic()
+        outcome = self.decision_router.decide(context) if len(canonical(context)) <= limit else None
+        result = TriageResult(status='completed' if outcome else 'skipped_input_limit',
+            decision=outcome.decision if outcome else None, provider=outcome.provider if outcome else None,
+            policy_version=self.triage_version, context_version=context_version,
+            latency_ms=round((time.monotonic() - started) * 1000), generated_at=self.clock())
+        self.store.put('triage', key, result.model_dump(mode='json'), **scope.db())
+        return {'triage': result.model_dump(mode='json')}
+
     def _assess(self, state):
         from .models import EvidencePack
         from .synthesis import route_assessment, validate_assessment
@@ -285,8 +321,12 @@ class AnalyticsService:
                 summary='Событие отменено или срок применимости истёк.' if inactive else 'Недостаточно корпоративных оснований.',
                 suggested_action='Сохранить историю.' if inactive else 'Уточнить корпоративный контекст.')
         else:
+            context = {'evidence': pack.model_dump(mode='json')}
+            triage = state.get('triage')
+            if triage and triage['decision']:
+                context['preliminary_triage'] = triage['decision']
             assessment = self.llm.structured('decision', DATA_INSTRUCTION + IMPACT_PROMPT,
-                {'evidence': pack.model_dump(mode='json')}, ImpactAssessment,
+                context, ImpactAssessment,
                 lambda value: validate_assessment(value, pack))
         validate_assessment(assessment, pack)
         route = 'irrelevant' if not self._event_active(pack.event) else route_assessment(assessment, pack)
@@ -298,7 +338,7 @@ class AnalyticsService:
         impact = CompanyImpact(**state['impact'], event_id=pack.event.event_id, event_revision=pack.event.revision,
                                company_knowledge_revision=pack.company_knowledge_revision,
                                assessment=ImpactAssessment.model_validate(state['assessment']), evidence=pack,
-                               route=state['route'], generated_at=self.clock())
+                               route=state['route'], generated_at=self.clock(), triage=state.get('triage'))
         self.store.put('impact', impact.impact_id, impact.model_dump(mode='json'), **scope.db())
         return dict(impact=impact.model_dump(mode='json'))
 

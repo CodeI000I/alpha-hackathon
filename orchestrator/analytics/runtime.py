@@ -29,6 +29,7 @@ class AnalyticsSettings(Model):
     graph_enabled: bool = True
     graphify_enabled: bool = False
     graphify_json_path: Path | None = None
+    triage_enabled: bool = False
     debounce_seconds: int = Field(default=30, ge=0, le=3600)
     max_job_attempts: int = Field(default=3, ge=1, le=10)
     checkpoints: bool = True
@@ -73,6 +74,15 @@ def runtime(*, read_only=False, env_file=None):
         llm = ReadOnlyModel(model_settings) if read_only else LLMClient(model_settings, store)
         if not read_only:
             stack.callback(llm.close)
+        decision_router, triage_version = None, None
+        if config.triage_enabled:
+            from .triage import triage_policy
+            triage_version = triage_policy(model_settings)
+            if not read_only:
+                from orchestrator.decision import LLMRoutingDecisionProvider, build_decision_router
+                decision_router = build_decision_router(model_settings, LLMRoutingDecisionProvider(llm),
+                                                        store=store)
+                stack.callback(decision_router.close)
         embeddings = None
         if config.embedding_backend == 'local':
             embeddings = SentenceTransformerEmbeddingProvider(config.embedding_model_path,
@@ -87,7 +97,8 @@ def runtime(*, read_only=False, env_file=None):
         knowledge = KnowledgeService(store, llm, embeddings=embeddings, object_dir=config.object_dir,
                                      graph_extractor=config.graphify_json_path if config.graphify_enabled else None)
         yield AnalyticsService(store, llm, retriever=retriever, knowledge=knowledge, checkpointer=checkpointer,
-                               debounce_seconds=config.debounce_seconds, max_job_attempts=config.max_job_attempts)
+                               debounce_seconds=config.debounce_seconds, max_job_attempts=config.max_job_attempts,
+                               decision_router=decision_router, triage_version=triage_version)
 
 
 def migrate(config):

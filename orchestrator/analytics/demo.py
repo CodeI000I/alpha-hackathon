@@ -10,11 +10,13 @@ import httpx
 from pydantic import SecretStr
 
 from orchestrator.config import Settings
+from orchestrator.decision import LLMRoutingDecisionProvider, build_decision_router
 from orchestrator.llm import LLMClient
 from .knowledge import KnowledgeService, parse_document
 from .models import CompanyProfile, NewsArticle, Scope
 from .service import AnalyticsService
 from .store import MemoryStore
+from .triage import triage_policy
 
 
 AS_OF = datetime(2026, 10, 23, 12, tzinfo=timezone.utc)
@@ -58,6 +60,8 @@ class SyntheticGateway:
                         entities=['sea_route' if event_type == 'logistics_cost' else 'supplier_x'],
                         affected_factors=['procurement_cost'], event_time=AS_OF.isoformat(),
                         effective_from='2026-11-01T00:00:00Z', evidence_quote=article['content'])
+        if name == 'RoutingDecision':
+            return dict(relevance='relevant', kind='event', priority='medium')
         if name == 'ImpactAssessment':
             pack = context['evidence']
             fixed = any('фиксирована' in fact['text'] for fact in pack['company_facts'])
@@ -96,18 +100,50 @@ class SyntheticGateway:
         raise AssertionError(f'Unexpected synthetic schema: {name}')
 
 
-def run_demo(store=None, *, checkpointer=None):
+class SyntheticSystemOneGateway:
+    def __init__(self, model, *, unavailable=False):
+        self.model, self.unavailable, self.calls = model, unavailable, []
+
+    def __call__(self, request):
+        self.calls.append(request.url.path)
+        if request.url.path == '/v1/models':
+            return httpx.Response(200, json={'models': [{'name': self.model}]})
+        if self.unavailable:
+            return httpx.Response(503, json={'error': 'synthetic outage'})
+        return httpx.Response(200, json={
+            'model': self.model,
+            'answers': {key: {'type': 'choice', 'choice': value} for key, value in
+                        dict(relevance='relevant', kind='event', priority='high').items()},
+            'usage': {'input_tokens': 20, 'output_tokens': 3},
+        })
+
+
+def run_demo(store=None, *, checkpointer=None, triage_mode='disabled'):
+    if triage_mode not in {'disabled', 'systemone', 'fallback'}:
+        raise ValueError("triage_mode must be 'disabled', 'systemone' or 'fallback'")
     store = store or MemoryStore()
     gateway = SyntheticGateway()
+    systemone = SyntheticSystemOneGateway('jev-latest', unavailable=triage_mode == 'fallback')
+    triage_enabled = triage_mode != 'disabled'
     settings = Settings(api_key=SecretStr('synthetic-test-key'), requests_per_minute=120,
-                        max_input_chars=100000, max_retries=0)
+                        max_input_chars=100000, max_retries=0,
+                        systemone_url='https://systemone.synthetic' if triage_enabled else '',
+                        systemone_api_key=SecretStr('synthetic-systemone-key'))
     client = LLMClient(settings, store, http_client=httpx.Client(transport=httpx.MockTransport(gateway)))
+    router = None
     scope = Scope(tenant_id='demo-' + uuid4().hex, company_id='plant', user_id='demo-user')
     try:
+        if triage_enabled:
+            router = build_decision_router(
+                settings, LLMRoutingDecisionProvider(client), store=store,
+                http_client=httpx.Client(transport=httpx.MockTransport(systemone)),
+            )
         with TemporaryDirectory(prefix='alfa-documents-') as directory:
             knowledge = KnowledgeService(store, client, object_dir=directory)
             service = AnalyticsService(store, client, knowledge=knowledge, checkpointer=checkpointer,
-                                       clock=lambda: AS_OF, debounce_seconds=0)
+                                       clock=lambda: AS_OF, debounce_seconds=0,
+                                       decision_router=router,
+                                       triage_version=triage_policy(settings) if triage_enabled else None)
             service.update_company_profile(scope, CompanyProfile(name='Производственная компания'))
             text = 'Компания закупает комплектующие у supplier_x. Поставщик использует sea_route. Цена определяется при отгрузке.'
             document = parse_document('contract', 1, 'contract.txt', text.encode(), 'text/plain').model_copy(update={'received_at': AS_OF})
@@ -122,10 +158,11 @@ def run_demo(store=None, *, checkpointer=None):
                     published_at=AS_OF, received_at=AS_OF), scopes=[scope])
             before = service.get_company_situation(scope)
             issue = service.list_company_issues(scope)[0]
-            calls_before_read = len(gateway.calls)
+            calls_before_read = len(gateway.calls) + len(systemone.calls)
             service.get_issue_evidence(scope, issue.issue_id)
             service.get_company_situation(scope)
-            assert len(gateway.calls) == calls_before_read
+            read_calls = len(gateway.calls) + len(systemone.calls) - calls_before_read
+            assert read_calls == 0
             answer = service.ask_about_issue(scope, issue.issue_id, 'Что если цена фиксирована?',
                                              conversation_id='demo-dialogue', request_id='question-1')
             updated_text = text + ' Цена фиксирована для ноябрьского заказа.'
@@ -138,12 +175,28 @@ def run_demo(store=None, *, checkpointer=None):
             assert len(latest.event_ids) == 3
             assert latest.overall_effect == 'mixed'
             assert after['current']
+            calls_before_final_reads = len(gateway.calls) + len(systemone.calls)
+            history = service.get_issue_history(scope, issue.issue_id)
+            evidence = service.get_issue_evidence(scope, latest.issue_id)
+            read_calls += len(gateway.calls) + len(systemone.calls) - calls_before_final_reads
+            assert read_calls == 0
+            triage_records = [record.payload for record in store.list('triage', **scope.db())]
+            triage = {
+                'count': len(triage_records),
+                'providers': {name: sum(row.get('provider') == name for row in triage_records)
+                              for name in sorted({row.get('provider') for row in triage_records if row.get('provider')})},
+                'statuses': {name: sum(row.get('status') == name for row in triage_records)
+                             for name in sorted({row.get('status') for row in triage_records})},
+            }
             return dict(synthetic=True, backend='PostgreSQL' if type(store).__name__ == 'PostgresStore' else 'temporary memory',
-                        scope=scope.db(), events=3, issues=1, issue_versions=len(service.get_issue_history(scope, issue.issue_id)),
-                        before=before, after=after, answer=answer,
-                        evidence=[pack.model_dump(mode='json') for pack in service.get_issue_evidence(scope, latest.issue_id)],
-                        calls=gateway.calls, read_calls=0)
+                        scope=scope.db(), events=3, issues=1, issue_versions=len(history),
+                        before=before, after=after, overall_effect=latest.overall_effect, answer=answer,
+                        evidence=[pack.model_dump(mode='json') for pack in evidence],
+                        calls=gateway.calls, read_calls=read_calls, triage_mode=triage_mode,
+                        triage=triage, metrics=store.metrics())
     finally:
+        if router is not None:
+            router.close()
         client.close()
 
 

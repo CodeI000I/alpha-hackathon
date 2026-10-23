@@ -23,6 +23,7 @@ def main():
     parser.add_argument('--conversation', default='cli')
     parser.add_argument('--request-id')
     parser.add_argument('--postgres-test-dsn')
+    parser.add_argument('--triage-mode', choices=['disabled', 'systemone', 'fallback'], default='disabled')
     args = parser.parse_args()
     if args.command == 'demo':
         from .demo import run_demo
@@ -44,9 +45,9 @@ def main():
             with PostgresSaver.from_conn_string(args.postgres_test_dsn) as checkpoints:
                 checkpoints.setup()
                 result = run_demo(PostgresStore(args.postgres_test_dsn, connect_timeout=5, statement_timeout_ms=10000),
-                                  checkpointer=checkpoints)
+                                  checkpointer=checkpoints, triage_mode=args.triage_mode)
         else:
-            result = run_demo()
+            result = run_demo(triage_mode=args.triage_mode)
     elif args.command in {'migrate', 'cleanup'}:
         from .runtime import load_analytics_settings, migrate, cleanup
         config = load_analytics_settings()

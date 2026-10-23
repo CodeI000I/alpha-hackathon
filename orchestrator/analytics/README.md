@@ -137,6 +137,56 @@ export ANALYTICS_GRAPHIFY_JSON_PATH=/absolute/path/contract-graph.json
 нужно указать соответствующий JSON либо выключить импорт. Graphify не запускается
 прототипом и не получает корпоративные данные автоматически.
 
+## Предварительный триаж System One
+
+Добавленный командой `orchestrator.decision.DecisionRouter` подключён к LangGraph
+после retrieval и проверки кеша. Включение явное:
+
+```dotenv
+ANALYTICS_TRIAGE_ENABLED=true
+AI_SYSTEMONE_URL=https://api.typesafe.ai
+AI_SYSTEMONE_MODEL=jev-latest
+AI_SYSTEMONE_API_KEY=<отдельный ключ TypeSafe>
+```
+
+Одного `AI_SYSTEMONE_URL` недостаточно для включения. При пустом URL используется
+существующий LLMClient; его ключ нужен и для полного анализа. Ключи в Git не сохраняются.
+После включения рабочие команды анализа передают выбранный корпоративный контекст
+настроенному провайдеру. Read-only команды создают только идентификатор политики,
+не создают HTTP-клиент и не проверяют доступ. Чтение и worker должны использовать
+одинаковые настройки моделей и `ANALYTICS_TRIAGE_ENABLED`.
+
+`relevance/kind/priority` сохраняются в `CompanyImpact.triage` вместе с фактическим
+провайдером, политикой, версией контекста, временем и задержкой. Триаж — непроверенная
+подсказка для полного анализа. `irrelevant` не скрывает новость, `kind` не заменяет
+доказанный эффект, `priority` не меняет urgency или порядок сводки. Оценка по полному
+EvidencePack и проверки ссылок выполняются независимо от триажа.
+
+Успешный триаж сохраняется отдельно в tenant/company scope: после сбоя полного
+анализа повторная попытка использует сохранённое решение, в том числе без checkpoint.
+Изменение контекста, primary/fallback модели, URL, вопросов или политики инвалидирует
+результат. Уже сохранённый fallback переиспользуется до такой инвалидации.
+При отсутствии фактов или неактивном событии триаж пропускается. Слишком большой
+контекст не обрезается: сохраняется `skipped_input_limit`, полный анализ продолжает
+работать со своим обычным лимитом. Под инструкции fallback резервируются 4000 символов.
+
+Адаптер использует контракт [TypeSafe OpenAPI](https://api.typesafe.ai/openapi.json):
+проверяет модель и choice-ответы, обязательные usage, ограничивает timeout и запрещает
+redirects. Ошибки и локальный RPM переключают на LLM через circuit cooldown.
+`metrics` включает System One как stage `systemone`: запросы, token usage, статус и
+задержку; fallback учитывается обычным LLMClient. Цены в рублях не предполагаются.
+
+Демонстрации всех шагов выполняются через настоящий router и HTTP MockTransport,
+без `.env.local`, реальных ключей и запросов к внешнему API:
+
+```bash
+.venv/bin/python -m orchestrator.analytics demo --triage-mode systemone
+.venv/bin/python -m orchestrator.analytics demo --triage-mode fallback
+```
+
+Для проверки сохранения в PostgreSQL к любой из команд можно добавить
+`--postgres-test-dsn` с явной loopback БД `analytics_test_*`, как в примере выше.
+
 ## Контракт будущего подключения
 
 `create_router(service, authorize, authorize_ingestion=...)` возвращает APIRouter с

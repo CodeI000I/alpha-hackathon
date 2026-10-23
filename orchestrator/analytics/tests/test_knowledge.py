@@ -158,7 +158,7 @@ class KnowledgeTests(unittest.TestCase):
         document = parse_document(
             'doc-1', revision, 'profile.txt',
             'Компания закупает упаковку у Поставщик-А.\nПоставщик-А поставляет упаковку.'.encode(), 'text/plain'
-        )
+        ).model_copy(update={'received_at': AS_OF})
         chunk = next(item for item in document.chunks if quote in item.text)
         return document, chunk, {
             'facts': [{

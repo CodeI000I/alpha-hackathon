@@ -7,6 +7,42 @@
 Исходный checkout в `~/Dev/alpha-hackathon` получил только pull.
 Backend, frontend, deployment и регистрация router не изменялись.
 
+## Интеграция после дополнительного pull
+
+23 октября получен адаптер из `codex/systemone-adapter` (`83ee60a`), затем подтянут
+merge PR #5 в `ai-orchestrator` (`1f37642`). На этой базе завершён стык адаптера
+с аналитическим пайплайном. Код и этот отчёт сохраняются в той же ветке.
+
+- `DecisionRouter` переиспользован в LangGraph: retrieval → triage → assessment → save.
+  Включение через `ANALYTICS_TRIAGE_ENABLED=true`, по умолчанию выключено.
+  URL провайдера сам по себе не включает новые вызовы.
+- Три поля System One не заменяют полноценный ImpactAssessment. Их результат —
+  проверяемая по полному контексту подсказка: `irrelevant` не скрывает новость,
+  `priority` не подменяет urgency. Основания и ссылки проверяются прежним кодом.
+- Результат триажа сохраняется в tenant/company scope и в CompanyImpact: решение,
+  фактический provider, context/policy version, время и latency. Повтор после сбоя
+  полного анализа не расходует второй запрос на уже готовый триаж.
+- Кеш учитывает вопросы, fallback-инструкцию, модели, URL, timeout/cooldown и лимиты.
+  Read-only runtime вычисляет ту же политику, не создавая клиентов и не требуя ключа.
+  Большой advisory-контекст получает `skipped_input_limit`; обычные ограничения
+  полного анализа продолжают действовать, ошибка не превращается в успешный ответ.
+- Исправлены обработка некорректных ответов, обязательных usage, HTTP redirect и
+  timeout у переданного HTTP-клиента. Добавлен учёт System One через существующий
+  ledger calls/tokens/latency; локальный RPM и недоступность включают LLM fallback.
+  CLI сообщает отказ провайдера без traceback.
+- Добавлены автономные `demo --triage-mode systemone` и `demo --triage-mode fallback`.
+  Оба используют настоящие адаптеры и синтетические HTTP-ответы. На PostgreSQL
+  получены 3 события, 1 mixed issue, 6 сохранённых триажей после обновления документа,
+  0 вызовов моделей при чтении; провайдеры соответственно `systemone` и `llm`.
+- Проверка восстановления теперь заново открывает PostgresStore и PostgresSaver,
+  пересоздаёт AnalyticsService и подтверждает продолжение с assess без второго триажа.
+  Два теста retrieval получили фиксированное время документа: прежняя fixture
+  зависела от текущего часа, production-фильтрация будущих источников была корректна.
+
+Три лёгких агента выполняли адаптер/учёт, runtime/persistence и demo/retrieval;
+каждый использовал Ponytail и Agent Skills. Независимый review закрыл пробелы
+инвалидации кеша и проверки восстановления. Реальные модельные сервисы не вызывались.
+
 ## Что работает
 
 - PostgreSQL — источник истины: версионированные бизнес-записи, атомарные изменения,
@@ -53,7 +89,7 @@ Backend, frontend, deployment и регистрация router не изменя
 2. Новые доменные модели строго валидируются и сохраняются как append-only JSONB
    записи со scope/version ключами. Это компактнее отдельной ORM-иерархии и удобно
    для меняющегося прототипа. Сложные запросы и граф пока рассчитаны на небольшой корпус.
-3. LangGraph checkpoint используется на цепочке retrieval → assessment → save;
+3. LangGraph checkpoint используется на цепочке retrieval → triage → assessment → save;
    ingestion, synthesis, snapshot и chat реализованы идемпотентными service operations
    и очередью. Checkpoints не заменяют бизнес-данные. Успешные модельные шаги кешируются.
 4. Лексический режим включён по умолчанию. Семантический режим использует локальную
@@ -76,13 +112,13 @@ PostgreSQL был запущен отдельным временным cluster �
 
 | Проверка | Результат |
 | --- | --- |
-| `unittest discover -s orchestrator/tests` с тестовым DSN | **82 passed**, без skips |
-| `unittest discover -s orchestrator/analytics/tests` с тестовым DSN | **73 passed**, без skips |
+| `unittest discover -s orchestrator/tests` с тестовым DSN | **106 passed**, без skips |
+| `unittest discover -s orchestrator/analytics/tests` с тестовым DSN | **87 passed**, без skips |
 | `unittest discover -s parser_service/tests` с отдельной parser test DB | **120 passed**, без skips |
 | `pip check` | Нет конфликтующих установленных зависимостей |
 | Offline demo через настоящий LLMClient + MockTransport | 3 события, 1 mixed issue, обновление договора и истории, чтение: 0 модельных вызовов |
-| То же демо с PostgresStore + PostgresSaver | Успешно; повторные запуски в той же тестовой БД также успешны |
-| Сбой на assess и продолжение с PostgreSQL checkpoint | Продолжение с assess; готовый impact сохранён |
+| Демо с PostgresStore + PostgresSaver, System One и fallback | Оба успешны; сохранены actual provider и token usage, чтение без вызовов |
+| Сбой на assess и повторное открытие PostgreSQL компонентов | Продолжение с assess; готовый impact сохранён, повторного триажа нет |
 | Конкурентные версии, rollback, shared locks и очистка checkpoints | Успешно, включая гонку cleanup с возобновлением run |
 | Локальная multilingual модель, offline encode | 384 измерения, реальные вектора; smoke на русских фразах |
 | Русский сканированный PDF | Текст извлечён OCR с локальными eng/rus данными |

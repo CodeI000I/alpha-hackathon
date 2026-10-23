@@ -26,6 +26,7 @@ class Settings(BaseModel):
     default_model: ModelID = 'deepseek/deepseek-v4.1-flash'
     decision_model: ModelID | None = None
     analysis_model: ModelID | None = None
+    synthesis_model: ModelID | None = None
     chat_model: ModelID | None = None
     request_timeout_seconds: float = Field(default=60, gt=0, le=180)
     max_retries: int = Field(default=2, ge=0, le=3)
@@ -51,6 +52,8 @@ class Settings(BaseModel):
         return self
 
     def model_for(self, stage: str) -> str:
+        if stage == 'analysis' and self.synthesis_model:
+            return self.synthesis_model
         return getattr(self, f'{stage}_model', None) or self.default_model
 
     def require_key(self):

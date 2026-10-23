@@ -127,7 +127,7 @@ class TriageTests(unittest.TestCase):
         self.assertIsNone(service.analyze_event_for_company(self.scope, event).triage)
         self.assertEqual(self.requests, [])
 
-    def test_oversize_triage_defers_to_grounded_assessment_input_limit(self):
+    def test_oversize_evidence_records_skipped_triage_and_needs_context_without_http(self):
         self.settings = self.settings.model_copy(update={'max_input_chars': 6000})
         self.model.settings = self.settings
         service = self.service()
@@ -141,9 +141,11 @@ class TriageTests(unittest.TestCase):
                            http_client=httpx.Client(transport=httpx.MockTransport(unexpected_http)))
         self.addCleanup(client.close)
         service.llm = client
-        with self.assertRaises(AIError) as error:
-            service.analyze_event_for_company(self.scope, event)
-        self.assertEqual(error.exception.code, 'input_limit')
+        impact = service.analyze_event_for_company(self.scope, event)
+        self.assertEqual(impact.route, 'needs_context')
+        self.assertEqual(impact.assessment.risk_supported, 'unknown')
+        self.assertIn('context_limit', impact.assessment.missing_factors)
+        self.assertEqual(impact.evidence.company_facts[0].text, company.facts[0].text)
         triage = self.store.list('triage', **self.scope.db())[0].payload
         self.assertEqual(triage['status'], 'skipped_input_limit')
         self.assertIsNone(triage['decision'])

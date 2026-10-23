@@ -1,9 +1,11 @@
 from datetime import datetime, timezone, timedelta
+from contextlib import contextmanager
+from threading import Event as ThreadingEvent, Thread, current_thread
 import unittest
 from unittest.mock import patch
 
-from orchestrator.analytics.models import CompanyFact, CompanyProfile, NewsArticle, Scope
-from orchestrator.analytics.store import MemoryStore
+from orchestrator.analytics.models import CompanyFact, CompanyProfile, Event, NewsArticle, Scope, digest
+from orchestrator.analytics.store import MemoryStore, StoreBusy
 from orchestrator.analytics.service import AnalyticsService
 
 
@@ -83,6 +85,70 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(right.assessment.risk_supported, 'no')
         self.assertEqual(self.model.calls.count('EventDraft'), 1)
 
+    def test_oversized_assessment_preserves_facts_and_requests_context_without_llm(self):
+        company = profile()
+        company.facts = [company.facts[0].model_copy(update={
+            'fact_id': f'contract-{number}',
+            'text': 'supplier price ' + ('x' * 4000),
+        }) for number in range(12)]
+        self.service.update_company_profile(self.scope, company)
+        event_id = self.service.ingest_news(self.article())['event_id']
+
+        impact = self.service.analyze_event_for_company(self.scope, event_id)
+
+        self.assertEqual(impact.route, 'needs_context')
+        self.assertIn('context_limit', impact.assessment.missing_factors)
+        self.assertEqual(len(impact.evidence.company_facts), 12)
+        self.assertEqual(impact.assessment.risk_supported, 'unknown')
+        self.assertEqual(self.model.calls.count('ImpactAssessment'), 0)
+        self.assertEqual(self.service.list_company_issues(self.scope), [])
+        self.assertTrue(all(record.payload['status'] == 'completed'
+                            for record in self.store.list('run', **self.scope.db())))
+
+    def test_changed_retrieved_chunks_invalidate_impact_without_company_revision_change(self):
+        from orchestrator.analytics.knowledge import parse_document
+        original_retrieve = self.service.retriever.retrieve
+        content = ['supplier contract first edition']
+
+        def retrieve(*args):
+            pack = original_retrieve(*args)
+            pack.chunks = parse_document('retrieved', 1, 'retrieved.txt',
+                                         content[0].encode(), 'text/plain').chunks
+            return pack
+
+        self.service.retriever.retrieve = retrieve
+        event_id = self.service.ingest_news(self.article())['event_id']
+        first = self.service.analyze_event_for_company(self.scope, event_id)
+        content[0] = 'supplier contract with newly available exception'
+        second = self.service.analyze_event_for_company(self.scope, event_id)
+
+        self.assertEqual(first.company_knowledge_revision, second.company_knowledge_revision)
+        self.assertNotEqual(first.context_version, second.context_version)
+        self.assertEqual(second.evidence.chunks[0].text, content[0])
+        self.assertEqual(self.model.calls.count('ImpactAssessment'), 2)
+        self.service.analyze_event_for_company(self.scope, event_id)
+        self.assertEqual(self.model.calls.count('ImpactAssessment'), 2)
+
+    def test_optional_triage_does_not_displace_primary_evidence_at_input_boundary(self):
+        from orchestrator.llm import structured_messages
+        from orchestrator.models import canonical
+        from orchestrator.analytics.models import ImpactAssessment
+        from orchestrator.analytics.service import DATA_INSTRUCTION, IMPACT_PROMPT
+
+        event_id = self.service.ingest_news(self.article())['event_id']
+        state = self.service._retrieve({'scope': self.scope.model_dump(), 'event_id': event_id})
+        context = {'evidence': state['evidence']}
+        self.service.max_input_chars = len(canonical(structured_messages(
+            DATA_INSTRUCTION + IMPACT_PROMPT, context, ImpactAssessment)))
+        state['triage'] = {'decision': {'relevance': 'relevant', 'kind': 'risk', 'priority': 'high'}}
+
+        with patch.object(self.model, 'structured', wraps=self.model.structured) as call:
+            result = self.service._assess(state)
+
+        self.assertEqual(result['route'], 'accepted')
+        self.assertEqual(call.call_args.args[2], context)
+        self.assertNotIn('preliminary_triage', call.call_args.args[2])
+
     def test_chat_is_pinned_and_does_not_change_facts(self):
         self.service.ingest_news(self.article(), scopes=[self.scope])
         issue = self.service.list_company_issues(self.scope)[0]
@@ -112,6 +178,120 @@ class ServiceTests(unittest.TestCase):
         self.assertTrue(self.service.get_company_situation(self.scope)['current'])
         self.assertEqual(self.service.list_company_issues(self.scope)[0].overall_effect, 'neutral')
 
+    def test_profile_and_reprocess_job_publish_atomically(self):
+        self.store.put('event', 'existing-event', {'revision': 1, 'source_news_ids': []})
+        changed = profile(True)
+        original_put = self.store.put
+        def fail_job_write(kind, key, payload, **kwargs):
+            if kind == 'job':
+                raise RuntimeError('simulated job publication failure')
+            return original_put(kind, key, payload, **kwargs)
+        self.store.put = fail_job_write
+        try:
+            with self.assertRaisesRegex(RuntimeError, 'publication'):
+                self.service.update_company_profile(self.scope, changed)
+        finally:
+            self.store.put = original_put
+
+        company = self.store.get('company', self.scope.company_id, **self.scope.db())
+        self.assertEqual(company.version, 1)
+        self.assertFalse(self.store.list('job', **self.scope.db()))
+
+        retried = self.service.update_company_profile(self.scope, changed)
+        self.assertIn('job_id', retried)
+        self.assertEqual(self.store.get('company', self.scope.company_id, **self.scope.db()).version, 2)
+        self.assertEqual(len(self.store.list('job', **self.scope.db())), 1)
+
+    def test_retry_failed_rechecks_job_after_worker_lock(self):
+        job = self.service.reprocess_company(self.scope, reason='manual')
+        self.store.put('job', job['job_id'], dict(job, status='failed', attempts=3), **self.scope.db())
+        lock_key = 'job:' + digest([self.scope.db(), job['job_id']])
+        lock_held = ThreadingEvent()
+        release_lock = ThreadingEvent()
+
+        def finish_as_worker():
+            with self.store.lock(lock_key):
+                lock_held.set()
+                release_lock.wait(3)
+                current = self.store.get('job', job['job_id'], **self.scope.db()).payload
+                self.store.put('job', job['job_id'], dict(current, status='completed', attempts=1),
+                               **self.scope.db())
+
+        worker = Thread(target=finish_as_worker)
+        worker.start()
+        self.assertTrue(lock_held.wait(3))
+        retry_lock_requested = ThreadingEvent()
+        original_lock = self.store.lock
+        def track_retry_lock(key):
+            if key == lock_key:
+                retry_lock_requested.set()
+            return original_lock(key)
+        self.store.lock = track_retry_lock
+        result = {}
+        retry = Thread(target=lambda: result.setdefault('job', self.service.reprocess_company(
+            self.scope, reason='manual', retry_failed=True)))
+        retry.start()
+        self.assertTrue(retry_lock_requested.wait(3))
+        release_lock.set()
+        worker.join(3)
+        retry.join(3)
+        self.store.lock = original_lock
+        self.assertFalse(worker.is_alive())
+        self.assertFalse(retry.is_alive())
+        self.assertEqual(result['job']['status'], 'completed')
+        self.assertEqual(self.store.get('job', job['job_id'], **self.scope.db()).payload['status'], 'completed')
+
+    def test_concurrent_job_creation_does_not_overwrite_completed_job(self):
+        original_get = self.store.get
+        first_read_done = ThreadingEvent()
+        allow_first_read = ThreadingEvent()
+
+        def pause_first_creator(kind, key, **kwargs):
+            record = original_get(kind, key, **kwargs)
+            if kind == 'job' and current_thread().name == 'late-job-creator':
+                first_read_done.set()
+                allow_first_read.wait(3)
+            return record
+
+        self.store.get = pause_first_creator
+        result = {}
+        creator = Thread(name='late-job-creator', target=lambda: result.setdefault(
+            'job', self.service.reprocess_company(self.scope, reason='creation-race')))
+        creator.start()
+        self.assertTrue(first_read_done.wait(3))
+        self.store.get = original_get
+        winner = self.service.reprocess_company(self.scope, reason='creation-race')
+        self.store.put('job', winner['job_id'], dict(winner, status='completed', attempts=1), **self.scope.db())
+        allow_first_read.set()
+        creator.join(3)
+        self.store.get = original_get
+
+        self.assertFalse(creator.is_alive())
+        self.assertEqual(result['job']['status'], 'completed')
+        self.assertEqual(self.store.get('job', winner['job_id'], **self.scope.db()).payload['status'], 'completed')
+
+    def test_store_lock_contention_requeues_job_without_consuming_attempt(self):
+        self.store.put('event', 'busy-event', {'revision': 1, 'source_news_ids': []})
+        job = self.service.reprocess_company(self.scope, reason='busy-test')
+        original_lock = self.store.lock
+
+        @contextmanager
+        def busy_company_lock(key):
+            if key.startswith('company:'):
+                raise StoreBusy('synthetic lock timeout')
+            with original_lock(key):
+                yield
+
+        self.store.lock = busy_company_lock
+        try:
+            result = self.service.process_jobs(self.scope)
+        finally:
+            self.store.lock = original_lock
+        self.assertEqual(len(result), 1)
+        self.assertEqual((result[0]['status'], result[0]['attempts'], result[0]['error']),
+                         ('queued', 0, 'busy'))
+        self.assertIsNotNone(result[0]['due_at'])
+
     def test_future_fact_activation_invalidates_snapshot_without_writing_on_read(self):
         now = [NOW]
         self.service.clock = lambda: now[0]
@@ -126,6 +306,35 @@ class ServiceTests(unittest.TestCase):
         calls = len(self.model.calls)
         self.assertFalse(self.service.get_company_situation(self.scope)['current'])
         self.assertEqual(len(self.model.calls), calls)
+
+    def test_snapshot_refresh_advances_watermark_without_model_call_when_issues_are_unchanged(self):
+        active_article = self.article().model_copy(update={'news_id': 'watermark-active'})
+        self.service.ingest_news(active_article, scopes=[self.scope])
+        previous = self.service.get_company_situation(self.scope)['snapshot']
+        previous_record = self.store.get('snapshot', digest(self.scope.role), **self.scope.db())
+        later = NOW + timedelta(days=1)
+        article = NewsArticle(news_id='watermark-cancelled', title='Отмена изменения цены',
+            content='Поставщик отменил изменение цены.', published_at=later, received_at=later)
+        self.store.put('article', article.evidence_id,
+                       dict(article=article.model_dump(mode='json'), status='ready', event_id='event-cancelled'))
+        event = Event(event_type='price', action='price_change', subject='parts', modality='announcement',
+            summary='Отменённое изменение цены', entities=['supplier'], affected_factors=['procurement_cost'],
+            event_time=NOW, evidence_quote=article.content, status='cancelled', event_id='event-cancelled',
+            source_news_ids=[article.evidence_id])
+        self.store.put('event', event.event_id, event.model_dump(mode='json'))
+        self.service.clock = lambda: later + timedelta(days=1)
+        self.service.analyze_event_for_company(self.scope, event.event_id)
+        calls = len(self.model.calls)
+
+        refreshed = self.service.refresh_snapshot(self.scope, force=True)
+        situation = self.service.get_company_situation(self.scope)
+        self.assertEqual(refreshed.news_processed_through, later)
+        self.assertEqual(refreshed.as_of, later + timedelta(days=1))
+        self.assertEqual(refreshed.snapshot_version, previous['snapshot_version'])
+        self.assertGreater(self.store.get('snapshot', digest(self.scope.role), **self.scope.db()).version,
+                           previous_record.version)
+        self.assertEqual(len(self.model.calls), calls)
+        self.assertTrue(situation['current'])
 
     def test_corrected_source_invalidates_impact_even_when_event_identity_is_unchanged(self):
         first = self.service.ingest_news(self.article(), scopes=[self.scope])

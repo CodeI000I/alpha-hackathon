@@ -7,11 +7,11 @@ from typing import Any, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from orchestrator.llm import AIError
+from orchestrator.llm import AIError, structured_messages
 from orchestrator.models import Answer, canonical, digest
 from .models import (BusinessIssue, CompanyImpact, CompanyProfile, Event, EventDraft,
                      ImpactAssessment, NewsArticle, Scope, SituationSnapshot, TriageResult, utcnow)
-from .store import RevisionConflict
+from .store import RevisionConflict, StoreBusy
 
 
 DATA_INSTRUCTION = (
@@ -64,10 +64,12 @@ class AnalyticsService:
             raise ValueError('triage_version is required with a decision router')
         self.decision_router, self.triage_version = decision_router, triage_version
         settings = getattr(llm, 'settings', None)
+        self.max_input_chars = getattr(settings, 'max_input_chars', 32000)
         from .synthesis import ISSUE_PROMPT, SNAPSHOT_PROMPT
         self.policy = digest(dict(version=policy_version, retrieval=getattr(self.retriever, 'version', 'hybrid-v1'),
                                   configured_version=getattr(settings, 'policy_version', ''),
                                   triage_version=triage_version,
+                                  assessment_context='complete-evidence-v1', max_input_chars=self.max_input_chars,
                                   prompts=[DATA_INSTRUCTION, IMPACT_PROMPT, ISSUE_PROMPT, SNAPSHOT_PROMPT, CHAT_PROMPT],
                                   models={stage: settings.model_for(stage) if settings else type(llm).__name__
                                           for stage in ('decision', 'analysis', 'chat')},
@@ -109,7 +111,10 @@ class AnalyticsService:
             if expected_revision is not None and expected_revision != (old.version if old else 0):
                 raise RevisionConflict('company knowledge revision changed')
             if old and CompanyProfile.model_validate(old.payload).model_dump(exclude={'knowledge_revision'}) == profile.model_dump(exclude={'knowledge_revision'}):
-                return {'company_id': scope.company_id, 'knowledge_revision': old.version}
+                result = {'company_id': scope.company_id, 'knowledge_revision': old.version}
+                if self.store.list('event'):
+                    result['job_id'] = self._queue_reprocess(scope, old, reason='profile_changed')['job_id']
+                return result
             profile = profile.model_copy(update={'knowledge_revision': (old.version if old else 0) + 1})
             record = self.store.put('company', scope.company_id, profile.model_dump(mode='json'),
                                     expected_version=expected_revision, **scope.db())
@@ -119,10 +124,10 @@ class AnalyticsService:
                     self.store.index_text('fact', removed['fact_id'], '', **scope.db())
             for fact in profile.facts:
                 self.store.index_text('fact', fact.fact_id, fact.text, text_version=digest(fact), **scope.db())
-        result = {'company_id': scope.company_id, 'knowledge_revision': record.version}
-        if self.store.list('event'):
-            result['job_id'] = self.reprocess_company(scope, reason='profile_changed')['job_id']
-        return result
+            result = {'company_id': scope.company_id, 'knowledge_revision': record.version}
+            if self.store.list('event'):
+                result['job_id'] = self._queue_reprocess(scope, record, reason='profile_changed')['job_id']
+            return result
 
     def ingest_company_document(self, scope, document, *, original=None):
         self._company(scope)
@@ -260,10 +265,8 @@ class AnalyticsService:
         event = Event.model_validate(event_record.payload)
         news = self._event_news(event)
         pack = self.retriever.retrieve(scope, event, news, self.clock())
-        fingerprint = digest(dict(policy=self.policy, event_revision=event.revision,
-                                  knowledge=pack.company_knowledge_revision, news=[article.evidence_id for article in news],
-                                  facts=[fact.model_dump(mode='json') for fact in pack.company_facts],
-                                  paths=[path.model_dump(mode='json') for path in pack.candidate_paths],
+        fingerprint = digest(dict(policy=self.policy, retrieval=getattr(self.retriever, 'version', ''),
+                                  evidence=pack.model_dump(mode='json', exclude={'as_of'}),
                                   event_state=self._event_state(event)))
         impact_id = 'impact_' + digest([scope.db(), event.event_id])[:32]
         existing = self.store.get('impact', impact_id, **scope.db())
@@ -279,6 +282,10 @@ class AnalyticsService:
         if not self._event_active(event):
             return 'inactive'
         return 'upcoming' if event.effective_from and self.clock() < event.effective_from else 'effective'
+
+    def _assessment_fits(self, context):
+        messages = structured_messages(DATA_INSTRUCTION + IMPACT_PROMPT, context, ImpactAssessment)
+        return len(canonical(messages)) <= self.max_input_chars
 
     def _triage(self, state):
         from .models import EvidencePack
@@ -298,7 +305,9 @@ class AnalyticsService:
         settings = getattr(self.llm, 'settings', None)
         limit = max(0, getattr(settings, 'max_input_chars', 32000) - 4000)
         started = time.monotonic()
-        outcome = self.decision_router.decide(context) if len(canonical(context)) <= limit else None
+        fits = (self._assessment_fits({'evidence': pack.model_dump(mode='json')})
+                and len(canonical(context)) <= limit)
+        outcome = self.decision_router.decide(context) if fits else None
         result = TriageResult(status='completed' if outcome else 'skipped_input_limit',
             decision=outcome.decision if outcome else None, provider=outcome.provider if outcome else None,
             policy_version=self.triage_version, context_version=context_version,
@@ -310,21 +319,29 @@ class AnalyticsService:
         from .models import EvidencePack
         from .synthesis import route_assessment, validate_assessment
         pack = EvidencePack.model_validate(state['evidence'])
-        if not pack.company_facts or not self._event_active(pack.event):
+        context = {'evidence': pack.model_dump(mode='json')}
+        triage = state.get('triage')
+        if triage and triage['decision']:
+            context['preliminary_triage'] = triage['decision']
+            if not self._assessment_fits(context):
+                # Advisory output must not crowd out the complete primary evidence.
+                del context['preliminary_triage']
+        oversized = not self._assessment_fits(context)
+        if not pack.company_facts or not self._event_active(pack.event) or oversized:
             inactive = not self._event_active(pack.event)
             assessment = ImpactAssessment(
                 relevance='irrelevant' if inactive else 'unknown', evidence_sufficiency='insufficient',
                 link_type='unknown', risk_supported='unknown', opportunity_supported='unknown',
                 impact_magnitude='unknown', urgency='none' if inactive else 'unknown', impact_horizon='unknown',
                 business_factors=pack.event.affected_factors, supporting_fact_ids=[], supporting_path_ids=[],
-                missing_factors=[] if inactive else ['company_context'],
-                summary='Событие отменено или срок применимости истёк.' if inactive else 'Недостаточно корпоративных оснований.',
-                suggested_action='Сохранить историю.' if inactive else 'Уточнить корпоративный контекст.')
+                missing_factors=[] if inactive else ['context_limit' if oversized else 'company_context'],
+                summary=('Событие отменено или срок применимости истёк.' if inactive else
+                         'Полный контекст не помещается в лимит модели; оценка не выполнена.' if oversized else
+                         'Недостаточно корпоративных оснований.'),
+                suggested_action=('Сохранить историю.' if inactive else
+                                  'Сузить набор evidence или увеличить проверенный лимит контекста.' if oversized else
+                                  'Уточнить корпоративный контекст.'))
         else:
-            context = {'evidence': pack.model_dump(mode='json')}
-            triage = state.get('triage')
-            if triage and triage['decision']:
-                context['preliminary_triage'] = triage['decision']
             assessment = self.llm.structured('decision', DATA_INSTRUCTION + IMPACT_PROMPT,
                 context, ImpactAssessment,
                 lambda value: validate_assessment(value, pack))
@@ -378,11 +395,12 @@ class AnalyticsService:
     def _update_issues(self, scope):
         from .synthesis import issue_identity, synthesize_issue
         records = self.store.list('impact', **scope.db())
+        company_revision = self._company(scope).version
         groups = {}
         for record in records:
             impact = CompanyImpact.model_validate(record.payload)
             if (impact.route == 'accepted' and self._event_active(impact.evidence.event)
-                    and impact.company_knowledge_revision == self._company(scope).version
+                    and impact.company_knowledge_revision == company_revision
                     and impact.policy_version == self.policy):
                 groups.setdefault(issue_identity(impact), []).append((record, impact))
         active_ids = set()
@@ -445,8 +463,6 @@ class AnalyticsService:
             old = self.store.get('snapshot', key, **scope.db())
             previous = SituationSnapshot.model_validate(old.payload) if old else None
             versions = sorted(f'{issue.issue_id}:v{issue.version}' for issue in issues)
-            if previous and sorted(previous.issue_version_ids) == versions and previous.company_knowledge_revision == company.version and previous.policy_version == self.policy:
-                return previous
             immediate = any(issue.urgency == 'immediate' for issue in issues)
             if previous and not force and not immediate and self.clock() < previous.as_of + timedelta(seconds=self.debounce_seconds):
                 self.reprocess_company(scope, reason='debounce', due_at=previous.as_of + timedelta(seconds=self.debounce_seconds))
@@ -492,23 +508,41 @@ class AnalyticsService:
                 return False
         return True
 
-    def reprocess_company(self, scope, *, reason, due_at=None, retry_failed=False):
-        company = self._company(scope)
+    def _queue_reprocess(self, scope, company, *, reason, due_at=None):
         events = [(record.key, record.payload['revision'], sorted(record.payload['source_news_ids']))
                   for record in self.store.list('event')]
         key = digest([scope.db(), scope.role, reason, company.version, events, self.policy,
                       due_at.isoformat() if due_at else None])
         old = self.store.get('job', key, **scope.db())
         if old:
-            if retry_failed and old.payload['status'] == 'failed':
-                job = dict(old.payload, status='queued', attempts=0, error=None, lease_until=None,
-                           due_at=(due_at or self.clock()).isoformat())
-                return self.store.put('job', key, job, **scope.db()).payload
             return old.payload
         job = dict(job_id=key, status='queued', reason=reason, attempts=0, error=None,
                    role=scope.role, due_at=(due_at or self.clock()).isoformat(),
                    created_at=self.clock().isoformat(), lease_until=None)
-        return self.store.put('job', key, job, **scope.db()).payload
+        try:
+            return self.store.put('job', key, job, expected_version=0, **scope.db()).payload
+        except RevisionConflict:
+            persisted = self.store.get('job', key, **scope.db())
+            if persisted is None:
+                raise
+            return persisted.payload
+
+    def reprocess_company(self, scope, *, reason, due_at=None, retry_failed=False):
+        company = self._company(scope)
+        if not retry_failed:
+            return self._queue_reprocess(scope, company, reason=reason, due_at=due_at)
+
+        events = [(record.key, record.payload['revision'], sorted(record.payload['source_news_ids']))
+                  for record in self.store.list('event')]
+        key = digest([scope.db(), scope.role, reason, company.version, events, self.policy,
+                      due_at.isoformat() if due_at else None])
+        with self.store.lock('job:' + digest([scope.db(), key])):
+            old = self.store.get('job', key, **scope.db())
+            if old is None or old.payload['status'] != 'failed':
+                return old.payload if old else self._queue_reprocess(scope, company, reason=reason, due_at=due_at)
+            job = dict(old.payload, status='queued', attempts=0, error=None, lease_until=None,
+                       due_at=(due_at or self.clock()).isoformat())
+            return self.store.put('job', key, job, **scope.db()).payload
 
     def process_jobs(self, scope, *, limit=10):
         from datetime import datetime
@@ -516,44 +550,52 @@ class AnalyticsService:
         for record in self.store.list('job', **scope.db()):
             if len(results) >= limit:
                 break
-            with self.store.lock('job:' + digest([scope.db(), record.key])):
-                job = self.store.get('job', record.key, **scope.db()).payload
-                if job['status'] not in {'queued', 'budget_exceeded', 'running'} or datetime.fromisoformat(job['due_at']) > self.clock():
-                    continue
-                if job['status'] == 'running' and datetime.fromisoformat(job['lease_until']) > self.clock():
-                    continue
-                if job['attempts'] >= self.max_job_attempts:
-                    job.update(status='failed', error='attempts_exhausted')
+            try:
+                with self.store.lock('job:' + digest([scope.db(), record.key])):
+                    job = self.store.get('job', record.key, **scope.db()).payload
+                    if job['status'] not in {'queued', 'budget_exceeded', 'running'} or datetime.fromisoformat(job['due_at']) > self.clock():
+                        continue
+                    if job['status'] == 'running' and datetime.fromisoformat(job['lease_until']) > self.clock():
+                        continue
+                    if job['attempts'] >= self.max_job_attempts:
+                        job.update(status='failed', error='attempts_exhausted')
+                        self.store.put('job', record.key, job, **scope.db())
+                        results.append(job)
+                        continue
+                    job.update(status='running', attempts=job['attempts'] + 1,
+                               lease_until=(self.clock() + timedelta(hours=1)).isoformat())
+                    self.store.put('job', record.key, job, **scope.db())
+                    worker_scope = scope.model_copy(update={'role': job['role']})
+                    try:
+                        for event in self.store.list('event'):
+                            self.analyze_event_for_company(worker_scope, event.key, update_issues=False)
+                        with self._company_lock(worker_scope):
+                            self._update_issues(worker_scope)
+                        self.refresh_snapshot(worker_scope, force=True)
+                        job.update(status='completed', error=None)
+                    except StoreBusy:
+                        # Contention is a pause, not an execution attempt.
+                        job.update(status='queued', attempts=job['attempts'] - 1, error='busy',
+                                   due_at=(self.clock() + timedelta(seconds=60)).isoformat())
+                    except AIError as exc:
+                        if exc.code == 'budget_exceeded':
+                            # Budget pauses are not failed execution attempts.
+                            job.update(status='budget_exceeded', attempts=job['attempts'] - 1,
+                                       due_at=datetime.fromtimestamp(exc.retry_at, self.clock().tzinfo).isoformat(), error=exc.code)
+                        elif exc.code in {'timeout', 'connection', 'unavailable', 'rate_limited', 'busy'} and job['attempts'] < self.max_job_attempts:
+                            job.update(status='queued', error=exc.code,
+                                       due_at=max(self.clock() + timedelta(seconds=60),
+                                                  datetime.fromtimestamp(exc.retry_at, self.clock().tzinfo)).isoformat())
+                        else:
+                            job.update(status='failed', error=exc.code)
+                    except Exception as exc:
+                        job.update(status='failed', error=type(exc).__name__)
+                    job['lease_until'] = None
                     self.store.put('job', record.key, job, **scope.db())
                     results.append(job)
-                    continue
-                job.update(status='running', attempts=job['attempts'] + 1,
-                           lease_until=(self.clock() + timedelta(hours=1)).isoformat())
-                self.store.put('job', record.key, job, **scope.db())
-                worker_scope = scope.model_copy(update={'role': job['role']})
-                try:
-                    for event in self.store.list('event'):
-                        self.analyze_event_for_company(worker_scope, event.key, update_issues=False)
-                    with self._company_lock(worker_scope):
-                        self._update_issues(worker_scope)
-                    self.refresh_snapshot(worker_scope, force=True)
-                    job.update(status='completed', error=None)
-                except AIError as exc:
-                    if exc.code == 'budget_exceeded':
-                        # Budget pauses are not failed execution attempts.
-                        job.update(status='budget_exceeded', attempts=job['attempts'] - 1,
-                                   due_at=datetime.fromtimestamp(exc.retry_at, self.clock().tzinfo).isoformat(), error=exc.code)
-                    elif exc.code in {'timeout', 'connection', 'unavailable', 'rate_limited', 'busy'} and job['attempts'] < self.max_job_attempts:
-                        job.update(status='queued', error=exc.code,
-                                   due_at=max(self.clock() + timedelta(seconds=60),
-                                              datetime.fromtimestamp(exc.retry_at, self.clock().tzinfo)).isoformat())
-                    else:
-                        job.update(status='failed', error=exc.code)
-                except Exception as exc:
-                    job.update(status='failed', error=type(exc).__name__)
-                job['lease_until'] = None
-                self.store.put('job', record.key, job, **scope.db())
-                results.append(job)
+            except StoreBusy:
+                # Another worker owns the lease; let it finish and continue scanning.
+                continue
         return results
 
     def scheduled_refresh(self, scope):

@@ -4,6 +4,7 @@ import runpy
 import os
 import sys
 import tempfile
+import threading
 import unittest
 from contextlib import redirect_stderr
 from io import StringIO
@@ -29,6 +30,56 @@ DECISION = RoutingDecision(relevance='relevant', kind='risk', priority='high')
 
 
 class SystemOneDecisionProviderTests(unittest.TestCase):
+    def test_deeply_nested_json_is_a_controlled_invalid_response(self):
+        provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+            http_client=httpx.Client(transport=httpx.MockTransport(lambda request:
+                httpx.Response(200, content=b'[' * 2000 + b'0' + b']' * 2000))))
+        self.addCleanup(provider.close)
+        for call in (provider.probe, lambda: provider.decide({})):
+            with self.subTest(call=call):
+                with self.assertRaises(SystemOneUnavailable) as caught:
+                    call()
+                self.assertEqual(caught.exception.code, 'invalid_response')
+
+    def test_oversized_response_stops_stream_and_uses_fallback(self):
+        class OversizedStream(httpx.SyncByteStream):
+            chunks_read = 0
+            closed = False
+
+            def __iter__(self):
+                yield b'{"models":[{"name":"jev-latest"}],"padding":"'
+                for _ in range(100):
+                    self.chunks_read += 1
+                    yield b'x' * 65536
+                yield b'"}'
+
+            def close(self):
+                self.closed = True
+
+        stream = OversizedStream()
+        provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+            http_client=httpx.Client(transport=httpx.MockTransport(
+                lambda request: httpx.Response(200, stream=stream))))
+        self.addCleanup(provider.close)
+        outcome = DecisionRouter(provider, FakeProvider('llm', [DECISION])).decide({})
+        self.assertEqual(outcome.provider, 'llm')
+        self.assertLess(stream.chunks_read, 20)
+        self.assertTrue(stream.closed)
+
+    def test_http_error_does_not_read_untrusted_body(self):
+        class UnreadableStream(httpx.SyncByteStream):
+            def __iter__(self):
+                raise AssertionError('error bodies must not be buffered')
+                yield b''
+
+        provider = SystemOneDecisionProvider('https://api.typesafe.ai', 'jev-latest',
+            http_client=httpx.Client(transport=httpx.MockTransport(
+                lambda request: httpx.Response(503, stream=UnreadableStream()))))
+        self.addCleanup(provider.close)
+        with self.assertRaises(SystemOneUnavailable) as caught:
+            provider.probe()
+        self.assertEqual(caught.exception.code, 'unavailable')
+
     def test_probe_and_decide_use_systemone_contract_and_bearer_auth(self):
         requests = []
 
@@ -363,6 +414,46 @@ class FakeProvider:
 
 
 class DecisionRouterTests(unittest.TestCase):
+    def test_slow_primary_does_not_create_unbounded_waiting_queue(self):
+        entered, release, completed = threading.Event(), threading.Event(), threading.Event()
+
+        class SlowProvider(FakeProvider):
+            def decide(self, state):
+                entered.set()
+                if not release.wait(2):
+                    raise AssertionError('test did not release primary')
+                return super().decide(state)
+
+        primary = SlowProvider('systemone', [DECISION])
+        fallback = FakeProvider('llm', [DECISION])
+        router = DecisionRouter(primary, fallback, queue_timeout_seconds=0.02)
+        results, errors = [], []
+
+        def call_router(signal=False):
+            try:
+                results.append(router.decide({}).provider)
+            except Exception as exc:
+                errors.append(exc)
+            finally:
+                if signal:
+                    completed.set()
+
+        first = threading.Thread(target=call_router)
+        second = threading.Thread(target=call_router, args=(True,))
+        first.start()
+        try:
+            self.assertTrue(entered.wait(1))
+            second.start()
+            self.assertTrue(completed.wait(1), 'second caller queued behind slow network')
+            self.assertEqual(results, ['llm'])
+        finally:
+            release.set()
+            first.join(2)
+            if second.ident is not None:
+                second.join(2)
+        self.assertEqual(errors, [])
+        self.assertEqual(results, ['llm', 'systemone'])
+
     def test_unconfigured_systemone_uses_llm_without_network(self):
         fallback = FakeProvider('llm', [DECISION])
         router = build_decision_router(Settings(), fallback)

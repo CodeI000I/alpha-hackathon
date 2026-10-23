@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from orchestrator.analytics.models import Scope
 from orchestrator.analytics.router import create_router
+from orchestrator.analytics.store import StoreBusy
 from orchestrator.analytics.tests import test_service as fixtures
 
 
@@ -46,6 +47,14 @@ class RouterTests(unittest.TestCase):
             response = client.post('/v1/analytics/news', json=self.article().model_dump(mode='json'))
             self.assertEqual(response.status_code, 403)
             self.assertEqual(self.store.list('event'), [])
+
+    def test_store_contention_returns_controlled_busy_response(self):
+        def busy(_scope):
+            raise StoreBusy('synthetic lock timeout')
+        self.service.get_company_situation = busy
+        response = self.client.get('/v1/analytics/situation')
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json(), {'detail': {'code': 'busy'}})
 
 
 if __name__ == '__main__':

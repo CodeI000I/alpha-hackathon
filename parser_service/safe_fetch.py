@@ -343,7 +343,13 @@ def _fetch_direct(
 
         while True:
             if content_length is None and len(body) == max_bytes:
-                raise FetchError("SIZE_LIMIT", bytes_read=len(body))
+                remaining = timeout_seconds - (time.monotonic() - started)
+                if remaining <= 0:
+                    raise FetchError("TIMEOUT", bytes_read=len(body))
+                connection.sock.settimeout(remaining)
+                if response.read(1):
+                    raise FetchError("SIZE_LIMIT", bytes_read=len(body) + 1)
+                break
             remaining = timeout_seconds - (time.monotonic() - started)
             if remaining <= 0:
                 raise FetchError("TIMEOUT", bytes_read=len(body))

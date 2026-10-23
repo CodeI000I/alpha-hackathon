@@ -10,7 +10,7 @@ from pydantic import Field
 from orchestrator.llm import AIError
 from .knowledge import DocumentParseError, KnowledgeExtractionError, parse_document
 from .models import CompanyProfile, Model, NewsArticle, Scope
-from .store import RevisionConflict
+from .store import RevisionConflict, StoreBusy
 
 
 class DocumentInput(Model):
@@ -46,6 +46,8 @@ def _invoke(operation, *args, **kwargs):
         raise HTTPException(404, detail={'code': 'not_found'}) from None
     except RevisionConflict:
         raise HTTPException(409, detail={'code': 'revision_conflict'}) from None
+    except StoreBusy:
+        raise HTTPException(503, detail={'code': 'busy'}) from None
     except (ValueError, DocumentParseError):
         raise HTTPException(422, detail={'code': 'invalid_input'}) from None
     except KnowledgeExtractionError:

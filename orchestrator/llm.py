@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 
 import httpx
 from openai import APIConnectionError, APIResponseValidationError, APIStatusError, APITimeoutError, OpenAI
+from openai.types.chat import ChatCompletion
 from pydantic import ValidationError
 
 from .models import canonical, digest
@@ -37,6 +38,14 @@ def next_reset(now: float) -> float:
 def budget_error(body) -> bool:
     text = str(body).lower()
     return 'budget has been exceeded' in text or 'insufficient_quota' in text
+
+
+def structured_messages(instruction, context, schema):
+    """Use the same serialized request for budget checks and model calls."""
+    return [
+        {'role': 'system', 'content': instruction + '\nВерни только JSON по схеме: ' + canonical(schema.model_json_schema())},
+        {'role': 'user', 'content': canonical(context)},
+    ]
 
 
 class LLMClient:
@@ -123,17 +132,24 @@ class LLMClient:
                     self.store.record_call(call_id, 'invalid_response')
                     raise AIError('invalid_response', 'Некорректный ответ шлюза.') from None
                 else:
+                    if not isinstance(result, ChatCompletion):
+                        self.store.record_call(call_id, 'invalid_response')
+                        raise AIError('invalid_response', 'Некорректный ответ шлюза.')
                     if budget_error((result.model_extra or {}).get('error', '')):
                         self.store.record_call(call_id, 'budget_exceeded')
                         self._block()
-                    self.store.record_call(call_id, 'ok', result.usage)
-                    if (not result.choices or not getattr(result.choices[0], 'message', None)
-                            or not isinstance(result.choices[0].message.content, str)
-                            or not result.choices[0].message.content.strip()):
+                    choices = getattr(result, 'choices', None)
+                    choice = choices[0] if isinstance(choices, list) and choices else None
+                    message = getattr(choice, 'message', None)
+                    content = getattr(message, 'content', None)
+                    if not isinstance(content, str) or not content.strip():
+                        self.store.record_call(call_id, 'invalid_response')
                         raise AIError('invalid_response', 'Шлюз вернул пустой ответ.')
-                    if result.choices[0].finish_reason not in ('stop', None):
+                    if getattr(choice, 'finish_reason', None) not in ('stop', None):
+                        self.store.record_call(call_id, 'incomplete_response', result.usage)
                         raise AIError('incomplete_response', 'Ответ модели не завершён; результат не опубликован.')
-                    return result.choices[0].message.content
+                    self.store.record_call(call_id, 'ok', result.usage)
+                    return content
                 delay = self._delay(response, attempt)
                 if attempt == s.max_retries:
                     failure.retry_at = self.clock() + delay
@@ -143,10 +159,7 @@ class LLMClient:
             self.semaphore.release()
 
     def structured(self, stage, instruction, context, schema, validate=None):
-        messages = [
-            {'role': 'system', 'content': instruction + '\nВерни только JSON по схеме: ' + canonical(schema.model_json_schema())},
-            {'role': 'user', 'content': canonical(context)},
-        ]
+        messages = structured_messages(instruction, context, schema)
         key = digest(dict(model=self.settings.model_for(stage), messages=messages,
                           max_tokens=self.settings.max_output_tokens, gateway=self.settings.base_url))
         cached = self.store.cache_get(key)

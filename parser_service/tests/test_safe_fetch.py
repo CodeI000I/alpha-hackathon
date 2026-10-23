@@ -156,6 +156,24 @@ class SafeFetcherTests(unittest.TestCase):
         self.assertEqual(call.kwargs["timeout"], 10.0)
         self.assertNotIn("env", call.kwargs)
 
+    def test_chunked_body_exactly_at_limit_is_accepted(self):
+        response, _ = self._fetch_raw_http(
+            b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n"
+            b"Transfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n",
+            max_bytes=4,
+        )
+        self.assertEqual(response.body, b"test")
+
+    def test_chunked_body_one_byte_over_limit_is_rejected(self):
+        with self.assertRaises(FetchError) as raised:
+            self._fetch_raw_http(
+                b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n"
+                b"Transfer-Encoding: chunked\r\n\r\n5\r\ntests\r\n0\r\n\r\n",
+                max_bytes=4,
+            )
+        self.assertEqual(raised.exception.code, "SIZE_LIMIT")
+        self.assertEqual(raised.exception.bytes_read, 5)
+
     def test_parent_timeout_charges_full_requested_cap(self):
         with patch(
             "parser_service.safe_fetch.subprocess.run",
@@ -450,17 +468,14 @@ class SafeFetcherTests(unittest.TestCase):
         fetched, _observed = self._fetch_raw_http(valid, kind="robots")
         self.assertEqual(fetched.content_type, "text/plain")
 
-    def test_stdlib_chunked_body_at_exact_cap_is_conservatively_rejected(self):
+    def test_stdlib_chunked_body_at_exact_cap_is_accepted(self):
         raw = (
             b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n"
             b"Transfer-Encoding: chunked\r\n\r\n7\r\nfixture\r\n0\r\n\r\n"
         )
 
-        with self.assertRaises(FetchError) as raised:
-            self._fetch_raw_http(raw, max_bytes=7)
-
-        self.assertEqual(raised.exception.code, "SIZE_LIMIT")
-        self.assertEqual(raised.exception.bytes_read, 7)
+        fetched, _observed = self._fetch_raw_http(raw, max_bytes=7)
+        self.assertEqual(fetched.body, b"fixture")
 
     def test_certificate_failure_maps_to_tls_error_and_closes_raw_socket(self):
         observed = {"raw_closed": False}

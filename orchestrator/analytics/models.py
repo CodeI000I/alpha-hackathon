@@ -112,6 +112,8 @@ class SourceDocument(Model):
     error: str | None = None
     extraction_version: str = 'corporate-v1'
     original_path: str | None = None
+    source_digest: str | None = Field(default=None, pattern=r'^[0-9a-f]{64}$')
+    parsed_text_digest: str | None = Field(default=None, pattern=r'^[0-9a-f]{64}$')
 
 
 class CompanyFact(Model):
@@ -180,6 +182,12 @@ class KnowledgeEdge(Model):
     valid_from: AwareDatetime | None = None
     valid_until: AwareDatetime | None = None
     extractor_version: str = 'baseline-v1'
+
+    @model_validator(mode='after')
+    def interval(self):
+        if self.valid_from and self.valid_until and self.valid_from >= self.valid_until:
+            raise ValueError('invalid edge interval')
+        return self
 
 
 class CandidatePath(Model):

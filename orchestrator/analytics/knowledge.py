@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 import tempfile
-from datetime import datetime
+import unicodedata
+from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 from typing import Iterable
@@ -40,6 +42,8 @@ MAX_CHUNK_CHARS = 4_000
 MAX_CHUNKS = 500
 MAX_GRAPH_JSON_BYTES = 2 * 1024 * 1024
 MAX_PDF_PAGES = 500
+MAX_OCR_PIXELS_PER_PAGE = 25_000_000
+MAX_OCR_PIXELS_PER_DOCUMENT = 200_000_000
 MAX_DOCX_EXPANDED_BYTES = 48 * 1024 * 1024
 TESSDATA_DIR = Path(__file__).resolve().parents[1] / 'data' / 'tessdata'
 
@@ -91,9 +95,35 @@ class FactExtraction(_ExtractionModel):
     edges: list[_ExtractedEdge] = Field(default_factory=list, max_length=1000)
 
 
+def _source_chunk_id(document_id: str, revision: int, locator: str, start: int, end: int) -> str:
+    digest_value = hashlib.sha256(
+        f'{document_id}\0{revision}\0{locator}\0{start}\0{end}'.encode()
+    ).hexdigest()[:24]
+    return f'{document_id}:r{revision}:{digest_value}'
+
+
+def _validate_document_chunks(document: SourceDocument) -> None:
+    seen: set[str] = set()
+    for chunk in document.chunks:
+        if (chunk.document_id != document.document_id
+                or chunk.document_revision != document.revision
+                or not 0 <= chunk.start < chunk.end <= len(document.text)
+                or not chunk.locator.strip()
+                or chunk.chunk_id in seen
+                or chunk.chunk_id != _source_chunk_id(
+                    document.document_id, document.revision, chunk.locator, chunk.start, chunk.end,
+                )
+                or chunk.text != document.text[chunk.start:chunk.end]
+                or chunk.text_hash != hashlib.sha256(chunk.text.encode('utf-8')).hexdigest()):
+            raise DocumentParseError('CHUNK_PROVENANCE')
+        seen.add(chunk.chunk_id)
+
+
 def _text_segments(document_id: str, revision: int, segments: Iterable[tuple[str, str]], media_type: str,
                    filename: str) -> SourceDocument:
     cleaned = [(locator, text) for locator, text in segments if text and text.strip()]
+    if sum(len(value) for _, value in cleaned) + max(0, len(cleaned) - 1) > MAX_DOCUMENT_CHARS:
+        raise DocumentParseError('TEXT_LIMIT')
     text = '\n'.join(value for _, value in cleaned)
     if not text.strip():
         raise DocumentParseError('NO_TEXT')
@@ -112,11 +142,9 @@ def _text_segments(document_id: str, revision: int, segments: Iterable[tuple[str
             start, end = offset + local_start, offset + local_end
             chunk_text = value[local_start:local_end]
             chunk_locator = f'{locator}:part:{local_start // MAX_CHUNK_CHARS + 1}'
-            chunk_id = hashlib.sha256(
-                f'{document_id}\0{revision}\0{chunk_locator}\0{start}\0{end}'.encode()
-            ).hexdigest()
             chunks.append(SourceChunk(
-                chunk_id=f'{document_id}:r{revision}:{chunk_id[:24]}', document_id=document_id,
+                chunk_id=_source_chunk_id(document_id, revision, chunk_locator, start, end),
+                document_id=document_id,
                 document_revision=revision, text=chunk_text, locator=chunk_locator,
                 start=start, end=end,
                 text_hash=hashlib.sha256(chunk_text.encode('utf-8')).hexdigest(),
@@ -130,6 +158,17 @@ def _text_segments(document_id: str, revision: int, segments: Iterable[tuple[str
         document_id=document_id, revision=revision, filename=filename, media_type=media_type,
         text=text, chunks=chunks,
     )
+
+
+def _append_limited_segment(segments: list[tuple[str, str]], total_chars: int,
+                            locator: str, text: str) -> int:
+    if not text or not text.strip():
+        return total_chars
+    next_total = total_chars + len(text) + bool(segments)
+    if next_total > MAX_DOCUMENT_CHARS:
+        raise DocumentParseError('TEXT_LIMIT')
+    segments.append((locator, text))
+    return next_total
 
 
 def _parse_txt(document_id: str, revision: int, filename: str, content: bytes,
@@ -164,7 +203,7 @@ def _parse_html(document_id: str, revision: int, filename: str, content: bytes,
     return _text_segments(document_id, revision, segments, media_type, filename)
 
 
-def _ocr_page_text(page, index: int) -> str:
+def _ocr_page_text(page, index: int, *, full: bool = True) -> str:
     tessdata_dir = Path(os.environ.get('TESSDATA_PREFIX') or TESSDATA_DIR).expanduser()
     missing = [name for name in ('eng', 'rus')
                if not (tessdata_dir / f'{name}.traineddata').is_file()
@@ -172,7 +211,7 @@ def _ocr_page_text(page, index: int) -> str:
     if missing:
         raise DocumentParseError('OCR_LANG_DATA_MISSING')
     try:
-        textpage = page.get_textpage_ocr(language='eng+rus', dpi=300, full=True,
+        textpage = page.get_textpage_ocr(language='eng+rus', dpi=300, full=full,
                                          tessdata=str(tessdata_dir))
         return page.get_text('text', textpage=textpage, sort=True).strip()
     except Exception:
@@ -194,13 +233,26 @@ def _parse_pdf(document_id: str, revision: int, filename: str, content: bytes,
         if pdf.page_count > MAX_PDF_PAGES:
             raise DocumentParseError('PAGE_LIMIT')
         segments = []
+        total_chars = 0
+        ocr_pixels = 0
         for index, page in enumerate(pdf, 1):
             page_text = page.get_text('text', sort=True)
-            if not page_text.strip():
-                page_text = _ocr_page_text(page, index)
+            if not page_text.strip() or page.get_images(full=True):
+                pixel_width = math.ceil(page.rect.width * 300 / 72)
+                pixel_height = math.ceil(page.rect.height * 300 / 72)
+                page_pixels = pixel_width * pixel_height
+                if (page_pixels > MAX_OCR_PIXELS_PER_PAGE
+                        or ocr_pixels + page_pixels > MAX_OCR_PIXELS_PER_DOCUMENT):
+                    raise DocumentParseError('OCR_PIXEL_LIMIT')
+                ocr_pixels += page_pixels
+                # Partial OCR preserves native text while recognizing image-only regions.
+                # PyMuPDF's partial OCR text page already contains native text regions.
+                page_text = _ocr_page_text(page, index, full=not bool(page_text.strip()))
             if not page_text.strip():
                 raise DocumentParseError(f'NO_TEXT_PAGE_{index}')
-            segments.append((f'pdf:page:{index}', page_text.strip()))
+            total_chars = _append_limited_segment(
+                segments, total_chars, f'pdf:page:{index}', page_text.strip(),
+            )
         return _text_segments(document_id, revision, segments, media_type, filename)
     finally:
         pdf.close()
@@ -236,17 +288,22 @@ def _parse_docx(document_id: str, revision: int, filename: str, content: bytes,
     except Exception:
         raise DocumentParseError('DOCX_INVALID') from None
     segments = []
+    total_chars = 0
     for section_index, section in enumerate(doc.sections, 1):
         for kind, container in (('header', section.header), ('footer', section.footer)):
             for item_index, item in enumerate(container.iter_inner_content(), 1):
                 value = item.text if isinstance(item, Paragraph) else _table_text(item)
                 if value.strip():
-                    segments.append((f'docx:{kind}:{section_index}:{item_index}', value))
+                    total_chars = _append_limited_segment(
+                        segments, total_chars, f'docx:{kind}:{section_index}:{item_index}', value,
+                    )
     for item_index, item in enumerate(doc.iter_inner_content(), 1):
         value = item.text if isinstance(item, Paragraph) else _table_text(item)
         if value.strip():
             kind = 'paragraph' if isinstance(item, Paragraph) else 'table'
-            segments.append((f'docx:body:{kind}:{item_index}', value))
+            total_chars = _append_limited_segment(
+                segments, total_chars, f'docx:body:{kind}:{item_index}', value,
+            )
     return _text_segments(document_id, revision, segments, media_type, filename)
 
 
@@ -275,14 +332,19 @@ def parse_document(document_id: str, revision: int, filename: str, content: byte
     if not declared or expected is None or declared not in {expected, 'text/plain' if suffix in {'.md', '.markdown'} else expected}:
         raise DocumentParseError('MEDIA_UNSUPPORTED')
     if suffix in {'.txt', '.md', '.markdown'}:
-        return _parse_txt(document_id, revision, filename, content, declared)
-    if suffix in {'.html', '.htm'}:
-        return _parse_html(document_id, revision, filename, content, declared)
-    if suffix == '.pdf':
-        return _parse_pdf(document_id, revision, filename, content, declared)
-    if suffix == '.docx':
-        return _parse_docx(document_id, revision, filename, content, declared)
-    raise DocumentParseError('MEDIA_UNSUPPORTED')
+        document = _parse_txt(document_id, revision, filename, content, declared)
+    elif suffix in {'.html', '.htm'}:
+        document = _parse_html(document_id, revision, filename, content, declared)
+    elif suffix == '.pdf':
+        document = _parse_pdf(document_id, revision, filename, content, declared)
+    elif suffix == '.docx':
+        document = _parse_docx(document_id, revision, filename, content, declared)
+    else:
+        raise DocumentParseError('MEDIA_UNSUPPORTED')
+    return document.model_copy(update={
+        'source_digest': hashlib.sha256(content).hexdigest(),
+        'parsed_text_digest': hashlib.sha256(document.text.encode('utf-8')).hexdigest(),
+    })
 
 
 def _validate_extraction(result: FactExtraction, document: SourceDocument) -> None:
@@ -335,7 +397,7 @@ def import_graphify_json(source: str | bytes | Path, scope: Scope,
     if not isinstance(data, dict) or not isinstance(data.get('edges', data.get('relations')), list):
         raise ValueError('graph JSON must contain an edges or relations array')
     chunks = {chunk.chunk_id: chunk for chunk in document.chunks}
-    result = []
+    extracted = []
     for index, raw_edge in enumerate(data.get('edges', data.get('relations')), 1):
         if not isinstance(raw_edge, dict):
             raise ValueError('graph edge must be an object')
@@ -351,14 +413,10 @@ def import_graphify_json(source: str | bytes | Path, scope: Scope,
             extractor_version=str(data.get('extractor_version', 'graphify-import-v1')),
             source_quote=str(raw_edge.get('source_quote', '')),
         )
-        if edge.predicate not in ALLOWED_RELATIONS:
-            raise ValueError('graph edge relation is not allowed')
-        if any(ref not in chunks for ref in edge.evidence_refs):
-            raise ValueError('graph edge references a missing source chunk')
-        if not any(edge.source_quote in chunks[ref].text for ref in edge.evidence_refs):
-            raise ValueError('graph edge quote does not match a referenced source chunk')
-        result.append(KnowledgeEdge.model_validate(edge.model_dump(exclude={'source_quote'})))
-    return result
+        extracted.append(edge)
+    _validate_extraction(FactExtraction(edges=extracted), document)
+    return [KnowledgeEdge.model_validate(edge.model_dump(exclude={'source_quote'}))
+            for edge in extracted]
 
 
 def _write_original(object_dir: Path, scope: Scope, document: SourceDocument,
@@ -402,8 +460,16 @@ class KnowledgeService:
     def _vector(self, text: str) -> list[float] | None:
         if self.embeddings is None:
             return None
+        return self._vectors([text])[0]
+
+    def _vectors(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
         try:
-            return self.embeddings.embed([text])[0]
+            vectors = self.embeddings.embed(texts)
+            if len(vectors) != len(texts) or any(vector is None for vector in vectors):
+                raise ValueError('embedding count does not match input count')
+            return vectors
         except Exception as exc:
             raise KnowledgeExtractionError('EMBEDDING_FAILED') from exc
 
@@ -446,18 +512,70 @@ class KnowledgeService:
             raise KnowledgeExtractionError('EXTRACTION_INVALID' if isinstance(exc, (ValueError, ValidationError))
                                            else 'EXTRACTION_FAILED') from None
 
+    def reindex(self, scope: Scope) -> int:
+        """Re-embed current ready chunks and profile facts without changing source records."""
+        if not isinstance(scope, Scope):
+            raise TypeError('scope must be a validated Scope')
+        if self.embeddings is None:
+            raise KnowledgeExtractionError('EMBEDDINGS_UNAVAILABLE')
+
+        with self.store.lock('company:' + digest(scope.db())):
+            company = self.store.get('company', scope.company_id, **scope.db())
+            profile = CompanyProfile.model_validate(
+                company.payload if company is not None else {'name': scope.company_id, 'facts': []}
+            )
+            chunks = HybridRetriever(self.store)._current_chunks(scope, datetime.now(timezone.utc))
+            entries = [
+                ('chunk', chunk.chunk_id, chunk.text,
+                 f'{chunk.document_id}:r{chunk.document_revision}:{chunk.text_hash}')
+                for chunk in chunks
+            ]
+            entries.extend(
+                ('fact', fact.fact_id, fact.text, digest(fact.model_dump(mode='json')))
+                for fact in profile.facts
+            )
+            vectors = self._vectors([text for _, _, text, _ in entries])
+            model_id, model_version = self.embeddings.model_id, self.embeddings.version
+            with self.store.transaction():
+                for (kind, key, text, text_version), vector in zip(entries, vectors):
+                    self.store.index_text(
+                        kind, key, text, **scope.db(), vector=vector,
+                        model_id=model_id, model_version=model_version, text_version=text_version,
+                    )
+            return len(entries)
+
     def ingest(self, scope: Scope, document: SourceDocument,
                original: bytes | None = None) -> SourceDocument:
         """Persist source/chunks first; failures leave a stored document with failed status."""
         if not isinstance(scope, Scope):
             raise TypeError('scope must be a validated Scope')
-        document = SourceDocument.model_validate(document.model_dump())
+        try:
+            document = SourceDocument.model_validate(document.model_dump())
+        except ValidationError as exc:
+            if any(error['loc'] and error['loc'][0] == 'chunks' for error in exc.errors()):
+                raise DocumentParseError('CHUNK_PROVENANCE') from None
+            raise
+        if len(document.text) > MAX_DOCUMENT_CHARS:
+            raise DocumentParseError('TEXT_LIMIT')
+        if (len(document.chunks) > MAX_CHUNKS
+                or any(len(chunk.text) > MAX_CHUNK_CHARS for chunk in document.chunks)):
+            raise DocumentParseError('CHUNK_LIMIT')
         if original is not None and not isinstance(original, bytes):
             raise TypeError('original must be bytes or None')
         if original is not None and self.object_dir is None:
             raise ValueError('object_dir is required when original bytes are supplied')
-        source_bytes = original if original is not None else document.text.encode('utf-8')
-        source_digest = hashlib.sha256(source_bytes).hexdigest()
+        text_digest = hashlib.sha256(document.text.encode('utf-8')).hexdigest()
+        if document.parsed_text_digest is not None and document.parsed_text_digest != text_digest:
+            raise RevisionConflict('parsed document text does not match its parser digest')
+        if original is not None and document.source_digest is None:
+            raise RevisionConflict('parsed document is missing its source digest')
+        source_digest = hashlib.sha256(original).hexdigest() if original is not None else (
+            document.source_digest or hashlib.sha256(document.text.encode('utf-8')).hexdigest()
+        )
+        if original is not None and document.source_digest is not None and source_digest != document.source_digest:
+            raise RevisionConflict('original bytes do not match the parsed document source digest')
+        _validate_document_chunks(document)
+        raw_size_bytes = len(original) if original is not None else len(document.text.encode('utf-8'))
         lock_key = f'knowledge:{scope.tenant_id}:{scope.company_id}:{document.document_id}'
         with self.store.lock(lock_key):
             current = self.store.get('document', document.document_id, **scope.db())
@@ -482,7 +600,7 @@ class KnowledgeService:
                 'document': _model_payload(saved), 'revision': document.revision,
                 'source_digest': source_digest,
                 'original_storage': 'object' if original is not None else 'text',
-                'raw_size_bytes': len(source_bytes),
+                'raw_size_bytes': raw_size_bytes,
             }
             expected_version = current.version if current is not None else 0
             self.store.put('document', document.document_id, payload, **scope.db(),
@@ -566,7 +684,8 @@ class KnowledgeService:
 
 
 def _canonical_node(value: str) -> str:
-    return re.sub(r'[^\w]+', '_', value.strip().lower().replace('ё', 'е')).strip('_')
+    normalized = unicodedata.normalize('NFC', value.strip().casefold().replace('ё', 'е'))
+    return re.sub(r'[^\w]+', '_', normalized).strip('_')
 
 
 def _edge_current(edge: KnowledgeEdge, as_of: datetime) -> bool:
@@ -590,7 +709,7 @@ class HybridRetriever:
     @property
     def version(self) -> str:
         return digest({
-            'algorithm': 'hybrid-v1', 'top_k': self.top_k,
+            'algorithm': 'hybrid-v2-token-windows', 'top_k': self.top_k,
             'max_depth': self.max_depth, 'use_graph': self.use_graph,
             'embedding_model_id': getattr(self.embeddings, 'model_id', '') if self.embeddings else '',
             'embedding_model_version': getattr(self.embeddings, 'version', '') if self.embeddings else '',
@@ -604,11 +723,12 @@ class HybridRetriever:
         except Exception:
             return None, 'Configured embedding provider failed; retrieval used lexical channels only.'
 
-    def _paths(self, scope: Scope, event: Event, as_of: datetime) -> list[CandidatePath]:
+    def _paths(self, scope: Scope, event: Event, as_of: datetime,
+               current_chunks: list[SourceChunk]) -> list[CandidatePath]:
         if not self.use_graph or self.max_depth == 0:
             return []
         records = self.store.list('edge', **scope.db())
-        active_chunk_ids = {chunk.chunk_id for chunk in self._current_chunks(scope, as_of)}
+        active_chunk_ids = {chunk.chunk_id for chunk in current_chunks}
         edges = []
         for record in records:
             try:
@@ -618,6 +738,11 @@ class HybridRetriever:
             if (_edge_current(edge, as_of) and edge.evidence_refs
                     and set(edge.evidence_refs) <= active_chunk_ids):
                 edges.append(edge)
+        adjacency = {}
+        for edge in edges:
+            subject, obj = _canonical_node(edge.subject_id), _canonical_node(edge.object_id)
+            adjacency.setdefault(subject, []).append((edge.object_id, f'->{edge.predicate}', edge))
+            adjacency.setdefault(obj, []).append((edge.subject_id, f'<-{edge.predicate}', edge))
         targets = {_canonical_node(item) for item in event.entities}
         targets.update(_canonical_node(item) for item in event.affected_factors)
         targets = {item for item in targets if item and item not in _GENERIC_NODES}
@@ -629,30 +754,24 @@ class HybridRetriever:
         for depth in range(1, self.max_depth + 1):
             next_frontier = []
             for node, nodes, relations, refs in frontier:
-                for edge in edges:
-                    subject, obj = _canonical_node(edge.subject_id), _canonical_node(edge.object_id)
-                    options = []
-                    if subject == node:
-                        options.append((edge.object_id, f'->{edge.predicate}'))
-                    if obj == node:
-                        options.append((edge.subject_id, f'<-{edge.predicate}'))
-                    for next_node, direction in options:
-                        normalized = _canonical_node(next_node)
-                        if not normalized or normalized in _GENERIC_NODES or normalized in nodes:
-                            continue
-                        path_nodes = [*nodes, next_node]
-                        path_relations = [*relations, direction]
-                        path_refs = list(dict.fromkeys([*refs, *edge.evidence_refs]))
-                        if normalized in targets:
-                            results.append(CandidatePath(
-                                path_id='path:' + hashlib.sha256(
-                                    ('|'.join(path_nodes) + '|' + '|'.join(path_relations)).encode()
-                                ).hexdigest()[:20], node_ids=path_nodes,
-                                relation_types=path_relations, evidence_refs=path_refs, status='supported',
-                            ))
-                        elif (normalized, depth) not in visited:
-                            visited.add((normalized, depth))
-                            next_frontier.append((next_node, path_nodes, path_relations, path_refs))
+                for next_node, direction, edge in adjacency.get(node, ()):
+                    normalized = _canonical_node(next_node)
+                    if (not normalized or normalized in _GENERIC_NODES
+                            or normalized in {_canonical_node(path_node) for path_node in nodes}):
+                        continue
+                    path_nodes = [*nodes, next_node]
+                    path_relations = [*relations, direction]
+                    path_refs = list(dict.fromkeys([*refs, *edge.evidence_refs]))
+                    if normalized in targets:
+                        results.append(CandidatePath(
+                            path_id='path:' + hashlib.sha256(
+                                ('|'.join(path_nodes) + '|' + '|'.join(path_relations)).encode()
+                            ).hexdigest()[:20], node_ids=path_nodes,
+                            relation_types=path_relations, evidence_refs=path_refs, status='supported',
+                        ))
+                    elif (normalized, depth) not in visited:
+                        visited.add((normalized, depth))
+                        next_frontier.append((normalized, path_nodes, path_relations, path_refs))
             frontier = next_frontier
             if not frontier:
                 break
@@ -745,7 +864,7 @@ class HybridRetriever:
         if vector_chunks:
             chunk_ranked.append(vector_chunks)
 
-        paths = self._paths(scope, event, as_of)
+        paths = self._paths(scope, event, as_of, list(chunk_by_id.values()))
         graph_refs = {ref for path in paths for ref in path.evidence_refs}
         graph_facts = [fact.fact_id for fact in active_facts if graph_refs & set(fact.source_refs)]
         if graph_facts:
@@ -809,8 +928,8 @@ class HybridRetriever:
 
     def _current_chunks(self, scope: Scope, as_of: datetime) -> list[SourceChunk]:
         current_ids = set()
-        for latest in self.store.list('document', **scope.db()):
-            history = self.store.history('document', latest.key, **scope.db())
+        histories = self.store.histories('document', **scope.db())
+        for history in histories.values():
             ready_revisions = []
             for record in history:
                 raw_document = record.payload.get('document', {})
@@ -826,11 +945,11 @@ class HybridRetriever:
                 selected = max(ready_revisions, key=lambda doc: (doc.revision, doc.received_at))
                 current_ids.update(chunk.chunk_id for chunk in selected.chunks)
         chunks = []
-        for chunk_id in current_ids:
-            record = self.store.get('chunk', chunk_id, **scope.db())
-            if record is not None:
-                try:
-                    chunks.append(SourceChunk.model_validate(record.payload))
-                except ValidationError:
-                    continue
+        for record in self.store.list('chunk', **scope.db()):
+            if record.key not in current_ids:
+                continue
+            try:
+                chunks.append(SourceChunk.model_validate(record.payload))
+            except ValidationError:
+                continue
         return chunks

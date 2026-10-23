@@ -24,6 +24,10 @@ class ScopeRequired(ValueError):
     """A private record operation omitted tenant or company scope."""
 
 
+class StoreBusy(RuntimeError):
+    """A bounded PostgreSQL advisory-lock wait expired; retry the operation later."""
+
+
 class RevisionConflict(RuntimeError):
     """The requested write was based on a stale record version."""
 
@@ -146,6 +150,15 @@ class MemoryStore:
         identity = _key(kind, tenant_id, company_id, key)
         with self._lock:
             return [_copy_record(record) for record in self._records.get(identity, ())]
+
+    def histories(self, kind, *, tenant_id='', company_id='') -> dict[str, list[Record]]:
+        tenant_id, company_id = _scope(kind, tenant_id, company_id)
+        with self._lock:
+            result: dict[str, list[Record]] = {}
+            for (record_kind, record_tenant, record_company, key), records in sorted(self._records.items()):
+                if (record_kind, record_tenant, record_company) == (kind, tenant_id, company_id) and records:
+                    result[key] = [_copy_record(record) for record in records]
+            return result
 
     @contextmanager
     def lock(self, key: str) -> Iterator[None]:
@@ -438,6 +451,18 @@ class PostgresStore:
             ''', identity).fetchall()
         return [self._record(row) for row in rows]
 
+    def histories(self, kind, *, tenant_id='', company_id='') -> dict[str, list[Record]]:
+        tenant_id, company_id = _scope(kind, tenant_id, company_id)
+        with self._connect() as connection:
+            rows = connection.execute('''
+                SELECT * FROM analytics.records WHERE kind=%s AND tenant_id=%s AND company_id=%s
+                ORDER BY record_key, version
+            ''', (kind, tenant_id, company_id)).fetchall()
+        result: dict[str, list[Record]] = {}
+        for row in rows:
+            result.setdefault(row['record_key'], []).append(self._record(row))
+        return result
+
     @contextmanager
     def lock(self, key: str) -> Iterator[None]:
         if not key:
@@ -464,7 +489,10 @@ class PostgresStore:
                                      row_factory=dict_row, autocommit=True)
         locks[key] = (connection, 1)
         try:
-            connection.execute('SELECT pg_advisory_lock(hashtextextended(%s, 0))', (key,))
+            try:
+                connection.execute('SELECT pg_advisory_lock(hashtextextended(%s, 0))', (key,))
+            except psycopg.errors.QueryCanceled as exc:
+                raise StoreBusy('timed out waiting for a PostgreSQL advisory lock') from exc
             try:
                 yield
             finally:
@@ -645,7 +673,10 @@ class PostgresStore:
                     with self.lock(lock_key):
                         with self._connect() as connection:
                             current = connection.execute('''
-                                SELECT r.record_key FROM analytics.record_heads h
+                                SELECT r.record_key,
+                                  EXISTS (SELECT 1 FROM public.checkpoints c
+                                          WHERE c.thread_id='impact:' || r.record_key) AS has_checkpoints
+                                FROM analytics.record_heads h
                                 JOIN analytics.records r USING (kind, tenant_id, company_id, record_key, version)
                                 WHERE h.kind='run' AND h.tenant_id=%s AND h.company_id=%s
                                   AND h.record_key=%s AND r.payload->>'status'='completed'
@@ -654,7 +685,7 @@ class PostgresStore:
                         if current is None:
                             continue
                         saver.delete_thread('impact:' + current['record_key'])
-                        checkpoint_count += 1
+                        checkpoint_count += int(current['has_checkpoints'])
 
         with self._connect() as connection:
             with connection.cursor() as cursor:

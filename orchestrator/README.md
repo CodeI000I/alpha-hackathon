@@ -192,13 +192,13 @@ budget_exceeded доступен следующему worker после `retry_a
 Для реального потока остаётся подключить банковский источник с ID/ревизиями и
 полным текстом, парсер документов компании, фоновую доставку/retry, backend ACL
 и отображение report/history/chat. `backend/internal/ingest/alfa.go` пока заглушка;
-Go `NewsItem.Body` не сериализуется в нынешнем контракте, его нужно передавать явно.
+Go `NewsItem.Body` передаётся в поле `body` внутреннего `/rank`-контракта.
 
-В `origin/backend` клиент уже использует `ORCHESTRATOR_URL` и `/rank`, но не
-отправляет служебный токен и ограничен 60 секундами. Для готового разбора из нескольких
-LLM-вызовов нужен фоновый путь jobs либо согласованный timeout. Ingest пока пропускает
-повторы новости; UpsertNews обновляет лишь title, AddFeedItem не обновляет конфликт.
-Команде нужно связать версии и обновление карточки. Go/frontend/deployment здесь не меняются.
+В текущем Go-клиенте используется `JEV_URL` и внутренний `/rank`, но пока не
+отправляется служебный токен; HTTP timeout составляет 30 секунд. Для готового разбора
+из нескольких LLM-вызовов нужен согласованный фоновый путь jobs либо другой timeout.
+Новый analytics router остаётся незарегистрированным. Последующие исправления Go/UI
+и проверки описаны в [отчёте аудита](../docs/pipeline-audit-2026-10-23.md).
 
 Справка: [Chat Completions](https://developers.openai.com/api/reference/resources/chat),
 [LangGraph Graph API](https://docs.langchain.com/oss/python/langgraph/graph-api),

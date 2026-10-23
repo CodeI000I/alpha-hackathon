@@ -3,6 +3,7 @@
 import json
 import hashlib
 import logging
+import math
 import threading
 import time
 from dataclasses import dataclass
@@ -83,6 +84,7 @@ QUESTIONS = {
 
 class SystemOneDecisionProvider:
     name = 'systemone'
+    max_response_bytes = 1 << 20
 
     def __init__(self, base_url: str, model: str, api_key: SecretStr = SecretStr(''), *,
                  timeout_seconds: float = 10, max_input_chars: int = 32000,
@@ -94,6 +96,8 @@ class SystemOneDecisionProvider:
             raise ValueError('System One URL and model are required')
         if max_input_chars <= 0:
             raise ValueError('max_input_chars must be positive')
+        if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
+            raise ValueError('timeout_seconds must be finite and positive')
         if type(requests_per_minute) is not int or requests_per_minute <= 0:
             raise ValueError('requests_per_minute must be a positive integer')
         self.max_input_chars = max_input_chars
@@ -116,25 +120,39 @@ class SystemOneDecisionProvider:
         self.client.close()
 
     def _request(self, method: str, path: str, **kwargs) -> httpx.Response:
-        headers = {**self._headers, **kwargs.pop('headers', {})}
+        headers = {**self._headers, **kwargs.pop('headers', {}), 'Accept-Encoding': 'identity'}
         try:
-            response = self.client.request(method, self.base_url + path, headers=headers,
-                                           timeout=self.timeout, follow_redirects=False, **kwargs)
+            with self.client.stream(method, self.base_url + path, headers=headers,
+                                    timeout=self.timeout, follow_redirects=False, **kwargs) as response:
+                self._check_status(response.status_code)
+                # Reject compressed bodies before decoding: a tiny compressed response can
+                # expand beyond the limit inside the decoder before a chunk is yielded.
+                if response.headers.get('content-encoding', 'identity').strip().lower() not in {'', 'identity'}:
+                    raise SystemOneUnavailable('invalid_response', 'System One response encoding is unsupported')
+                body = bytearray()
+                for chunk in response.iter_bytes():
+                    if len(body) + len(chunk) > self.max_response_bytes:
+                        raise SystemOneUnavailable('invalid_response', 'System One response exceeds size limit')
+                    body.extend(chunk)
+                return httpx.Response(response.status_code, content=bytes(body),
+                                      headers=response.headers, request=response.request)
         except httpx.TransportError:
             raise SystemOneUnavailable('unavailable', 'System One provider is unavailable') from None
-        if 300 <= response.status_code < 400:
+
+    @staticmethod
+    def _check_status(status_code: int) -> None:
+        if 300 <= status_code < 400:
             raise SystemOneUnavailable('invalid_response', 'System One returned a redirect',
-                                       permanent=True, status_code=response.status_code)
-        if response.status_code in {401, 403}:
+                                       permanent=True, status_code=status_code)
+        if status_code in {401, 403}:
             raise SystemOneUnavailable('authentication', 'System One credentials were rejected',
-                                       permanent=True, status_code=response.status_code)
-        if response.status_code in {408, 409, 429} or response.status_code >= 500:
+                                       permanent=True, status_code=status_code)
+        if status_code in {408, 409, 429} or status_code >= 500:
             raise SystemOneUnavailable('unavailable', 'System One provider is temporarily unavailable',
-                                       status_code=response.status_code)
-        if response.status_code >= 400:
+                                       status_code=status_code)
+        if status_code >= 400:
             raise SystemOneUnavailable('request_rejected', 'System One request was rejected',
-                                       permanent=True, status_code=response.status_code)
-        return response
+                                       permanent=True, status_code=status_code)
 
     def probe(self) -> None:
         try:
@@ -226,11 +244,15 @@ class LLMRoutingDecisionProvider:
 
 class DecisionRouter:
     def __init__(self, primary: DecisionProvider | None, fallback: DecisionProvider, *,
-                 cooldown_seconds: float = 60, clock=time.monotonic):
-        if cooldown_seconds <= 0:
-            raise ValueError('cooldown_seconds must be positive')
+                 cooldown_seconds: float = 60, queue_timeout_seconds: float = 10,
+                 clock=time.monotonic):
+        if not math.isfinite(cooldown_seconds) or cooldown_seconds <= 0:
+            raise ValueError('cooldown_seconds must be finite and positive')
+        if not math.isfinite(queue_timeout_seconds) or queue_timeout_seconds <= 0:
+            raise ValueError('queue_timeout_seconds must be finite and positive')
         self.primary, self.fallback = primary, fallback
         self.cooldown_seconds, self.clock = cooldown_seconds, clock
+        self.queue_timeout_seconds = queue_timeout_seconds
         self._probed = False
         self._disabled = False
         self._retry_at = 0.0
@@ -241,7 +263,15 @@ class DecisionRouter:
             self.primary.close()
 
     def decide(self, state: Any) -> DecisionOutcome:
-        with self._lock:
+        acquired = self._lock.acquire(timeout=self.queue_timeout_seconds)
+        if not acquired:
+            log.warning('decision_provider_fallback', extra={
+                'provider': self.primary.name if self.primary else None,
+                'fallback_provider': self.fallback.name,
+                'error_code': 'busy', 'permanent': False,
+            })
+            return DecisionOutcome(self.fallback.decide(state), self.fallback.name)
+        try:
             use_primary = (self.primary is not None and not self._disabled
                            and self.clock() >= self._retry_at)
             if use_primary:
@@ -265,6 +295,8 @@ class DecisionRouter:
                 else:
                     self._retry_at = 0.0
                     return DecisionOutcome(decision, self.primary.name)
+        finally:
+            self._lock.release()
         return DecisionOutcome(self.fallback.decide(state), self.fallback.name)
 
 
@@ -284,4 +316,5 @@ def build_decision_router(settings, fallback: DecisionProvider, *, http_client=N
         )
     return DecisionRouter(primary, fallback,
                           cooldown_seconds=settings.systemone_cooldown_seconds,
+                          queue_timeout_seconds=settings.systemone_timeout_seconds,
                           clock=clock)

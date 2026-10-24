@@ -1,5 +1,17 @@
 # Analytics implementation checklist
 
+## Frontend interactions follow-up (2026-10-24)
+
+- [x] Fetch branches and retain current main deployment tags.
+- [x] Merge two frontend commits without regressing auth or live analytics.
+- [x] Review and pass frontend unit/type/build/browser checks.
+- [x] Update integration report and publish the ordinary merge to main.
+
+Verification: 154 unit tests, TypeScript, production build and 55 Playwright
+scenarios (27 demo + 28 API) passed. A targeted mutation reproduced a regression;
+the original implementation was restored before final checks. Backend code and
+dependency locks are unchanged; remote CI/deploy is not confirmed locally.
+
 ## Frontend follow-up integration (2026-10-24)
 
 - [x] Fetch remote branches; retain successful CI tags from `origin/main`.

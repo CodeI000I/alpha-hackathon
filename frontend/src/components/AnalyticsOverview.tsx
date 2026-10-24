@@ -27,7 +27,7 @@ export default function AnalyticsOverview({ role }: { role: string }) {
     }
   }, [job.data?.status, queryClient, role]);
 
-  if (isDemoMode) return <section className="analytics-overview w-panel" aria-label="Аналитические ситуации"><h2>Бизнес-ситуации</h2><p className="w-muted">В деморежиме аналитические ситуации сервера недоступны. Здесь не показаны синтетические оценки влияния.</p></section>;
+  if (isDemoMode) return <section className="analytics-overview w-panel" aria-label="Аналитические ситуации"><h2>Бизнес-ситуации</h2><p className="w-muted">Серверные бизнес-ситуации в этом режиме недоступны. Здесь не показаны синтетические оценки влияния.</p></section>;
   if (!role) return <section className="analytics-overview w-panel" aria-label="Аналитические ситуации"><h2>Бизнес-ситуации</h2><p className="w-muted">Выберите роль, чтобы получить обзор по её бизнес-задачам.</p></section>;
 
   return <section className="analytics-overview w-panel" aria-label="Аналитические ситуации">

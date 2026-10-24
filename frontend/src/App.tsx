@@ -20,7 +20,7 @@ import { resolveActiveRole } from './roleSelection';
 function LegacyRedirect() { const location = useLocation(); return <Navigate to={legacyTarget(location.pathname + location.search)} replace />; }
 function LegacyHashRedirect({ target }: { target: string }) {
   useEffect(() => { if (target === '/bank.html') window.location.replace('/bank.html'); }, [target]);
-  return target === '/bank.html' ? <p role="status">Открываем демонстрацию банка…</p> : <Navigate to={target} replace />;
+  return target === '/bank.html' ? <p role="status">Открываем Альфа-Бизнес…</p> : <Navigate to={target} replace />;
 }
 function AuthenticatedLayout({ userId, onLogout, logoutError }: { userId: number; onLogout: () => void; logoutError: string | null }) {
   const user = useQuery({ queryKey: ['user', userId], queryFn: ({ signal }) => api.user(userId, signal) });

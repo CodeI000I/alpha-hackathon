@@ -1,5 +1,16 @@
 # Unified application — integration into main (2026-10-24)
 
+## Follow-up: frontend interactions and presentation
+
+Merge `origin/frontend` at `1329054` (including `1a62198`) into main after
+fast-forwarding to `47982fd`, preserving its deployed image tags. Use an ordinary
+merge as requested; retain main authentication, analytics and dependency contracts.
+Frontend agent resolves runtime/test conflicts; backend agent reviews contracts;
+root resolves documentation, runs browser checks, reviews and publishes the merge.
+Use existing helpers and test fixtures, Ponytail and Agent Skills. Verify unit,
+TypeScript/build and the complete browser suite before publication; backend code
+is unchanged, so the earlier backend integration results remain historical.
+
 ## Follow-up: incoming frontend updates
 
 Baseline: `main` at `ecfc415` (successful CI image tags). Merge `origin/frontend`

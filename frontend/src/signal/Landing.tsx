@@ -33,7 +33,7 @@ export type LandingProps = {
   goToRegister: () => void;
   goToDashboard: () => void;
   productName?: string;
-  demoMode?: boolean;
+
 };
 
 export function Landing({
@@ -41,7 +41,7 @@ export function Landing({
   goToRegister,
   goToDashboard,
   productName = 'Сигнал',
-  demoMode = false,
+
 }: LandingProps) {
   const openApp = hasSession ? goToDashboard : goToRegister;
 
@@ -63,10 +63,10 @@ export function Landing({
       <section className="section theme-light theme-soft" id="how" aria-labelledby="how-title"><div className="shell"><h2 id="how-title">Как работает сервис</h2><ol className="steps">{steps.map(([title, text], index) => <li key={title}><span className="step-number">{index + 1}</span><h3>{title}</h3><p>{text}</p></li>)}</ol></div></section>
 
       <section className="section demo-section" id="demo" aria-labelledby="demo-title"><div className="shell demo-grid"><div className="demo-intro"><h2 id="demo-title">Персональный обзор бизнеса</h2><p className="demo-lead">Роль и контекст компании меняют приоритеты, объяснение влияния и следующие шаги.</p><div className="demo-note"><span className="note-mark" aria-hidden="true">↗</span><h3>{hasSession ? 'Ваш профиль готов' : 'Начните с профиля компании'}</h3><p>{hasSession ? 'Откройте ленту, чтобы посмотреть актуальные события и разборы.' : 'Укажите компанию и выберите роли. Доступные роли загружаются из сервиса.'}</p><Button onClick={openApp}>{hasSession ? 'Открыть ленту' : 'Создать профиль'}</Button></div></div>
-        <article className="profile-form" aria-label="Демонстрационный пример результата"><div className="form-heading"><h3>Что вы получите</h3><Tag>{demoMode ? 'Деморежим' : 'Пример'}</Tag></div><div className="analysis-group"><h4>События по вашей роли</h4><p>Риски и возможности отсортированы по релевантности для компании.</p></div><div className="analysis-group"><h4>Проверяемые основания</h4><p>Источник остаётся рядом с объяснением, а неподтверждённые сведения не подменяют факты.</p></div><div className="analysis-group"><h4>Следующее действие</h4><p>Разбор помогает перейти от новости к вопросу, который стоит проверить команде.</p></div></article>
+        <article className="profile-form" aria-label="Пример результата"><div className="form-heading"><h3>Что вы получите</h3></div><div className="analysis-group"><h4>События по вашей роли</h4><p>Риски и возможности отсортированы по релевантности для компании.</p></div><div className="analysis-group"><h4>Проверяемые основания</h4><p>Источник остаётся рядом с объяснением, а неподтверждённые сведения не подменяют факты.</p></div><div className="analysis-group"><h4>Следующее действие</h4><p>Разбор помогает перейти от новости к вопросу, который стоит проверить команде.</p></div></article>
       </div></section>
 
-      <section className="section theme-light" aria-labelledby="result-title"><div className="shell"><h2 id="result-title">От события к действию</h2><div className="result-layout"><article className="event-panel"><h3>Поставщик переносит отгрузку комплектующих</h3><p>Источник сообщает о переносе ближайшей партии. Сервис сохраняет исходное сообщение и показывает его значение в контексте компании.</p><div className="event-actions"><Tag>Демонстрационный пример</Tag></div></article><article className="empty-result"><div className="empty-copy"><h3>Что это значит<br />для вашей компании?</h3><p>Создайте профиль, чтобы увидеть последствия и возможные действия.</p><Button variant="secondary" onClick={openApp}>{hasSession ? 'Открыть мою ленту' : 'Задать контекст'}</Button></div><img src={asset('result-v2')} width="260" height="260" alt="Объёмная папка с готовым отчётом" loading="lazy" /></article></div></div></section>
+      <section className="section theme-light" aria-labelledby="result-title"><div className="shell"><h2 id="result-title">От события к действию</h2><div className="result-layout"><article className="event-panel"><h3>Поставщик переносит отгрузку комплектующих</h3><p>Источник сообщает о переносе ближайшей партии. Сервис сохраняет исходное сообщение и показывает его значение в контексте компании.</p><div className="event-actions"><Tag>Пример</Tag></div></article><article className="empty-result"><div className="empty-copy"><h3>Что это значит<br />для вашей компании?</h3><p>Создайте профиль, чтобы увидеть последствия и возможные действия.</p><Button variant="secondary" onClick={openApp}>{hasSession ? 'Открыть мою ленту' : 'Задать контекст'}</Button></div><img src={asset('result-v2')} width="260" height="260" alt="Объёмная папка с готовым отчётом" loading="lazy" /></article></div></div></section>
     </main>
     <footer className="footer theme-light"><div className="shell footer-inner"><Brand productName={productName} /><p>Прототип команды · Альфа-хакатон 2026</p></div></footer>
   </div>;

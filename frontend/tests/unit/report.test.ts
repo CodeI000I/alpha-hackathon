@@ -154,7 +154,7 @@ describe('text report provenance', () => {
     expect(report).toContain('Значение для бизнеса [Интерпретация / insight]');
     expect(report).toContain('Что может измениться [Гипотеза]');
     expect(report).toContain('Документы компании [Основания]');
-    expect(report).toContain('Материалы банка [Основания]');
+    expect(report).toContain('Аналитика от Альфа-Банка [Основания]');
     expect(report).toContain(BANK_UNKNOWN);
     expect(report).toContain('Источник: S11');
     expect(report).toContain('Ссылка: https://example.test/source');

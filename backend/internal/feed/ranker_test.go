@@ -1,4 +1,4 @@
-package feed
+package feed_test
 
 import (
 	"context"
@@ -9,31 +9,32 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/devowt/alpha-hackaton/backend/internal/domain"
+	"github.com/devowt/alpha-hackaton/backend/internal/feed"
+	"github.com/devowt/alpha-hackaton/backend/internal/orchestrator"
 )
 
 type roundTripperFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripperFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
-func rankWithFixture(body string, roles ...string) ([]Match, error) {
-	ranker := NewJevRanker("http://ranker.test")
-	ranker.Client = &http.Client{Transport: roundTripperFunc(func(*http.Request) (*http.Response, error) {
+func rankWithFixture(body string, roles ...string) ([]feed.Match, error) {
+	ranker := orchestrator.New("http://ranker.test", "", 0)
+	ranker.HTTP = &http.Client{Transport: roundTripperFunc(func(*http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header),
 			Body: io.NopCloser(strings.NewReader(body))}, nil
 	})}
-	return ranker.Rank(context.Background(), Request{Roles: roles})
+	return ranker.Rank(context.Background(), feed.Request{Roles: roles})
 }
 
 func TestJevRankerReturnsDecodedMatches(t *testing.T) {
 	var gotRequest bool
-	ranker := NewJevRanker("http://ranker.test")
-	ranker.Client = &http.Client{Transport: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+	ranker := orchestrator.New("http://ranker.test", "", 0)
+	ranker.HTTP = &http.Client{Transport: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Method != http.MethodPost || r.URL.String() != "http://ranker.test/rank" {
 			t.Errorf("unexpected request: %s %s", r.Method, r.URL)
 		}
 		gotRequest = true
-		var request Request
+		var request feed.Request
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil || request.News.Body != "Full source body" {
 			t.Errorf("full source body was lost at the rank boundary: %q, %v", request.News.Body, err)
 		}
@@ -42,7 +43,7 @@ func TestJevRankerReturnsDecodedMatches(t *testing.T) {
 		))}, nil
 	})}
 
-	got, err := ranker.Rank(context.Background(), Request{Roles: []string{"procurement"}, News: domain.NewsItem{Body: "Full source body"}})
+	got, err := ranker.Rank(context.Background(), feed.Request{Roles: []string{"procurement"}, News: feed.News{Body: "Full source body"}})
 	if err != nil {
 		t.Fatalf("Rank() error = %v", err)
 	}

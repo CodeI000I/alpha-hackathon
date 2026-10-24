@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/devowt/alpha-hackaton/backend/internal/domain"
 	"github.com/devowt/alpha-hackaton/backend/internal/storage/postgres"
@@ -25,11 +26,19 @@ type onboardingRequest struct {
 	User struct {
 		Email    string   `json:"email"`
 		FullName string   `json:"fullName"`
+		Password string   `json:"password"`
 		Roles    []string `json:"roles"`
 	} `json:"user"`
 }
 
 func (s *Server) createOnboarding(w http.ResponseWriter, r *http.Request) {
+	if s.RequireAuth && !sameOriginRequest(r) {
+		writeJSON(w, http.StatusForbidden, apiError{"Запрос должен быть отправлен с этого сайта"})
+		return
+	}
+	if s.RequireAuth && !s.allowAuthAttempt(w, r) {
+		return
+	}
 	key := r.Header.Get("Idempotency-Key")
 	if !validIdempotencyKey(key) {
 		badRequest(w, "Idempotency-Key must be 1-128 ASCII letters, digits, '.', '_', ':', or '-'")
@@ -62,10 +71,14 @@ func (s *Server) createOnboarding(w http.ResponseWriter, r *http.Request) {
 	input.Company.INN = strings.TrimSpace(input.Company.INN)
 	input.Company.OGRN = strings.TrimSpace(input.Company.OGRN)
 	input.Company.Name = strings.TrimSpace(input.Company.Name)
-	input.User.Email = strings.TrimSpace(input.User.Email)
+	input.User.Email = strings.ToLower(strings.TrimSpace(input.User.Email))
 	input.User.FullName = strings.TrimSpace(input.User.FullName)
 	if input.Company.INN == "" || len(input.Company.INN) > 12 || input.Company.Name == "" || len(input.Company.OGRN) > 15 || input.User.Email == "" || input.User.FullName == "" {
 		badRequest(w, "company inn/name and user email/fullName are required and identifiers must fit their columns")
+		return
+	}
+	if len(input.User.Password) < 10 || len(input.User.Password) > 72 {
+		badRequest(w, "password must be between 10 and 72 bytes")
 		return
 	}
 	if input.User.Roles == nil {
@@ -89,15 +102,27 @@ func (s *Server) createOnboarding(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	canonical, err := json.Marshal(input)
+	requestFingerprint := input
+	requestFingerprint.User.Password = ""
+	canonical, err := json.Marshal(requestFingerprint)
 	if err != nil {
-		s.fail(w, err)
+		s.fail(w, err, msgCompanyNotFound)
 		return
 	}
 	digest := sha256.Sum256(canonical)
-	company, user, replayed, err := s.Store.CreateOnboarding(r.Context(), key, hex.EncodeToString(digest[:]), domain.Company{
+	token, sessionHash, err := newSessionToken()
+	if err != nil {
+		s.fail(w, err, msgCompanyNotFound)
+		return
+	}
+	expires := time.Now().Add(sessionTTL)
+	company, user, replayed, err := s.Store.CreateOnboarding(r.Context(), key, hex.EncodeToString(digest[:]), input.User.Password, sessionHash, expires, domain.Company{
 		INN: input.Company.INN, OGRN: input.Company.OGRN, Name: input.Company.Name,
 	}, domain.User{Email: input.User.Email, FullName: input.User.FullName, Roles: input.User.Roles})
+	if errors.Is(err, postgres.ErrInvalidCredentials) {
+		writeJSON(w, http.StatusUnauthorized, apiError{"Неверная почта или пароль"})
+		return
+	}
 	if errors.Is(err, postgres.ErrIdempotencyConflict) {
 		writeJSON(w, http.StatusConflict, apiError{"idempotency key was already used for a different request"})
 		return
@@ -111,13 +136,17 @@ func (s *Server) createOnboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		s.fail(w, err)
+		s.fail(w, err, msgCompanyNotFound)
 		return
 	}
 	status := http.StatusCreated
 	if replayed {
 		status = http.StatusOK
 	}
+	if s.RequireAuth {
+		s.resetAuthAttempts(r)
+	}
+	s.setSessionCookie(w, token, expires)
 	writeJSON(w, status, struct {
 		Company domain.Company `json:"company"`
 		User    domain.User    `json:"user"`

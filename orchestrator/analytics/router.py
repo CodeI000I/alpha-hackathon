@@ -1,13 +1,15 @@
-"""Unregistered router. The host must inject authenticated company ownership."""
+"""Scoped analytics routes; the host injects authenticated company ownership."""
 
 import base64
 import binascii
+import time
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import Field
 
 from orchestrator.llm import AIError
+from orchestrator.models import digest
 from .knowledge import DocumentParseError, KnowledgeExtractionError, parse_document
 from .models import CompanyProfile, Model, NewsArticle, Scope
 from .store import RevisionConflict, StoreBusy
@@ -54,7 +56,9 @@ def _invoke(operation, *args, **kwargs):
         raise HTTPException(503, detail={'code': 'extraction_failed'}) from None
     except AIError as exc:
         raise HTTPException(429 if exc.code in {'budget_exceeded', 'rate_limited', 'busy'} else 503,
-                            detail=exc.public()) from None
+                            detail=exc.public(),
+                            headers={'Retry-After': str(max(1, int(exc.retry_at - time.time()) + 1))}
+                            if exc.retry_at else None) from None
 
 
 def create_router(service, authorize, *, authorize_ingestion=None):
@@ -84,6 +88,12 @@ def create_router(service, authorize, *, authorize_ingestion=None):
         parsed = _invoke(parse_document, value.document_id, value.revision, value.filename,
                          content, value.media_type)
         return _invoke(service.ingest_company_document, scope, parsed, original=content)
+
+    @router.get('/documents')
+    def documents(scope: Scope = Depends(authorize)):
+        fields = {'file_id', 'filename', 'document_id', 'status', 'attempts', 'error', 'retry_at'}
+        return [{key: value for key, value in row.payload.items() if key in fields}
+                for row in service.store.list('integration_file', **scope.db())]
 
     @router.post('/events/{event_id}/analyze')
     def analyze(event_id: str, scope: Scope = Depends(authorize)):
@@ -128,7 +138,17 @@ def create_router(service, authorize, *, authorize_ingestion=None):
 
     @router.post('/refresh', status_code=202)
     def refresh(value: Refresh, scope: Scope = Depends(authorize)):
-        return _invoke(service.reprocess_company, scope, reason=value.reason, retry_failed=value.retry_failed)
+        return _invoke(refresh_company, value, scope)
+
+    def refresh_company(value, scope):
+        if value.retry_failed:
+            for row in service.store.list('integration_file', **scope.db()):
+                with service.store.lock('backend-file:' + digest([scope.db(), row.key])):
+                    current = service.store.get('integration_file', row.key, **scope.db())
+                    if current is not None and current.payload['status'] == 'failed':
+                        service.store.put('integration_file', row.key,
+                            dict(current.payload, status='queued', attempts=0, error=None, retry_at=0), **scope.db())
+        return service.reprocess_company(scope, reason=value.reason, retry_failed=value.retry_failed)
 
     @router.get('/jobs/{job_id}')
     def job(job_id: str, scope: Scope = Depends(authorize)):

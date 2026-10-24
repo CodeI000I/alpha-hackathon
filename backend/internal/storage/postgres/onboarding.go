@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/devowt/alpha-hackaton/backend/internal/domain"
 )
@@ -19,7 +21,7 @@ var (
 
 // CreateOnboarding atomically creates the company, its first user, role links,
 // and the idempotency record. Concurrent replays of a key serialize in PG.
-func (s *Store) CreateOnboarding(ctx context.Context, key, requestHash string, company domain.Company, user domain.User) (domain.Company, domain.User, bool, error) {
+func (s *Store) CreateOnboarding(ctx context.Context, key, requestHash, password, sessionHash string, sessionExpires time.Time, company domain.Company, user domain.User) (domain.Company, domain.User, bool, error) {
 	var resultCompany domain.Company
 	var resultUser domain.User
 	replayed := false
@@ -36,12 +38,22 @@ func (s *Store) CreateOnboarding(ctx context.Context, key, requestHash string, c
 			if existingHash != requestHash {
 				return ErrIdempotencyConflict
 			}
+			var currentPasswordHash string
+			if err := tx.QueryRow(ctx, `SELECT password_hash FROM users WHERE id=$1 FOR UPDATE`, userID).Scan(&currentPasswordHash); err != nil {
+				return err
+			}
+			if currentPasswordHash == "" || bcrypt.CompareHashAndPassword([]byte(currentPasswordHash), []byte(password)) != nil {
+				return ErrInvalidCredentials
+			}
 			resultCompany, err = getCompanyTx(ctx, tx, companyID)
 			if err != nil {
 				return err
 			}
 			resultUser, err = getUserTx(ctx, tx, userID)
 			if err != nil {
+				return err
+			}
+			if _, err := tx.Exec(ctx, `INSERT INTO auth_sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)`, sessionHash, userID, sessionExpires); err != nil {
 				return err
 			}
 			replayed = true
@@ -51,6 +63,10 @@ func (s *Store) CreateOnboarding(ctx context.Context, key, requestHash string, c
 			return err
 		}
 
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
 		if company.Profile == nil {
 			company.Profile = map[string]json.RawMessage{}
 		}
@@ -61,8 +77,8 @@ func (s *Store) CreateOnboarding(ctx context.Context, key, requestHash string, c
 		}
 		user.CompanyID = &company.ID
 		if err := tx.QueryRow(ctx, `
-			INSERT INTO users (company_id, email, full_name)
-			VALUES ($1, $2, $3) RETURNING id`, company.ID, user.Email, user.FullName).Scan(&user.ID); err != nil {
+			INSERT INTO users (company_id, email, full_name, password_hash)
+			VALUES ($1, $2, $3, $4) RETURNING id`, company.ID, user.Email, user.FullName, passwordHash).Scan(&user.ID); err != nil {
 			return err
 		}
 		for _, code := range user.Roles {
@@ -75,6 +91,12 @@ func (s *Store) CreateOnboarding(ctx context.Context, key, requestHash string, c
 			if _, err := tx.Exec(ctx, `INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)`, user.ID, roleID); err != nil {
 				return err
 			}
+		}
+		if err := enqueueUserNewsDeliveries(ctx, tx, user.ID); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `INSERT INTO auth_sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)`, sessionHash, user.ID, sessionExpires); err != nil {
+			return err
 		}
 		if _, err := tx.Exec(ctx, `INSERT INTO onboarding_requests (idempotency_key, request_hash, company_id, user_id) VALUES ($1, $2, $3, $4)`, key, requestHash, company.ID, user.ID); err != nil {
 			return err

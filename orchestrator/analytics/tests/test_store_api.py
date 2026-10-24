@@ -5,6 +5,7 @@ from threading import Event, Thread
 from datetime import timedelta
 import unittest
 from uuid import uuid4
+from unittest.mock import patch
 
 from orchestrator.analytics.migrate import apply_migrations
 from orchestrator.analytics.models import Scope, utcnow
@@ -113,6 +114,21 @@ class PostgresStoreApiTests(unittest.TestCase):
             self.assertIsNotNone(store.get('run', run_id, **scope.db()))
         finally:
             store.close()
+
+    def test_runtime_migrations_keep_checkpoint_setup_under_cross_process_lock(self):
+        import psycopg
+        from langgraph.checkpoint.postgres import PostgresSaver
+        from orchestrator.analytics.runtime import AnalyticsSettings, migrate
+        setup = PostgresSaver.setup
+
+        def guarded_setup(saver):
+            with psycopg.connect(DSN, autocommit=True) as contender:
+                acquired = contender.execute("SELECT pg_try_advisory_lock(hashtextextended('alpha.analytics.runtime-migrations', 0))").fetchone()[0]
+                self.assertFalse(acquired, 'checkpoint schema migration must be serialized with the other init container')
+            return setup(saver)
+
+        with patch.object(PostgresSaver, 'setup', guarded_setup):
+            migrate(AnalyticsSettings(database_url=DSN))
 
 
 if __name__ == '__main__':

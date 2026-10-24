@@ -1,5 +1,24 @@
 # Analytics implementation checklist
 
+## Main integration (2026-10-24)
+
+- [x] Fetch all remotes and map changes already merged into main.
+- [x] Resolve merges without losing audit protections or Signal UI.
+- [x] Connect private analytics API and compatible /rank endpoint; contract tests.
+- [x] Connect recoverable profile/file/job sync and parser output ingestion; tests.
+- [x] Connect server sessions, scoped Go proxy and real Signal analytics views.
+- [x] Prepare full Compose/Helm runtime and CI image builds (local Docker unavailable).
+- [x] Run full Python/Go/frontend tests and isolated HTTP/DB/browser smoke.
+- [x] Review final changes and update architecture/runbook/report for main publication.
+
+Verification: 372 Python tests without skips, full Go race/vet with three isolated
+PostgreSQL databases and no skips, 121 frontend unit and 38 browser tests, typecheck,
+build, npm audit (zero findings), Helm/actionlint and unified HTTP smoke. Local
+Docker build, live model/source calls and cluster rollout are not claimed.
+See docs/integration-main-2026-10-24.md.
+
+## Completed prototype
+
 - [x] Inspect repository, update branch, map reusable code and differences.
 - [x] Reproduce and fix legacy policy freshness and exhausted budget jobs (64 tests).
 - [x] Strict domain contracts and invalid-input tests.

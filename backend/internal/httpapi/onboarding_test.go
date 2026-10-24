@@ -3,6 +3,8 @@ package httpapi
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -58,7 +61,7 @@ func newOnboardingTestServer(t *testing.T) (*httptest.Server, *postgres.Store, s
 	if err := store.Migrate(ctx, migrations.FS); err != nil {
 		t.Fatal(err)
 	}
-	server := &Server{Store: store, Log: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	server := &Server{Store: store, RequireAuth: true, Log: slog.New(slog.NewTextHandler(io.Discard, nil))}
 	httpServer := httptest.NewServer(server.Handler())
 	t.Cleanup(httpServer.Close)
 	return httpServer, store, dsn
@@ -79,6 +82,7 @@ func postOnboarding(t *testing.T, serverURL, key string, body any) *http.Respons
 		t.Fatal(err)
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Origin", serverURL)
 	req.Header.Set("Idempotency-Key", key)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -101,7 +105,7 @@ func onboardingBody(suffix string) map[string]any {
 	value, _ := strconv.ParseInt(suffix, 36, 64)
 	return map[string]any{
 		"company": map[string]any{"inn": fmt.Sprintf("%012d", value%1_000_000_000_000), "name": "Company " + suffix},
-		"user":    map[string]any{"email": suffix + "@example.test", "fullName": "Test User", "roles": []string{"sales", "procurement"}},
+		"user":    map[string]any{"email": suffix + "@example.test", "fullName": "Test User", "password": "correct-horse-battery", "roles": []string{"sales", "procurement"}},
 	}
 }
 
@@ -119,6 +123,9 @@ func TestOnboardingReplayIsIdempotentAndRoleOrderIsCanonical(t *testing.T) {
 		t.Fatalf("first response status = %d, want %d", first.StatusCode, http.StatusCreated)
 	}
 	created := decodeOnboarding(t, first)
+	if first.Header.Get("Set-Cookie") == "" {
+		t.Fatal("onboarding did not create an authenticated session cookie")
+	}
 	if created.Company.ID == 0 || created.User.ID == 0 || created.User.CompanyID == nil || *created.User.CompanyID != created.Company.ID {
 		t.Fatalf("inconsistent onboarding result: %+v", created)
 	}
@@ -132,6 +139,227 @@ func TestOnboardingReplayIsIdempotentAndRoleOrderIsCanonical(t *testing.T) {
 	replayed := decodeOnboarding(t, replay)
 	if replayed.Company.ID != created.Company.ID || replayed.User.ID != created.User.ID {
 		t.Fatalf("replay created different records: first=%+v replay=%+v", created, replayed)
+	}
+}
+
+func TestOnboardingSessionLoginAndLogout(t *testing.T) {
+	server, _, _ := newOnboardingTestServer(t)
+	suffix := onboardingSuffix()
+	blockedPayload, _ := json.Marshal(onboardingBody(suffix))
+	blockedReq, _ := http.NewRequest(http.MethodPost, server.URL+"/api/v1/onboarding", bytes.NewReader(blockedPayload))
+	blockedReq.Header.Set("Content-Type", "application/json")
+	blockedReq.Header.Set("Idempotency-Key", "cross-site-"+suffix)
+	blockedReq.Header.Set("Origin", "https://attacker.example")
+	blocked, err := http.DefaultClient.Do(blockedReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	blocked.Body.Close()
+	if blocked.StatusCode != http.StatusForbidden {
+		t.Fatalf("cross-site onboarding status = %d, want forbidden", blocked.StatusCode)
+	}
+	resp := postOnboarding(t, server.URL, "session-"+suffix, onboardingBody(suffix))
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("onboarding status = %d", resp.StatusCode)
+	}
+	user := decodeOnboarding(t, resp).User
+	var cookie *http.Cookie
+	for _, c := range resp.Cookies() {
+		if c.Name == sessionCookie {
+			cookie = c
+		}
+	}
+	if cookie == nil || !cookie.HttpOnly || cookie.SameSite != http.SameSiteStrictMode {
+		t.Fatalf("unsafe session cookie: %#v", cookie)
+	}
+
+	payload, _ := json.Marshal(map[string]string{"email": strings.ToUpper(user.Email), "password": "correct-horse-battery"})
+	loginReq, _ := http.NewRequest(http.MethodPost, server.URL+"/api/v1/auth/login", bytes.NewReader(payload))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginReq.Header.Set("Origin", "https://attacker.example")
+	blockedLogin, err := http.DefaultClient.Do(loginReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	blockedLogin.Body.Close()
+	if blockedLogin.StatusCode != http.StatusForbidden {
+		t.Fatalf("cross-site login status = %d, want forbidden", blockedLogin.StatusCode)
+	}
+	loginReq, _ = http.NewRequest(http.MethodPost, server.URL+"/api/v1/auth/login", bytes.NewReader(payload))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginReq.Header.Set("Origin", server.URL)
+	loginResp, err := http.DefaultClient.Do(loginReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer loginResp.Body.Close()
+	if loginResp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(loginResp.Body)
+		t.Fatalf("login status %d: %s", loginResp.StatusCode, b)
+	}
+	var loginCookie *http.Cookie
+	for _, c := range loginResp.Cookies() {
+		if c.Name == sessionCookie {
+			loginCookie = c
+		}
+	}
+	if loginCookie == nil {
+		t.Fatal("login did not set a session cookie")
+	}
+	protected, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/v1/users/%d", server.URL, user.ID), nil)
+	protected.AddCookie(loginCookie)
+	protectedResp, err := http.DefaultClient.Do(protected)
+	if err != nil {
+		t.Fatal(err)
+	}
+	protectedResp.Body.Close()
+	if protectedResp.StatusCode != http.StatusOK {
+		t.Fatalf("self user endpoint status = %d", protectedResp.StatusCode)
+	}
+	if user.CompanyID == nil {
+		t.Fatal("new user has no company")
+	}
+	colleagueBody, _ := json.Marshal(map[string]any{"companyId": *user.CompanyID, "email": suffix + "+colleague@example.test", "fullName": "Another User", "password": "another-good-password", "roles": []string{"sales"}})
+	colleagueReq, _ := http.NewRequest(http.MethodPost, server.URL+"/api/v1/users", bytes.NewReader(colleagueBody))
+	colleagueReq.Header.Set("Content-Type", "application/json")
+	colleagueReq.Header.Set("Origin", server.URL)
+	colleagueReq.AddCookie(loginCookie)
+	colleagueResp, err := http.DefaultClient.Do(colleagueReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	colleagueResp.Body.Close()
+	if colleagueResp.StatusCode != http.StatusCreated {
+		t.Fatalf("same-company registration status = %d, want created", colleagueResp.StatusCode)
+	}
+	other, _ := http.NewRequest(http.MethodGet, server.URL+"/api/v1/users/999999999", nil)
+	other.AddCookie(loginCookie)
+	otherResp, err := http.DefaultClient.Do(other)
+	if err != nil {
+		t.Fatal(err)
+	}
+	otherResp.Body.Close()
+	if otherResp.StatusCode != http.StatusForbidden {
+		t.Fatalf("cross-user lookup status = %d, want forbidden", otherResp.StatusCode)
+	}
+
+	meReq, _ := http.NewRequest(http.MethodGet, server.URL+"/api/v1/auth/me", nil)
+	meReq.AddCookie(loginCookie)
+	meResp, err := http.DefaultClient.Do(meReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer meResp.Body.Close()
+	if meResp.StatusCode != http.StatusOK {
+		t.Fatalf("me status = %d", meResp.StatusCode)
+	}
+
+	logoutReq, _ := http.NewRequest(http.MethodPost, server.URL+"/api/v1/auth/logout", nil)
+	logoutReq.AddCookie(loginCookie)
+	logoutReq.Header.Set("Origin", server.URL)
+	logoutResp, err := http.DefaultClient.Do(logoutReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer logoutResp.Body.Close()
+	if logoutResp.StatusCode != http.StatusNoContent {
+		t.Fatalf("logout status = %d", logoutResp.StatusCode)
+	}
+}
+
+func TestOnboardingReplayChecksCurrentPasswordWithoutPersistingItInFingerprint(t *testing.T) {
+	server, store, dsn := newOnboardingTestServer(t)
+	suffix := onboardingSuffix()
+	key := "onboarding-password-" + suffix
+	body := onboardingBody(suffix)
+	first := postOnboarding(t, server.URL, key, body)
+	if first.StatusCode != http.StatusCreated {
+		t.Fatalf("first response status = %d, want %d", first.StatusCode, http.StatusCreated)
+	}
+	first.Body.Close()
+
+	var fingerprintInput onboardingRequest
+	encoded, err := json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(encoded, &fingerprintInput); err != nil {
+		t.Fatal(err)
+	}
+	fingerprintInput.User.Password = ""
+	sort.Strings(fingerprintInput.User.Roles)
+	canonical, err := json.Marshal(fingerprintInput)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantHash := sha256.Sum256(canonical)
+	var storedHash string
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	conn, err := pgx.Connect(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close(ctx)
+	if err := conn.QueryRow(ctx, `SELECT request_hash FROM onboarding_requests WHERE idempotency_key=$1`, key).Scan(&storedHash); err != nil {
+		t.Fatal(err)
+	}
+	if storedHash != hex.EncodeToString(wantHash[:]) {
+		t.Fatal("persisted onboarding fingerprint includes secret fields or differs from canonical public request")
+	}
+
+	newPassword := "new-correct-horse-battery"
+	newHash, err := hashPassword(newPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+	email := body["user"].(map[string]any)["email"].(string)
+	if err := store.SetPasswordByEmail(context.Background(), email, newHash); err != nil {
+		t.Fatal(err)
+	}
+	var userID int64
+	if err := conn.QueryRow(ctx, `SELECT id FROM users WHERE email=$1`, email).Scan(&userID); err != nil {
+		t.Fatal(err)
+	}
+
+	stale := postOnboarding(t, server.URL, key, body)
+	stale.Body.Close()
+	if stale.StatusCode != http.StatusUnauthorized || stale.Header.Get("Set-Cookie") != "" {
+		t.Fatalf("replay with revoked password status=%d cookie=%q, want 401 without session", stale.StatusCode, stale.Header.Get("Set-Cookie"))
+	}
+	var sessionCount int
+	if err := conn.QueryRow(ctx, `SELECT count(*) FROM auth_sessions WHERE user_id=$1`, userID).Scan(&sessionCount); err != nil {
+		t.Fatal(err)
+	}
+	if sessionCount != 0 {
+		t.Fatalf("replay with revoked password created %d sessions, want none", sessionCount)
+	}
+
+	body["user"].(map[string]any)["password"] = newPassword
+	current := postOnboarding(t, server.URL, key, body)
+	current.Body.Close()
+	if current.StatusCode != http.StatusOK || current.Header.Get("Set-Cookie") == "" {
+		t.Fatalf("replay with current password status=%d cookie=%q, want 200 with session", current.StatusCode, current.Header.Get("Set-Cookie"))
+	}
+	if err := conn.QueryRow(ctx, `SELECT count(*) FROM auth_sessions WHERE user_id=$1`, userID).Scan(&sessionCount); err != nil {
+		t.Fatal(err)
+	}
+	if sessionCount != 1 {
+		t.Fatalf("replay with current password created %d sessions, want one", sessionCount)
+	}
+
+	body["user"].(map[string]any)["password"] = "wrong-password-for-replay"
+	for i := 0; i < 10; i++ {
+		resp := postOnboarding(t, server.URL, key, body)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("wrong replay attempt %d status=%d, want 401", i+1, resp.StatusCode)
+		}
+	}
+	limited := postOnboarding(t, server.URL, key, body)
+	limited.Body.Close()
+	if limited.StatusCode != http.StatusTooManyRequests || limited.Header.Get("Retry-After") != "60" {
+		t.Fatalf("repeated wrong replay status=%d retry-after=%q, want 429/60", limited.StatusCode, limited.Header.Get("Retry-After"))
 	}
 }
 
@@ -151,6 +379,24 @@ func TestOnboardingChangedRequestWithSameKeyConflicts(t *testing.T) {
 	resp := postOnboarding(t, server.URL, key, changed)
 	if resp.StatusCode != http.StatusConflict {
 		t.Fatalf("changed replay response status = %d, want %d", resp.StatusCode, http.StatusConflict)
+	}
+}
+
+func TestOnboardingRejectsCaseVariantEmail(t *testing.T) {
+	server, _, _ := newOnboardingTestServer(t)
+	suffix := onboardingSuffix()
+	first := onboardingBody(suffix)
+	resp := postOnboarding(t, server.URL, "case-a-"+suffix, first)
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("first onboarding status = %d", resp.StatusCode)
+	}
+	resp.Body.Close()
+	second := onboardingBody(suffix + "-other")
+	second["user"].(map[string]any)["email"] = strings.ToUpper(suffix + "@example.test")
+	resp = postOnboarding(t, server.URL, "case-b-"+suffix, second)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusConflict {
+		t.Fatalf("case-variant onboarding status = %d, want conflict", resp.StatusCode)
 	}
 }
 
@@ -287,6 +533,7 @@ func TestConcurrentOnboardingReplayCreatesOneCompanyAndUser(t *testing.T) {
 				return
 			}
 			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Origin", server.URL)
 			req.Header.Set("Idempotency-Key", key)
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
@@ -337,6 +584,7 @@ func TestOnboardingRejectsInvalidKeyAndOversizedBody(t *testing.T) {
 				t.Fatal(err)
 			}
 			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Origin", server.URL)
 			req.Header.Set("Idempotency-Key", testCase.key)
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {

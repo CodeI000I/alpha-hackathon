@@ -1,0 +1,16 @@
+.w-app .chat-quick-questions{margin:20px 0}
+.w-app .chat-quick-label{margin:0 0 4px;color:#e0dfe6;font-size:11px;font-weight:600;line-height:1.5}
+.w-app .chat-quick-hint{margin:0 0 12px;color:#a9a9b2;font-size:11px;line-height:1.6}
+.w-app .chat-quick-questions .w-prompt{justify-content:flex-start;gap:var(--action-icon-gap);line-height:1.6}
+.w-app .chat-quick-questions .w-prompt>.action-icon{width:16px;height:16px;flex-shrink:0}
+.w-app .chat-about{flex-shrink:0;margin:12px 0 0;padding-top:10px;border-top:1px solid #ffffff0c}
+.w-app .chat-about[open]{max-width:none}
+.w-app .chat-about summary{color:#a9a9b2;font-size:10px;line-height:1.6}
+.w-app .chat-about summary:hover{color:#e0dfe6}
+.w-app .chat-about summary:focus-visible{outline:2px solid #b7b7c1;outline-offset:3px;border-radius:2px}
+.w-app .w-chat .w-chat-head,.w-app .w-chat .w-chat-form{flex-shrink:0}
+.w-app .w-chat .w-chat-body{min-height:0;overscroll-behavior:contain}
+.w-app .w-chat-form>.chat-submit-row{justify-content:flex-end}
+.w-app .w-chat-form .action-icon{width:16px;height:16px}
+.w-app .w-about-link{display:inline-flex;align-items:center;gap:var(--action-icon-gap)}
+.w-app .w-source-pill{gap:var(--action-icon-gap)}

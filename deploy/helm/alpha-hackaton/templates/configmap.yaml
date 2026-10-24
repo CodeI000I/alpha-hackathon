@@ -6,7 +6,17 @@ metadata:
     {{- include "alpha.labels" . | nindent 4 }}
 data:
   {{- range $k, $v := .Values.config }}
+  {{- if and (ne $k "ORCHESTRATOR_URL") (ne $k "PARSER_POLL_SECONDS") }}
   {{ $k }}: {{ $v | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.analytics.enabled }}
+  ORCHESTRATOR_URL: {{ printf "http://%s-analytics:%v" (include "alpha.fullname" .) .Values.analytics.servicePort | quote }}
+  {{- else }}
+  ORCHESTRATOR_URL: {{ index .Values.config "ORCHESTRATOR_URL" | quote }}
+  {{- end }}
+  {{- if .Values.analytics.enabled }}
+  PARSER_POLL_SECONDS: {{ .Values.analytics.parser.pollSeconds | quote }}
   {{- end }}
   {{- if .Values.rustfs.enabled }}
   S3_ENDPOINT: {{ printf "%s-rustfs:9000" (include "alpha.fullname" .) | quote }}

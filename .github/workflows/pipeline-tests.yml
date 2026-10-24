@@ -50,15 +50,54 @@ jobs:
         run: |
           createdb -h localhost -U postgres alpha_test
           createdb -h localhost -U postgres analytics_test_audit_backend
+          createdb -h localhost -U postgres alpha_legacy_test
 
       - name: Test Go backend
         working-directory: backend
         env:
           ALPHA_TEST_DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/alpha_test
           INGEST_TEST_DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/analytics_test_audit_backend
+          TEST_DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/alpha_legacy_test
         run: |
           go test -race ./... -count=1 -v 2>&1 | tee "$RUNNER_TEMP/go-tests.log"
           ! grep -Eq '^--- SKIP:|^[[:space:]]+--- SKIP:' "$RUNNER_TEMP/go-tests.log"
+
+  frontend-tests:
+    name: Frontend unit, type, and browser tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: frontend
+        run: npm run test -- --run
+
+      - name: Check TypeScript
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser tests
+        working-directory: frontend
+        env:
+          CI: true
+        run: npm run test:e2e
 
   python-tests:
     name: Python 3.12 and PostgreSQL 17 tests
@@ -93,6 +132,12 @@ jobs:
             parser_service/requirements-test.txt
             parser_service/requirements-ai.txt
 
+      - name: Set up Go for unified runtime smoke
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
       - name: Install Python test dependencies
         run: |
           python -m pip install --upgrade pip
@@ -107,7 +152,7 @@ jobs:
           from psycopg import connect, sql
 
           with connect('postgresql://postgres@localhost:5432/postgres', autocommit=True) as db:
-              for name in ('orchestrator_core_ci', 'analytics_ci', 'kib_parser_test'):
+              for name in ('orchestrator_core_ci', 'analytics_ci', 'kib_parser_test', 'analytics_test_unified'):
                   db.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(name)))
           PY
 
@@ -143,3 +188,8 @@ jobs:
         run: |
           python -m unittest discover -s parser_service/tests -q 2>&1 | tee "$RUNNER_TEMP/parser-tests.log"
           ! grep -Eq 'skipped=[1-9]' "$RUNNER_TEMP/parser-tests.log"
+
+      - name: Test unified Go and Python runtime over PostgreSQL
+        env:
+          UNIFIED_TEST_DATABASE_URL: postgresql://postgres:ci-only@127.0.0.1:5432/analytics_test_unified
+        run: python scripts/test_unified.py

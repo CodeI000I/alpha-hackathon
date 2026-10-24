@@ -120,7 +120,7 @@ func newIngestFixture(t *testing.T, items ...domain.NewsItem) *ingestFixture {
 
 	key := strings.ReplaceAll(uuid.NewString(), "-", "")
 	sourceID := "audit-" + key
-	company, err := store.CreateCompany(ctx, domain.Company{
+	company, _, err := store.CreateCompany(ctx, domain.Company{
 		INN: key[:12], Name: "Ingest test " + key[:8],
 	})
 	if err != nil {

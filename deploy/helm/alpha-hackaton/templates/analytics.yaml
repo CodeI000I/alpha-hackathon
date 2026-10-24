@@ -1,0 +1,231 @@
+{{- if .Values.analytics.enabled }}
+{{- if ne (int .Values.analytics.replicas) 1 }}
+{{- fail "analytics.replicas must be 1 while API and worker share a ReadWriteOnce documents volume" }}
+{{- end }}
+{{- $name := include "alpha.fullname" . }}
+{{- $image := printf "%s:%s" .Values.analytics.image.repository .Values.analytics.image.tag }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}-analytics-documents
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+spec:
+  accessModes: [ReadWriteOnce]
+  {{- with .Values.analytics.objectStorageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests: { storage: {{ .Values.analytics.objectStorage }} }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-analytics
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+    app.kubernetes.io/component: analytics
+spec:
+  replicas: {{ .Values.analytics.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "alpha.selector" (list . "analytics") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "alpha.selector" (list . "analytics") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      securityContext: { fsGroup: 10001 }
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: migrate
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          command: ["python", "-m", "orchestrator.analytics", "migrate"]
+          env:
+            - { name: ANALYTICS_CHECKPOINTS, value: "true" }
+            {{- if .Values.postgres.enabled }}
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: POSTGRES_PASSWORD } }
+            - name: ANALYTICS_DATABASE_URL
+              value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ $name }}-postgres:5432/{{ .Values.postgres.database }}?sslmode=disable"
+            {{- else }}
+            - name: ANALYTICS_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: DATABASE_URL } }
+            {{- end }}
+            {{- if .Values.analytics.parser.enabled }}
+        - name: parser-migrate
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          command: ["python", "-m", "parser_service.migrate"]
+          envFrom:
+            - configMapRef: { name: {{ $name }}-config }
+          env:
+            - name: PARSER_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: PARSER_DATABASE_URL } }
+            {{- end }}
+      containers:
+        - name: analytics
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          ports:
+            - { name: http, containerPort: 8090 }
+          envFrom:
+            - configMapRef: { name: {{ $name }}-config }
+            - secretRef: { name: {{ .Values.existingSecret }} }
+          env:
+            - { name: ANALYTICS_OBJECT_DIR, value: /data/documents }
+            - { name: ANALYTICS_POLL_SECONDS, value: {{ .Values.analytics.pollSeconds | quote }} }
+            - { name: BACKEND_URL, value: "http://{{ $name }}:{{ .Values.service.port }}" }
+            - name: INTERNAL_API_TOKEN
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: INTERNAL_API_TOKEN } }
+            - name: PARSER_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: PARSER_DATABASE_URL, optional: true } }
+            - name: AI_SERVICE_TOKEN
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: ORCHESTRATOR_TOKEN } }
+            {{- if .Values.postgres.enabled }}
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: POSTGRES_PASSWORD } }
+            - name: ANALYTICS_DATABASE_URL
+              value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ $name }}-postgres:5432/{{ .Values.postgres.database }}?sslmode=disable"
+            - name: ANALYTICS_BACKEND_DATABASE_URL
+              value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ $name }}-postgres:5432/{{ .Values.postgres.database }}?sslmode=disable"
+            {{- else }}
+            - name: ANALYTICS_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: DATABASE_URL } }
+            - name: ANALYTICS_BACKEND_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: DATABASE_URL } }
+            {{- end }}
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.analytics.resources | nindent 12 }}
+          volumeMounts:
+            - { name: documents, mountPath: /data/documents }
+      volumes:
+        - name: documents
+          persistentVolumeClaim: { claimName: {{ $name }}-analytics-documents }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-analytics
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+    app.kubernetes.io/component: analytics
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "alpha.selector" (list . "analytics") | nindent 4 }}
+  ports:
+    - { name: http, port: {{ .Values.analytics.servicePort }}, targetPort: http }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-analytics-worker
+  labels:
+    {{- include "alpha.labels" . | nindent 4 }}
+    app.kubernetes.io/component: analytics-worker
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels:
+      {{- include "alpha.selector" (list . "analytics-worker") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "alpha.selector" (list . "analytics-worker") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      securityContext: { fsGroup: 10001 }
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  {{- include "alpha.selector" (list . "analytics") | nindent 18 }}
+      initContainers:
+        - name: migrate
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          command: ["python", "-m", "orchestrator.analytics", "migrate"]
+          env:
+            - { name: ANALYTICS_CHECKPOINTS, value: "true" }
+            {{- if .Values.postgres.enabled }}
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: POSTGRES_PASSWORD } }
+            - name: ANALYTICS_DATABASE_URL
+              value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ $name }}-postgres:5432/{{ .Values.postgres.database }}?sslmode=disable"
+            {{- else }}
+            - name: ANALYTICS_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: DATABASE_URL } }
+            {{- end }}
+            {{- if .Values.analytics.parser.enabled }}
+        - name: parser-migrate
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          command: ["python", "-m", "parser_service.migrate"]
+          envFrom:
+            - configMapRef: { name: {{ $name }}-config }
+          env:
+            - name: PARSER_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: PARSER_DATABASE_URL } }
+            {{- end }}
+      containers:
+        - name: analytics-worker
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          command: ["python", "-m", "orchestrator.analytics.worker"]
+          envFrom:
+            - configMapRef: { name: {{ $name }}-config }
+            - secretRef: { name: {{ .Values.existingSecret }} }
+          env:
+            - { name: ANALYTICS_OBJECT_DIR, value: /data/documents }
+            - { name: ANALYTICS_POLL_SECONDS, value: {{ .Values.analytics.pollSeconds | quote }} }
+            - { name: BACKEND_URL, value: "http://{{ $name }}:{{ .Values.service.port }}" }
+            - name: INTERNAL_API_TOKEN
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: INTERNAL_API_TOKEN } }
+            - name: PARSER_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: PARSER_DATABASE_URL, optional: true } }
+            - name: AI_SERVICE_TOKEN
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: ORCHESTRATOR_TOKEN } }
+            {{- if .Values.postgres.enabled }}
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: POSTGRES_PASSWORD } }
+            - name: ANALYTICS_DATABASE_URL
+              value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ $name }}-postgres:5432/{{ .Values.postgres.database }}?sslmode=disable"
+            - name: ANALYTICS_BACKEND_DATABASE_URL
+              value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ $name }}-postgres:5432/{{ .Values.postgres.database }}?sslmode=disable"
+            {{- else }}
+            - name: ANALYTICS_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: DATABASE_URL } }
+            - name: ANALYTICS_BACKEND_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Values.existingSecret }}, key: DATABASE_URL } }
+            {{- end }}
+          resources:
+            {{- toYaml .Values.analytics.workerResources | nindent 12 }}
+          volumeMounts:
+            - { name: documents, mountPath: /data/documents }
+      volumes:
+        - name: documents
+          persistentVolumeClaim: { claimName: {{ $name }}-analytics-documents }
+{{- end }}

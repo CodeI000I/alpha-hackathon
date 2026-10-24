@@ -1,5 +1,8 @@
 # Аудит пайплайна, 23 октября 2026
 
+Исторический отчёт до подключения к приложению. Интеграция в main и актуальные
+проверки описаны в [отчёте от 24 октября](integration-main-2026-10-24.md).
+
 Проверена ветка `ai-orchestrator`, исходный commit `fff8580`. Перед работой выполнен
 fetch; локальная ветка совпадала с remote. Аудит охватил Python orchestrator,
 analytics, parser_service, Go ingestion/storage/API, React и manifests зависимостей.

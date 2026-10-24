@@ -1,4 +1,4 @@
-# Тесты → сборка образа в приватный Docker Hub → новый тег в Helm values.
+# Тесты → сборка образа в приватный Docker Hub → новый тег в Helm values → GitHub Release.
 # Сам деплой делает Argo CD в кластере: он видит коммит с тегом и раскатывает чарт (docs/cd-k3s.md).
 name: CI-CD
 
@@ -26,17 +26,18 @@ env:
   APP_NAME: alpha
   CHART_PATH: deploy/helm/alpha-hackaton
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/alpha-hackaton
+  ANALYTICS_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/alpha-hackaton
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   pipeline-tests:
-    name: Go and Python quality gates
+    name: Go, frontend, and Python quality gates
     uses: ./.github/workflows/pipeline-tests.yml
 
   test-and-validate:
     name: Test and validate Helm chart
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -66,11 +67,34 @@ jobs:
           npm ci
           npm run build
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Go and frontend image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: alpha-hackaton:ci
+
+      - name: Build analytics image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.analytics
+          push: false
+          tags: alpha-analytics:ci
+
       - name: Install Helm
         uses: azure/setup-helm@v5
 
       - name: Lint Helm chart
-        run: helm lint "$CHART_PATH" --strict --set-string image.tag="$IMAGE_TAG"
+        run: |
+          helm lint "$CHART_PATH" --strict \
+            --set image.repository="$IMAGE_NAME" \
+            --set-string image.tag="$IMAGE_TAG" \
+            --set analytics.image.repository="$ANALYTICS_IMAGE_NAME" \
+            --set-string analytics.image.tag="analytics-$IMAGE_TAG"
 
       - name: Render Helm templates
         run: |
@@ -78,6 +102,8 @@ jobs:
             --namespace alpha \
             --set image.repository="$IMAGE_NAME" \
             --set-string image.tag="$IMAGE_TAG" \
+            --set analytics.image.repository="$ANALYTICS_IMAGE_NAME" \
+            --set-string analytics.image.tag="analytics-$IMAGE_TAG" \
             > rendered-manifests.yaml
 
       - name: Upload rendered manifests
@@ -92,7 +118,7 @@ jobs:
     needs: [test-and-validate, pipeline-tests]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -114,6 +140,18 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push analytics image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.analytics
+          push: true
+          tags: |
+            ${{ env.ANALYTICS_IMAGE_NAME }}:analytics-${{ env.IMAGE_TAG }}
+            ${{ env.ANALYTICS_IMAGE_NAME }}:analytics-latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -139,6 +177,12 @@ jobs:
           }" "$CHART_PATH/values.yaml"
           test "$(yq '.image.repository' "$CHART_PATH/values.yaml")" = "$IMAGE_NAME"
           test "$(yq '.image.tag' "$CHART_PATH/values.yaml")" = "$IMAGE_TAG"
+          sed -i -E "/^analytics:/,/^[^[:space:]#]/ {
+            s|^(    repository:).*|\1 ${ANALYTICS_IMAGE_NAME}|
+            s|^(    tag:).*|\1 \"analytics-${IMAGE_TAG}\"|
+          }" "$CHART_PATH/values.yaml"
+          test "$(yq '.analytics.image.repository' "$CHART_PATH/values.yaml")" = "$ANALYTICS_IMAGE_NAME"
+          test "$(yq '.analytics.image.tag' "$CHART_PATH/values.yaml")" = "analytics-$IMAGE_TAG"
 
       - name: Commit and push
         run: |
@@ -156,3 +200,56 @@ jobs:
             git pull --rebase origin main
           done
           exit 1
+
+  release:
+    name: Publish GitHub release
+    needs: update-image-tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write   # тег и релиз
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # вся история и теги: следующая версия считается от последнего тега
+
+      # Семантическая версия по сообщениям коммитов с прошлого релиза (Conventional Commits):
+      # "type!:" или "BREAKING CHANGE" → major, "feat" → minor, остальное → patch.
+      # Первый релиз — 1.0.0. Коммиты бота с тегом образа ("[skip ci]") не считаются.
+      - name: Compute next version
+        id: version
+        run: |
+          if [ -n "$(git tag --points-at "$GITHUB_SHA" --list 'v[0-9]*')" ]; then
+            echo "$GITHUB_SHA is already released"
+            exit 0
+          fi
+          last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+          if [ -z "$last" ]; then
+            next=1.0.0
+          else
+            log=$(git log --format='%s%n%b' --invert-grep --grep='\[skip ci\]' "$last..$GITHUB_SHA")
+            if [ -z "$log" ]; then
+              echo "No changes since $last"
+              exit 0
+            fi
+            IFS=. read -r major minor patch <<<"${last#v}"
+            if grep -qE '^(\* )?[a-z]+(\([^)]*\))?!:|^BREAKING[ -]CHANGE' <<<"$log"; then
+              next="$((major + 1)).0.0"
+            elif grep -qE '^(\* )?feat(\([^)]*\))?:' <<<"$log"; then
+              next="$major.$((minor + 1)).0"
+            else
+              next="$major.$minor.$((patch + 1))"
+            fi
+          fi
+          echo "Next release: v$next"
+          echo "tag=v$next" >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        if: steps.version.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes \
+            --notes "Образы Go и analytics: тег \`$GITHUB_SHA\` в Docker Hub, их раскатывает Argo CD."

@@ -1,43 +1,4 @@
-:root {
-  --bg: #f5f5f7;
-  --surface: #ffffff;
-  --text: #1d1d1f;
-  --muted: #6e6e73;
-  --accent: #ef3124;
-  --risk: #d92d20;
-  --opportunity: #12a150;
-  --event: #3370ff;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color: var(--text);
-  background: var(--bg);
-}
-body { margin: 0; }
-.layout { max-width: 960px; margin: 0 auto; padding: 0 16px; }
-.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
-.header nav { display: flex; gap: 16px; }
-.header a { color: var(--muted); text-decoration: none; }
-.header a.active { color: var(--text); font-weight: 600; }
-.logo { font-weight: 700; color: var(--accent); }
-.card { background: var(--surface); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
-.field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
-.field input { padding: 8px; border: 1px solid #d2d2d7; border-radius: 8px; font: inherit; }
-button { padding: 10px 16px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
-button:disabled { opacity: 0.5; cursor: default; }
-.roles { display: flex; flex-wrap: wrap; gap: 8px; }
-.role { border: 1px solid #d2d2d7; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
-.role input { display: none; }
-.role--on { border-color: var(--accent); background: #fdeceb; }
-.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.tab { background: var(--surface); color: var(--text); border: 1px solid #d2d2d7; }
-.tab--on { background: var(--text); color: #fff; }
-.feed { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.insight { background: var(--surface); border-radius: 12px; padding: 16px; border-left: 4px solid var(--event); }
-.insight--risk { border-left-color: var(--risk); }
-.insight--opportunity { border-left-color: var(--opportunity); }
-.insight__meta { display: flex; gap: 12px; font-size: 13px; color: var(--muted); }
-.insight__title { display: block; margin-top: 6px; font-weight: 600; color: var(--text); }
-.badge { font-weight: 600; }
-.profile { border-collapse: collapse; font-size: 14px; }
-.profile td { padding: 4px 8px; border-bottom: 1px solid #eee; }
-.muted { color: var(--muted); }
-.error { color: var(--risk); }
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/ui.css";
+@import "./styles/components.css";

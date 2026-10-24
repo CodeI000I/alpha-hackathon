@@ -1,23 +1,60 @@
-// До появления авторизации текущий пользователь хранится в localStorage.
-const KEY = "alpha.userId";
+import { dataMode } from "./api/client";
+import type { DataMode } from "./api/types";
 
-export function currentUserId(): number | null {
+// До появления серверной авторизации идентификаторы хранятся только в браузере.
+// v2 намеренно не читает старые alpha.userId/alpha.pendingCompanyId: API и демо
+// используют разные пространства и не могут случайно восстановить чужую сессию.
+const SESSION_NAMESPACE = "signal.session.v2";
+
+function sessionKey(mode: DataMode, name: "userId" | "pendingCompanyId"): string {
+  return `${SESSION_NAMESPACE}.${mode}.${name}`;
+}
+
+function readPositiveId(key: string): number | null {
   try {
-    const raw = localStorage.getItem(KEY);
-    const value = raw === null ? null : Number(raw);
-    if (value !== null && Number.isSafeInteger(value) && value > 0) return value;
-    if (raw !== null) localStorage.removeItem(KEY);
+    const raw = localStorage.getItem(key);
+    if (raw === null) return null;
+    const value = Number(raw);
+    if (Number.isSafeInteger(value) && value > 0) return value;
+    localStorage.removeItem(key);
     return null;
   } catch {
     return null;
   }
 }
 
-export function setCurrentUserId(id: number | null) {
+function writePositiveId(key: string, id: number | null): void {
   try {
-    if (id !== null && Number.isSafeInteger(id) && id > 0) localStorage.setItem(KEY, String(id));
-    else localStorage.removeItem(KEY);
+    if (id !== null && Number.isSafeInteger(id) && id > 0) {
+      localStorage.setItem(key, String(id));
+    } else {
+      localStorage.removeItem(key);
+    }
   } catch {
-    /* ignore */
+    // Приложение продолжает работать без восстановления сессии.
   }
+}
+
+export function currentUserId(mode: DataMode = dataMode): number | null {
+  return readPositiveId(sessionKey(mode, "userId"));
+}
+
+export function setCurrentUserId(id: number | null, mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "userId"), id);
+}
+
+export function clearCurrentUserId(mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "userId"), null);
+}
+
+export function pendingCompanyId(mode: DataMode = dataMode): number | null {
+  return readPositiveId(sessionKey(mode, "pendingCompanyId"));
+}
+
+export function setPendingCompanyId(id: number | null, mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "pendingCompanyId"), id);
+}
+
+export function clearPendingCompanyId(mode: DataMode = dataMode): void {
+  writePositiveId(sessionKey(mode, "pendingCompanyId"), null);
 }

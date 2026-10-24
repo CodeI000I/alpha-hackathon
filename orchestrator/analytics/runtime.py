@@ -8,8 +8,8 @@ from typing import Literal
 from dotenv import dotenv_values
 from pydantic import Field, SecretStr
 
-from orchestrator.config import ROOT, load_settings
-from orchestrator.llm import LLMClient
+from orchestrator.config import ROOT, ConfigurationError, load_settings
+from orchestrator.llm import AIError, LLMClient
 from .embeddings import SentenceTransformerEmbeddingProvider
 from .knowledge import HybridRetriever, KnowledgeService
 from .models import Model
@@ -65,13 +65,29 @@ class ReadOnlyModel:
         raise RuntimeError('This command only reads persisted results')
 
 
+class UnconfiguredModel(ReadOnlyModel):
+    def structured(self, *_args, **_kwargs):
+        raise AIError('model_not_configured', 'Для анализа необходимо настроить AI_API_KEY.')
+
+    def close(self):
+        pass
+
+
 @contextmanager
-def runtime(*, read_only=False, env_file=None):
+def runtime(*, read_only=False, env_file=None, allow_unconfigured=False):
     config = load_analytics_settings(env_file)
     model_settings = load_settings(env_file)
     store = PostgresStore(config.database_url.get_secret_value(), connect_timeout=5, statement_timeout_ms=10000)
     with ExitStack() as stack:
-        llm = ReadOnlyModel(model_settings) if read_only else LLMClient(model_settings, store)
+        if read_only:
+            llm = ReadOnlyModel(model_settings)
+        else:
+            try:
+                llm = LLMClient(model_settings, store)
+            except ConfigurationError:
+                if not allow_unconfigured:
+                    raise
+                llm = UnconfiguredModel(model_settings)
         if not read_only:
             stack.callback(llm.close)
         decision_router, triage_version = None, None
@@ -104,11 +120,17 @@ def runtime(*, read_only=False, env_file=None):
 def migrate(config):
     from .migrate import apply_migrations
     dsn = config.database_url.get_secret_value()
-    result = apply_migrations(dsn, connect_timeout=5, statement_timeout_ms=10000)
-    if config.checkpoints:
-        from langgraph.checkpoint.postgres import PostgresSaver
-        with PostgresSaver.from_conn_string(dsn) as checkpointer:
-            checkpointer.setup()
+    store = PostgresStore(dsn, connect_timeout=5, statement_timeout_ms=10000)
+    # API and worker init containers may start together. Saver.setup() also writes
+    # migration state and must stay inside the same cross-process critical section.
+    with store.lock('alpha.analytics.runtime-migrations'):
+        result = apply_migrations(dsn, connect_timeout=5, statement_timeout_ms=10000)
+        if config.checkpoints:
+            from langgraph.checkpoint.postgres import PostgresSaver
+            from psycopg.conninfo import make_conninfo
+            bounded_dsn = make_conninfo(dsn, connect_timeout=5, options='-c statement_timeout=10000')
+            with PostgresSaver.from_conn_string(bounded_dsn) as checkpointer:
+                checkpointer.setup()
     return result
 
 

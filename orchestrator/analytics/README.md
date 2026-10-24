@@ -1,15 +1,19 @@
 # Аналитический прототип «Альфа-Будущее»
 
-Изолированный модуль поверх существующего `orchestrator`: документы → знания компании,
+Модуль поверх существующего `orchestrator`: документы → знания компании,
 общий архив новостей → события → CompanyImpact → BusinessIssue → SituationSnapshot.
 Чтение готовой сводки, источников, истории и переписки не вызывает LLM.
 Спецификация: [analytics-spec-v1.md](../../docs/analytics-spec-v1.md).
 Результаты проверки: [analytics-prototype-report.md](../../docs/analytics-prototype-report.md).
-Полный аудит и последние проверки: [pipeline-audit-2026-10-23.md](../../docs/pipeline-audit-2026-10-23.md).
+Исторический аудит: [pipeline-audit-2026-10-23.md](../../docs/pipeline-audit-2026-10-23.md).
+Текущее подключение и проверки: [integration-main-2026-10-24.md](../../docs/integration-main-2026-10-24.md).
 
-`router.py` создаёт **незарегистрированный** APIRouter. Он не импортируется приложениями
-backend/frontend или существующим `orchestrator.api`. HTTP проверяется только через
-временный FastAPI/TestClient. В проект не добавлены фоновые службы или сетевой listener.
+`app.py` регистрирует router в закрытом HTTP host, совместимом с Go `/rank`.
+Go проверяет сессию/компанию/роль и проксирует разрешённые маршруты из Signal.
+`worker.py` синхронизирует профили и файлы, импортирует результаты parser и выполняет
+задания. Compose/Helm запускают API и worker отдельно; существующий `orchestrator.api`
+для этого не используется. Все проверки разработки используют временные БД и
+синтетические model transports; реальные ключи и рабочая БД не нужны.
 
 ## Быстрый запуск без API и PostgreSQL
 
@@ -216,7 +220,7 @@ redirects. Ошибки и локальный RPM переключают на LL
 Для проверки сохранения в PostgreSQL к любой из команд можно добавить
 `--postgres-test-dsn` с явной loopback БД `analytics_test_*`, как в примере выше.
 
-## Контракт будущего подключения
+## Контракт подключения
 
 `create_router(service, authorize, authorize_ingestion=...)` возвращает APIRouter с
 префиксом `/v1/analytics`. `authorize` обязан вернуть Scope после проверки прав
@@ -229,6 +233,7 @@ redirects. Ошибки и локальный RPM переключают на LL
 | `POST /news` | Общий ingestion и анализ разрешённой компании; отдельный ingest principal |
 | `PUT /company?expected_revision=N` | Optimistic update профиля |
 | `POST /documents` | Base64 файла → знания и job_id |
+| `GET /documents` | Состояния файлов, импортируемых из Go: queued/ready/failed |
 | `POST /events/{id}/analyze` | Подготовка воздействия и ситуаций |
 | `GET /situation`, `GET /issues` | Сохранённые результаты; offset/limit для списка |
 | `GET /issues/{id}` | Карточка, опционально `?version=N` |
@@ -240,7 +245,10 @@ redirects. Ошибки и локальный RPM переключают на LL
 
 Ошибки контракта — 422, чужой/отсутствующий объект — 404, конфликт ревизий — 409,
 бюджет/RPM — 429, недоступность модели — 503. Служебные ошибки не становятся
-пустым успешным ответом. Подключение к backend/frontend оставлено отдельным совместным шагом.
+пустым успешным ответом. Go proxy открывает чтение, state, questions и refresh;
+запись company/news/documents остаётся служебной. Загрузки браузера проходят через
+Go multipart и background sync. Private host ограничивает обычные JSON-запросы
+2 МиБ, base64-документы — 16 МиБ плюс metadata; оригинал ограничен 12 МиБ.
 
 ## Проверка и эксплуатационные ограничения
 

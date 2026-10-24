@@ -578,7 +578,10 @@ class AnalyticsService:
                         job.update(status='queued', attempts=job['attempts'] - 1, error='busy',
                                    due_at=(self.clock() + timedelta(seconds=60)).isoformat())
                     except AIError as exc:
-                        if exc.code == 'budget_exceeded':
+                        if exc.code == 'model_not_configured':
+                            job.update(status='queued', attempts=job['attempts'] - 1, error=exc.code,
+                                       due_at=(self.clock() + timedelta(seconds=60)).isoformat())
+                        elif exc.code == 'budget_exceeded':
                             # Budget pauses are not failed execution attempts.
                             job.update(status='budget_exceeded', attempts=job['attempts'] - 1,
                                        due_at=datetime.fromtimestamp(exc.retry_at, self.clock().tzinfo).isoformat(), error=exc.code)

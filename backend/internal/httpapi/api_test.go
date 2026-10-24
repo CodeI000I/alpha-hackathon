@@ -229,14 +229,27 @@ func TestImportNews(t *testing.T) {
 type memFiles struct {
 	mu   sync.Mutex
 	keys []string
+	data map[string][]byte
 }
 
 func (m *memFiles) Put(_ context.Context, key string, r io.Reader, _ int64, _ string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.keys = append(m.keys, key)
-	_, err := io.Copy(io.Discard, r)
+	data, err := io.ReadAll(r)
+	if err == nil {
+		if m.data == nil {
+			m.data = map[string][]byte{}
+		}
+		m.data[key] = data
+	}
 	return err
+}
+
+func (m *memFiles) Get(_ context.Context, key string) (io.ReadCloser, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return io.NopCloser(bytes.NewReader(m.data[key])), nil
 }
 
 func upload(t *testing.T, url string, size int) (int, []byte) {
@@ -268,13 +281,31 @@ func TestFiles(t *testing.T) {
 	status, body = upload(t, srv.URL+"/api/v1/companies/999999999/files", 10)
 	expect(t, status, body, 404, "Компания не найдена")
 	status, body = upload(t, filesURL, maxUpload+1)
-	expect(t, status, body, 413, "Файл больше 50 МБ")
+	expect(t, status, body, 413, "Файл больше 12 МБ")
 	if len(files.keys) != 0 {
 		t.Fatalf("nothing should reach the storage, got %v", files.keys)
 	}
 
 	status, body = upload(t, filesURL, 10)
 	expect(t, status, body, 201, `"filename":"бюджет-2027.pdf"`)
+	var uploaded domain.CompanyFile
+	if err := json.Unmarshal(body, &uploaded); err != nil {
+		t.Fatal(err)
+	}
+	internalURL := fmt.Sprintf("%s/api/v1/internal/files/%d/content", srv.URL, uploaded.ID)
+	unauthorized, _ := http.NewRequest(http.MethodGet, internalURL, nil)
+	status, body = do(t, unauthorized)
+	expect(t, status, body, 401, "Нужен служебный токен")
+	internal, _ := http.NewRequest(http.MethodGet, internalURL, nil)
+	internal.Header.Set("Authorization", "Bearer "+testToken)
+	status, body = do(t, internal)
+	expect(t, status, body, 200, "xxxxxxxxxx")
+	if got := files.data[files.keys[0]]; string(got) != "xxxxxxxxxx" {
+		t.Fatalf("stored test object = %q", got)
+	}
+	files.data[files.keys[0]] = []byte("short")
+	status, body = do(t, internal)
+	expect(t, status, body, 502, "Размер файла не совпадает")
 	status, body = call(t, "GET", filesURL, nil)
 	expect(t, status, body, 200, `"sizeBytes":10`)
 }

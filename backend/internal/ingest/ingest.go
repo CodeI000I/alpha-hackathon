@@ -4,6 +4,7 @@ package ingest
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -17,7 +18,6 @@ type Fetcher interface {
 	Fetch(ctx context.Context, src postgres.SourceConfig) ([]domain.NewsItem, error)
 }
 
-// maxAttempts — после стольких неудач подряд оценка новости снимается с очереди (status = failed).
 const maxAttempts = 8
 
 type Pipeline struct {
@@ -25,13 +25,15 @@ type Pipeline struct {
 	Ranker    feed.Ranker
 	Fetchers  map[string]Fetcher // ключ = sources.adapter
 	Log       *slog.Logger
-	MaxPerRun int           // оценок за проход: первая загрузка RSS не должна съесть суточный бюджет LLM
-	Lookback  time.Duration // оцениваются только новости, опубликованные за этот период
+	MaxPerRun int
+	Lookback  time.Duration
+	Lease     time.Duration
 
-	pausedUntil time.Time // оркестратор ответил Retry-After (лимит или бюджет LLM)
+	pausedUntil time.Time
+	oldestNext  bool
 }
 
-// RunOnce — один проход: собрать новости со всех включённых источников, оценить их и разложить по лентам.
+// RunOnce собирает источники, затем обрабатывает ограниченное число доставок.
 func (p *Pipeline) RunOnce(ctx context.Context) error {
 	if err := p.Collect(ctx); err != nil {
 		return err
@@ -39,7 +41,7 @@ func (p *Pipeline) RunOnce(ctx context.Context) error {
 	return p.Rank(ctx)
 }
 
-// Collect сохраняет новости со всех включённых источников. Оценивает их Rank.
+// Collect сохраняет новости всех включённых источников.
 func (p *Pipeline) Collect(ctx context.Context) error {
 	sources, err := p.Store.EnabledSources(ctx)
 	if err != nil {
@@ -48,114 +50,143 @@ func (p *Pipeline) Collect(ctx context.Context) error {
 	for _, src := range sources {
 		f, ok := p.Fetchers[src.Adapter]
 		if !ok {
-			p.Log.Warn("no fetcher for adapter", "source", src.ID, "adapter", src.Adapter)
+			p.logger().Warn("no fetcher for adapter", "source", src.ID, "adapter", src.Adapter)
 			continue
 		}
 		items, err := f.Fetch(ctx, src)
 		if err != nil {
-			p.Log.Error("fetch failed", "source", src.ID, "err", err)
+			p.logger().Error("fetch failed", "source", src.ID, "err", err)
 			continue
 		}
-		added := 0
 		for _, n := range items {
 			n.SourceID = src.ID
-			_, isNew, err := p.Store.UpsertNews(ctx, n)
-			if err != nil {
+			if _, _, err := p.Store.UpsertNews(ctx, n); err != nil {
 				return err
 			}
-			if isNew {
-				added++
-			}
 		}
-		p.Log.Info("source processed", "source", src.ID, "items", len(items), "new", added)
+		p.logger().Info("source processed", "source", src.ID, "items", len(items))
 	}
 	return nil
 }
 
-// Rank ставит свежие новости в очередь оценок, выполняет не больше MaxPerRun оценок
-// и раскладывает готовые результаты по лентам.
+// Rank rechecks recent work for backfill, then makes at most MaxPerRun ranked deliveries.
 func (p *Pipeline) Rank(ctx context.Context) error {
-	since := time.Now().Add(-p.Lookback)
-	queued, err := p.Store.EnqueueRankings(ctx, since)
-	if err != nil {
-		return err
-	}
 	if wait := time.Until(p.pausedUntil); wait > 0 {
-		p.Log.Info("ranking paused by orchestrator", "queued", queued, "resume_in", wait.Round(time.Second).String())
-	} else if err := p.rankDue(ctx); err != nil {
-		return err
-	}
-	added, err := p.Store.FanOutFeed(ctx, since)
-	if err != nil {
-		return err
-	}
-	p.Log.Info("ranking done", "queued", queued, "feed_items", added)
-	return nil
-}
-
-func (p *Pipeline) rankDue(ctx context.Context) error {
-	due, err := p.Store.DueRankings(ctx, p.MaxPerRun)
-	if err != nil {
-		return err
-	}
-	companies := map[int64]domain.Company{}
-	for _, r := range due {
-		c, ok := companies[r.CompanyID]
-		if !ok {
-			var err error
-			if c, err = p.Store.GetCompany(ctx, r.CompanyID); err != nil {
-				return err
-			}
-			companies[c.ID] = c
-		}
-		var matches []feed.Match
-		var err error
-		if len(r.Roles) > 0 { // роли могли снять после постановки в очередь
-			matches, err = p.Ranker.Rank(ctx, feed.Request{News: feed.NewsFrom(r.News), Roles: r.Roles, Company: c})
-		}
-		if err == nil {
-			if err := p.Store.FinishRanking(ctx, r.News.ID, r.CompanyID, r.Roles, matches); err != nil {
-				return err
-			}
-			continue
-		}
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-
-		now := time.Now()
-		var fe *feed.Error
-		errors.As(err, &fe)
-		switch {
-		case fe != nil && fe.Permanent:
-			// Оркестратор отверг эту новость: повтор не поможет, переходим к следующей.
-			p.Log.Warn("rank rejected", "news", r.News.ID, "company", r.CompanyID, "err", err)
-			if err := p.Store.RetryRanking(ctx, r.News.ID, r.CompanyID, r.Attempts+1, now, true, err.Error()); err != nil {
-				return err
-			}
-			continue
-		case fe != nil && fe.RetryAfter > 0:
-			// Лимит или суточный бюджет LLM: попытку не засчитываем, ждём, сколько просят.
-			p.pausedUntil = now.Add(fe.RetryAfter)
-			p.Log.Warn("rank postponed", "news", r.News.ID, "company", r.CompanyID, "until", p.pausedUntil, "err", err)
-			if err := p.Store.RetryRanking(ctx, r.News.ID, r.CompanyID, r.Attempts, p.pausedUntil, false, err.Error()); err != nil {
-				return err
-			}
-		default:
-			attempt := r.Attempts + 1
-			p.Log.Warn("rank failed", "news", r.News.ID, "company", r.CompanyID, "attempt", attempt, "err", err)
-			if err := p.Store.RetryRanking(ctx, r.News.ID, r.CompanyID, attempt, now.Add(backoff(attempt)), attempt >= maxAttempts, err.Error()); err != nil {
-				return err
-			}
-		}
-		// Оркестратор недоступен или просит подождать: следующие оценки упадут так же,
-		// остаток очереди — в следующий проход.
+		p.logger().Info("ranking paused by orchestrator", "resume_in", wait.Round(time.Second).String())
 		return nil
 	}
+	since := time.Time{}
+	if p.Lookback > 0 {
+		since = time.Now().Add(-p.Lookback)
+	}
+	if !since.IsZero() {
+		if err := p.Store.EnqueueRecentNewsDeliveries(ctx, since); err != nil {
+			return err
+		}
+	}
+	limit := p.MaxPerRun
+	if limit < 1 {
+		limit = 20
+	}
+	lease := p.Lease
+	if lease < 10*time.Minute {
+		lease = 10 * time.Minute
+	}
+	for range limit {
+		newestFirst := p.nextClaimNewestFirst()
+		deliveries, err := p.Store.ClaimNewsDeliveriesSinceOrder(ctx, 1, lease, since, newestFirst)
+		if err != nil {
+			return err
+		}
+		if len(deliveries) == 0 {
+			return nil
+		}
+		d := deliveries[0]
+		if d.User.ID == 0 || d.User.CompanyID == nil || !d.HasCompany || len(d.User.Roles) == 0 {
+			if _, err := p.Store.CompleteNewsDelivery(ctx, d, nil); err != nil {
+				return err
+			}
+			continue
+		}
+		roles, err := p.Store.CompanyRoles(ctx, *d.User.CompanyID)
+		if err != nil {
+			if retryErr := p.Store.RetryNewsDelivery(ctx, d, "rank_failed"); retryErr != nil {
+				return retryErr
+			}
+			return err
+		}
+		if len(roles) == 0 {
+			if _, err := p.Store.CompleteNewsDelivery(ctx, d, nil); err != nil {
+				return err
+			}
+			continue
+		}
+		if p.Ranker == nil {
+			return fmt.Errorf("ranker is not configured")
+		}
+		requestNews := feed.NewsFrom(d.News)
+		requestNews.Revision = d.Revision
+		matches, rankErr := p.Ranker.Rank(ctx, feed.Request{News: requestNews, Roles: roles, Company: d.Company})
+		if rankErr != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			if retryErr := p.retryRank(ctx, d, rankErr); retryErr != nil {
+				return retryErr
+			}
+			var remote *feed.Error
+			if !errors.As(rankErr, &remote) || !remote.Permanent {
+				return nil
+			}
+			continue
+		}
+		completed, err := p.Store.CompleteNewsDelivery(ctx, d, matches)
+		if err != nil {
+			if retryErr := p.Store.RetryNewsDelivery(ctx, d, "persistence_failed"); retryErr != nil {
+				return retryErr
+			}
+			p.logger().Error("complete feed delivery", "news", d.NewsID, "user", d.UserID, "err", err)
+			continue
+		}
+		if !completed {
+			p.logger().Info("stale news delivery ignored", "news", d.NewsID, "user", d.UserID)
+		}
+	}
 	return nil
+}
+
+func (p *Pipeline) nextClaimNewestFirst() bool {
+	newestFirst := !p.oldestNext
+	p.oldestNext = !p.oldestNext
+	return newestFirst
+}
+
+func (p *Pipeline) processDeliveries(ctx context.Context) error { return p.Rank(ctx) }
+
+func (p *Pipeline) retryRank(ctx context.Context, d postgres.NewsDelivery, rankErr error) error {
+	var remote *feed.Error
+	if errors.As(rankErr, &remote) && remote.Permanent {
+		return p.Store.RetryNewsDeliveryAt(ctx, d, "rank_rejected", time.Now(), true)
+	}
+	if errors.As(rankErr, &remote) && remote.RetryAfter > 0 {
+		p.pausedUntil = time.Now().Add(remote.RetryAfter)
+		return p.Store.RetryNewsDeliveryAt(ctx, d, "rank_deferred", p.pausedUntil, false)
+	}
+	attempt := d.Attempts
+	return p.Store.RetryNewsDeliveryAt(ctx, d, "rank_failed", time.Now().Add(backoff(attempt)), attempt >= maxAttempts)
 }
 
 // backoff — пауза перед повтором: 1, 2, 4, … минут, не больше 6 часов.
 func backoff(attempt int) time.Duration {
+	if attempt < 1 {
+		attempt = 1
+	}
 	return min(time.Minute<<min(attempt-1, 10), 6*time.Hour)
+}
+
+func (p *Pipeline) logger() *slog.Logger {
+	if p.Log != nil {
+		return p.Log
+	}
+	return slog.Default()
 }

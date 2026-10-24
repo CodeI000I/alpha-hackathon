@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import base64
 import binascii
+import codecs
+from email.message import Message
 import http.client
 import ipaddress
 import json
@@ -309,7 +311,21 @@ def _fetch_direct(
         content_encoding = (response.getheader("Content-Encoding") or "identity").strip().lower()
         if content_encoding != "identity":
             raise FetchError("ENCODING_UNSUPPORTED")
-        content_type = (response.getheader("Content-Type") or "").split(";", 1)[0].strip().lower()
+        raw_content_type = response.getheader("Content-Type") or ""
+        content_type_header = Message()
+        content_type_header["content-type"] = raw_content_type
+        parameters = content_type_header.get_params(header="content-type", failobj=[]) or []
+        charsets = [value for name, value in parameters[1:] if name.lower() == "charset"]
+        if kind in {"page", "robots"} and charsets:
+            if len(charsets) != 1:
+                raise FetchError("ENCODING_UNSUPPORTED")
+            try:
+                charset = codecs.lookup(charsets[0]).name
+            except (LookupError, TypeError):
+                raise FetchError("ENCODING_UNSUPPORTED") from None
+            if charset not in {"utf-8", "utf-8-sig"}:
+                raise FetchError("ENCODING_UNSUPPORTED")
+        content_type = raw_content_type.split(";", 1)[0].strip().lower()
         if kind not in _ALLOWED_MIME or content_type not in _ALLOWED_MIME[kind]:
             raise FetchError("MIME_UNSUPPORTED")
 
@@ -327,7 +343,13 @@ def _fetch_direct(
 
         while True:
             if content_length is None and len(body) == max_bytes:
-                raise FetchError("SIZE_LIMIT", bytes_read=len(body))
+                remaining = timeout_seconds - (time.monotonic() - started)
+                if remaining <= 0:
+                    raise FetchError("TIMEOUT", bytes_read=len(body))
+                connection.sock.settimeout(remaining)
+                if response.read(1):
+                    raise FetchError("SIZE_LIMIT", bytes_read=len(body) + 1)
+                break
             remaining = timeout_seconds - (time.monotonic() - started)
             if remaining <= 0:
                 raise FetchError("TIMEOUT", bytes_read=len(body))

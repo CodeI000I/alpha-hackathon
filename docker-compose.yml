@@ -1,24 +1,176 @@
-# Локальная разработка: Postgres + RustFS (S3-совместимое хранилище файлов).
-# Backend и frontend запускаются с хоста (см. Makefile).
+# Полный локальный стек: Go API + worker, analytics API + worker, PostgreSQL и RustFS.
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: alpha
-    ports: ["5432:5432"]
-    volumes: [pgdata:/var/lib/postgresql/data]
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-alpha}
+    ports: ["127.0.0.1:5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   rustfs:
     image: rustfs/rustfs:1.0.1
     environment:
-      RUSTFS_ACCESS_KEY: rustfsadmin
-      RUSTFS_SECRET_KEY: rustfs12345
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY:-rustfsadmin}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY:-rustfs12345}
       RUSTFS_CONSOLE_ENABLE: "true"
-    ports: ["9000:9000", "9001:9001"]   # 9000 — S3 API, 9001 — веб-консоль
-    volumes: [rustfsdata:/data]
+    ports: ["127.0.0.1:9000:9000", "127.0.0.1:9001:9001"]   # 9000 — S3 API, 9001 — веб-консоль
+    volumes:
+      - rustfsdata:/data
+
+  server:
+    build: .
+    environment: &backend-env
+      DATABASE_URL: postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-alpha}?sslmode=disable
+      HTTP_ADDR: :8080
+      S3_ENDPOINT: rustfs:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-rustfsadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-rustfs12345}
+      S3_BUCKET: ${S3_BUCKET:-company-files}
+      ORCHESTRATOR_TOKEN: ${AI_SERVICE_TOKEN:?Set AI_SERVICE_TOKEN in .env}
+      ORCHESTRATOR_URL: http://analytics:8090
+      ORCHESTRATOR_TIMEOUT: ${ORCHESTRATOR_TIMEOUT:-5m}
+      INGEST_PERIOD: ${INGEST_PERIOD:-15m}
+      RANK_MAX_PER_RUN: ${RANK_MAX_PER_RUN:-20}
+      RANK_LOOKBACK: ${RANK_LOOKBACK:-168h}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?Set INTERNAL_API_TOKEN in .env}
+      SESSION_COOKIE_SECURE: "false"
+    ports: ["127.0.0.1:8080:8080"]
+    restart: on-failure
+    depends_on:
+      postgres: { condition: service_healthy }
+      rustfs: { condition: service_started }
+
+  worker:
+    build: .
+    entrypoint: ["/app/worker"]
+    environment: *backend-env
+    restart: on-failure
+    depends_on:
+      postgres: { condition: service_healthy }
+      rustfs: { condition: service_started }
+      server: { condition: service_started }
+      analytics: { condition: service_healthy }
+
+  analytics-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.analytics
+    command:
+      - sh
+      - -c
+      - python -m orchestrator.analytics migrate && if [ -n "$${PARSER_DATABASE_URL}" ]; then python -m parser_service.migrate; fi
+    environment:
+      ANALYTICS_DATABASE_URL: ${COMPOSE_ANALYTICS_DATABASE_URL:-postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-alpha}?sslmode=disable}
+      ANALYTICS_CHECKPOINTS: ${ANALYTICS_CHECKPOINTS:-true}
+      PARSER_DATABASE_URL: ${COMPOSE_PARSER_DATABASE_URL:-}
+      PARSER_CONNECT_TIMEOUT_SECONDS: ${PARSER_CONNECT_TIMEOUT_SECONDS:-5}
+      PARSER_STATEMENT_TIMEOUT_MS: ${PARSER_STATEMENT_TIMEOUT_MS:-10000}
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  analytics:
+    build:
+      context: .
+      dockerfile: Dockerfile.analytics
+    environment: &analytics-env
+      DATABASE_URL: postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-alpha}?sslmode=disable
+      ANALYTICS_DATABASE_URL: ${COMPOSE_ANALYTICS_DATABASE_URL:-postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-alpha}?sslmode=disable}
+      ANALYTICS_BACKEND_DATABASE_URL: ${COMPOSE_ANALYTICS_BACKEND_DATABASE_URL:-postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-alpha}?sslmode=disable}
+      ANALYTICS_OBJECT_DIR: /data/documents
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:?Set AI_SERVICE_TOKEN in .env}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_BASE_URL: ${AI_BASE_URL:-https://changellenge.up.railway.app/v1}
+      AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-deepseek/deepseek-v4.1-flash}
+      AI_DECISION_MODEL: ${AI_DECISION_MODEL:-}
+      AI_ANALYSIS_MODEL: ${AI_ANALYSIS_MODEL:-}
+      AI_SYNTHESIS_MODEL: ${AI_SYNTHESIS_MODEL:-}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-}
+      AI_REQUEST_TIMEOUT_SECONDS: ${AI_REQUEST_TIMEOUT_SECONDS:-60}
+      AI_MAX_RETRIES: ${AI_MAX_RETRIES:-2}
+      AI_MAX_RETRY_DELAY_SECONDS: ${AI_MAX_RETRY_DELAY_SECONDS:-15}
+      AI_MAX_CONCURRENT_REQUESTS: ${AI_MAX_CONCURRENT_REQUESTS:-2}
+      AI_REQUESTS_PER_MINUTE: ${AI_REQUESTS_PER_MINUTE:-20}
+      AI_MAX_OUTPUT_TOKENS: ${AI_MAX_OUTPUT_TOKENS:-1800}
+      AI_MAX_INPUT_CHARS: ${AI_MAX_INPUT_CHARS:-32000}
+      AI_RETRIEVAL_TOP_K: ${AI_RETRIEVAL_TOP_K:-8}
+      AI_RELEVANCE_LOW: ${AI_RELEVANCE_LOW:-0.35}
+      AI_RELEVANCE_HIGH: ${AI_RELEVANCE_HIGH:-0.7}
+      AI_POLICY_VERSION: ${AI_POLICY_VERSION:-bank-analysis-v1}
+      AI_SYSTEMONE_URL: ${AI_SYSTEMONE_URL:-}
+      AI_SYSTEMONE_MODEL: ${AI_SYSTEMONE_MODEL:-jev-latest}
+      AI_SYSTEMONE_API_KEY: ${AI_SYSTEMONE_API_KEY:-}
+      AI_SYSTEMONE_TIMEOUT_SECONDS: ${AI_SYSTEMONE_TIMEOUT_SECONDS:-10}
+      AI_SYSTEMONE_COOLDOWN_SECONDS: ${AI_SYSTEMONE_COOLDOWN_SECONDS:-60}
+      ANALYTICS_CHECKPOINTS: ${ANALYTICS_CHECKPOINTS:-true}
+      ANALYTICS_OPERATIONAL_RETENTION_DAYS: ${ANALYTICS_OPERATIONAL_RETENTION_DAYS:-30}
+      ANALYTICS_TOP_K: ${ANALYTICS_TOP_K:-12}
+      ANALYTICS_GRAPH_DEPTH: ${ANALYTICS_GRAPH_DEPTH:-2}
+      ANALYTICS_GRAPH_ENABLED: ${ANALYTICS_GRAPH_ENABLED:-true}
+      ANALYTICS_TRIAGE_ENABLED: ${ANALYTICS_TRIAGE_ENABLED:-false}
+      ANALYTICS_DEBOUNCE_SECONDS: ${ANALYTICS_DEBOUNCE_SECONDS:-30}
+      ANALYTICS_MAX_JOB_ATTEMPTS: ${ANALYTICS_MAX_JOB_ATTEMPTS:-3}
+      ANALYTICS_GRAPHIFY_ENABLED: ${ANALYTICS_GRAPHIFY_ENABLED:-false}
+      ANALYTICS_GRAPHIFY_JSON_PATH: ${ANALYTICS_GRAPHIFY_JSON_PATH:-}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-lexical}
+      EMBEDDING_MODEL_PATH: ${EMBEDDING_MODEL_PATH:-/data/embedding-model}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      EMBEDDING_VERSION: ${EMBEDDING_VERSION:-e8f8c211226b894fcb81acc59f3b34ba3efd5f42}
+      PARSER_DATABASE_URL: ${COMPOSE_PARSER_DATABASE_URL:-}
+      PARSER_CONNECT_TIMEOUT_SECONDS: ${PARSER_CONNECT_TIMEOUT_SECONDS:-5}
+      PARSER_STATEMENT_TIMEOUT_MS: ${PARSER_STATEMENT_TIMEOUT_MS:-10000}
+      PARSER_LEASE_SECONDS: ${PARSER_LEASE_SECONDS:-150}
+      PARSER_MAX_ATTEMPTS: ${PARSER_MAX_ATTEMPTS:-3}
+      PARSER_POLL_SECONDS: ${PARSER_POLL_SECONDS:-900}
+      PARSER_CBR_ALLOW_FETCH: ${PARSER_CBR_ALLOW_FETCH:-false}
+      PARSER_CBR_ALLOW_PERSIST: ${PARSER_CBR_ALLOW_PERSIST:-false}
+      PARSER_CBR_POLICY_VERSION: ${PARSER_CBR_POLICY_VERSION:-cbr-press-v1}
+      PARSER_CBR_USER_AGENT: ${PARSER_CBR_USER_AGENT:-AlphaHackathon/1.0}
+      PARSER_CBR_MAX_ITEMS: ${PARSER_CBR_MAX_ITEMS:-10}
+      PARSER_CBR_MAX_RESPONSE_BYTES: ${PARSER_CBR_MAX_RESPONSE_BYTES:-2000000}
+      PARSER_CBR_MAX_TOTAL_BYTES: ${PARSER_CBR_MAX_TOTAL_BYTES:-5000000}
+      PARSER_CBR_REQUEST_TIMEOUT_SECONDS: ${PARSER_CBR_REQUEST_TIMEOUT_SECONDS:-10}
+      PARSER_CBR_JOB_TIMEOUT_SECONDS: ${PARSER_CBR_JOB_TIMEOUT_SECONDS:-120}
+      PARSER_CBR_MIN_INTERVAL_SECONDS: ${PARSER_CBR_MIN_INTERVAL_SECONDS:-1}
+      ANALYTICS_POLL_SECONDS: ${ANALYTICS_POLL_SECONDS:-5}
+      BACKEND_URL: http://server:8080
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?Set INTERNAL_API_TOKEN in .env}
+    volumes:
+      - documents:/data/documents
+    depends_on:
+      postgres: { condition: service_healthy }
+      analytics-migrate: { condition: service_completed_successfully }
+    ports: ["127.0.0.1:8090:8090"]
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/readyz', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  analytics-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.analytics
+    command: ["python", "-m", "orchestrator.analytics.worker"]
+    environment: *analytics-env
+    restart: on-failure
+    volumes:
+      - documents:/data/documents
+    depends_on:
+      postgres: { condition: service_healthy }
+      analytics-migrate: { condition: service_completed_successfully }
+      analytics: { condition: service_healthy }
 
 volumes:
   pgdata:
   rustfsdata:
+  documents:

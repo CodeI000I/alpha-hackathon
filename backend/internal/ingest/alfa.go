@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/devowt/alpha-hackaton/backend/internal/domain"
 	"github.com/devowt/alpha-hackaton/backend/internal/storage/postgres"
@@ -13,5 +14,5 @@ import (
 type AlfaFetcher struct{}
 
 func (AlfaFetcher) Fetch(ctx context.Context, src postgres.SourceConfig) ([]domain.NewsItem, error) {
-	return nil, nil
+	return nil, fmt.Errorf("alfa source %s: adapter requires a configured source contract", src.ID)
 }

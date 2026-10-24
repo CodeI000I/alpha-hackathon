@@ -10,6 +10,7 @@ import httpx
 from pydantic import SecretStr, ValidationError
 
 from .config import ConfigurationError, Settings, load_settings
+from .decision import SystemOneDecisionProvider, SystemOneUnavailable
 from .llm import AIError, LLMClient
 from .models import RankRequest
 from .pipeline import Pipeline
@@ -21,6 +22,7 @@ def main(argv=None):
     sub = parser.add_subparsers(dest='command', required=True)
     sub.add_parser('demo', help='Полный локальный пример через mock API, бесплатно')
     sub.add_parser('check-config', help='Проверка настроек, без сетевых запросов')
+    sub.add_parser('check-systemone', help='Проверка доступа к настроенной модели Jev/Clef')
     sub.add_parser('smoke', help='Один реальный короткий запрос, расходует командный бюджет')
     sub.add_parser('worker', help='Однократно обработать доступные долговечные задания')
     serve = sub.add_parser('serve', help='Внутренний HTTP API с Bearer-аутентификацией')
@@ -42,6 +44,18 @@ def main(argv=None):
                 client.close()
         return 0
     settings = load_settings()
+    if args.command == 'check-systemone':
+        if not settings.systemone_url:
+            raise ConfigurationError('Заполните AI_SYSTEMONE_URL для проверки Jev/Clef.')
+        provider = SystemOneDecisionProvider(
+            settings.systemone_url, settings.systemone_model, settings.systemone_api_key,
+            timeout_seconds=settings.systemone_timeout_seconds)
+        try:
+            provider.probe()
+        finally:
+            provider.close()
+        print(f'System One доступен; модель {settings.systemone_model} разрешена аккаунту.')
+        return 0
     settings.require_key()
     if args.command == 'smoke':
         settings = settings.model_copy(update={'max_retries': 0})
@@ -85,7 +99,7 @@ def main(argv=None):
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except (AIError, ConfigurationError) as exc:
+    except (AIError, ConfigurationError, SystemOneUnavailable) as exc:
         print(str(exc), file=sys.stderr)
         sys.exit(1)
     except (ValidationError, ValueError, OSError):

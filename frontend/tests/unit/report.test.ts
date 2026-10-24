@@ -8,6 +8,7 @@ import {
   dailySummary,
   exportReport,
   relevance,
+  priority,
   sourceUrl,
 } from '../../src/report';
 
@@ -46,6 +47,23 @@ const company: Company = {
 };
 
 describe('24-hour summary', () => {
+  it('counts one news event across roles and uses its highest-scoring analysis', () => {
+    const risk = item(1, 'cfo', new Date(NOW).toISOString(), 'risk');
+    const opportunity = { ...risk, id: 2, role: 'strategy', score: .95, kind: 'opportunity' as const };
+    const result = dailySummary([risk, opportunity], NOW);
+    expect(result.items).toEqual([opportunity]);
+    expect(result.counts).toEqual({ event: 0, risk: 0, opportunity: 1 });
+  });
+
+  it('uses stable tie-breaking and never merges different events with missing news IDs', () => {
+    const first = item(1, 'cfo', new Date(NOW).toISOString(), 'risk');
+    const otherRole = { ...first, id: 2, role: 'strategy' };
+    expect(dailySummary([otherRole, first], NOW).items).toEqual([first]);
+    const unknownA = { ...first, news: { ...first.news, id: 0 } };
+    const unknownB = { ...otherRole, news: { ...otherRole.news, id: 0 } };
+    expect(dailySummary([unknownA, unknownB], NOW).items).toHaveLength(2);
+  });
+
   it('includes both boundaries and excludes older, future, and invalid dates', () => {
     const values = [
       item(1, 'cfo', new Date(NOW - 24 * HOUR).toISOString(), 'risk'),
@@ -105,6 +123,18 @@ describe('source URLs and relevance', () => {
   ])('formats relevance %s as %s', (score, expected) => {
     expect(relevance(score)).toBe(expected);
   });
+
+  it.each([
+    [0, 'Без срочности'],
+    [0.25, 'Срочность не указана'],
+    [0.5, 'Наблюдать'],
+    [0.8, 'Скоро'],
+    [1, 'Срочно'],
+    [0.7, 'Срочность не указана'],
+    [Number.NaN, 'Срочность не указана'],
+  ])('formats live ordinal priority %s as %s', (score, expected) => {
+    expect(priority(score)).toBe(expected);
+  });
 });
 
 describe('text report provenance', () => {
@@ -119,12 +149,12 @@ describe('text report provenance', () => {
     expect(report).toContain('Компания: ООО «Проверка»');
     expect(report).toContain('Ракурс: Финансовый директор');
     expect(report).toContain('Тип: Риск');
-    expect(report).toContain('Релевантность: 87%');
+    expect(report).toContain('Приоритет (срочность): Срочность не указана');
     expect(report).toContain('Что произошло [Сообщение источника / news.summary]');
     expect(report).toContain('Значение для бизнеса [Интерпретация / insight]');
     expect(report).toContain('Что может измениться [Гипотеза]');
     expect(report).toContain('Документы компании [Основания]');
-    expect(report).toContain('Материалы банка [Основания]');
+    expect(report).toContain('Аналитика от Альфа-Банка [Основания]');
     expect(report).toContain(BANK_UNKNOWN);
     expect(report).toContain('Источник: S11');
     expect(report).toContain('Ссылка: https://example.test/source');

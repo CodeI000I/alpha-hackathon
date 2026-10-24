@@ -59,6 +59,7 @@ func main() {
 		Log:       log,
 		MaxPerRun: cfg.RankMaxPerRun,
 		Lookback:  cfg.RankLookback,
+		Lease:     2 * cfg.Orchestrator.Timeout,
 	}
 
 	// Импорт новостей и новые директора будят воркер: карточки появляются сразу, а не через INGEST_PERIOD.

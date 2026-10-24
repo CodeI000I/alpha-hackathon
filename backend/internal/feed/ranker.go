@@ -31,6 +31,7 @@ type Request struct {
 // который уходит во фронтенд, здесь есть полный текст (body).
 type News struct {
 	ID          int64     `json:"id"`
+	Revision    int64     `json:"revision"`
 	SourceID    string    `json:"sourceId"`
 	URL         string    `json:"url"`
 	Title       string    `json:"title"`

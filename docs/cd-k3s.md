@@ -5,12 +5,13 @@
 ```
 push в main
   └─ GitHub Actions (.github/workflows/ci-cd.yaml), облачные раннеры
-       1. go vet + go test, сборка фронтенда, helm lint + helm template
-       2. docker build → Docker Hub: <user>/alpha-hackaton:<sha> и :latest
-       3. коммит в main: image.tag = <sha> в deploy/helm/alpha-hackaton/values.yaml
+       1. Go race/PG, Python/pgvector, frontend unit/browser, сквозной HTTP smoke
+       2. сборка обоих образов, helm lint + helm template
+       3. Docker Hub: <user>/alpha-hackaton:<sha> и :analytics-<sha>
+       4. коммит обоих тегов в deploy/helm/alpha-hackaton/values.yaml
   └─ Argo CD в k3s
        раз в ~3 минуты сверяет main с кластером, видит новый тег,
-       рендерит Helm-чарт и раскатывает server и worker
+       рендерит Helm-чарт и раскатывает Go server/worker и Python API/worker
 ```
 
 CI ничего не знает о кластере, а кластер сам ходит в GitHub (только исходящие соединения, порт 6443 наружу не открывается) и в Docker Hub за образом.
@@ -51,11 +52,23 @@ deploy/
 
 | Job | Когда | Что делает |
 |---|---|---|
-| `test-and-validate` | push в main, pull request, ручной запуск | `go vet` и `go test` в `backend/`, `npm run build` во `frontend/`, `helm lint --strict`, `helm template`. Отрендеренные манифесты сохраняются артефактом на 7 дней |
-| `build-and-push` | только main | Собирает `Dockerfile` из корня и пушит `<DOCKERHUB_USERNAME>/alpha-hackaton:<sha>` и `:latest`. Слои кэшируются в GitHub Actions cache |
-| `update-image-tag` | только main, после пуша образа | Прописывает `image.repository` и `image.tag` в `values.yaml` и коммитит в main с `[skip ci]` |
+| `pipeline-tests` | push в main, pull request, ручной запуск | Go race и PG; Python и pgvector/checkpoints; frontend unit/Playwright; сквозной Go/Python HTTP smoke с синтетической моделью |
+| `test-and-validate` | push в main, pull request, ручной запуск | Go vet/tests, frontend build, сборка `Dockerfile` и `Dockerfile.analytics`, Helm lint/render; manifests сохраняются на 7 дней |
+| `build-and-push` | push в main или ручной запуск на main, после обеих проверок | Публикует Go/React `:<sha>` и Python `:analytics-<sha>`; также обновляет `latest` и `analytics-latest` |
+| `update-image-tag` | main, после публикации обоих образов | Обновляет `image` и `analytics.image` в values одним коммитом с `[skip ci]` |
 
-Push, в котором поменялись только `*.md`, `docs/` или `deploy/`, образ не пересобирает: изменения чарта Argo CD подхватывает сам. Pull request проверяется целиком, но образ не собирается.
+Push только с `*.md`, `docs/` или `deploy/` не пересобирает образы: чарт Argo CD
+подхватывает сам. Pull request собирает оба образа для проверки, без публикации.
+
+Кеш BuildKit в GitHub Actions разделён по образам (`alpha-app` и `alpha-analytics`).
+Запись кеша ограничена двумя минутами и необязательна (`ignore-error=true`): ошибка
+`error writing layer blob: failed to reserve cache` при экспорте кеша не должна
+блокировать выпуск успешно собранного и опубликованного образа. Ошибки самих
+тестов, сборки и push по-прежнему останавливают следующие jobs.
+Параметры описаны в [документации Docker](https://docs.docker.com/build/cache/backends/gha/).
+После изменения workflow проверяйте новый запуск на свежем коммите; повтор старого
+запуска использует прежнюю конфигурацию. Зелёный `build-and-push` ещё не подтверждает
+обновление кластера: нужны успешный `update-image-tag` и проверка Argo CD.
 
 В логах Actions имя пользователя Docker Hub замазано как `***`, потому что оно лежит в secrets. Это нормально.
 
@@ -82,7 +95,9 @@ kubectl -n alpha create secret docker-registry dockerhub \
 kubectl -n alpha create secret generic alpha-secrets \
   --from-literal=POSTGRES_PASSWORD="$(openssl rand -hex 24)" \
   --from-literal=S3_ACCESS_KEY=alpha-app \
-  --from-literal=S3_SECRET_KEY="$(openssl rand -hex 24)"
+  --from-literal=S3_SECRET_KEY="$(openssl rand -hex 24)" \
+  --from-literal=ORCHESTRATOR_TOKEN="$(openssl rand -hex 32)" \
+  --from-literal=INTERNAL_API_TOKEN="$(openssl rand -hex 32)"
 
 kubectl -n alpha get secrets   # должны быть dockerhub и alpha-secrets
 ```
@@ -93,7 +108,20 @@ kubectl -n alpha get secrets   # должны быть dockerhub и alpha-secret
 
 Без этих секретов поды server и worker висят в `ImagePullBackOff` с событием `Unable to retrieve some image pull secrets (dockerhub)`, а postgres и rustfs в `CreateContainerConfigError`. Если секреты создали уже после синхронизации, поды можно не ждать, а пересоздать: `kubectl -n alpha delete pods --all`.
 
-`DATABASE_URL` писать не нужно: чарт собирает его из `POSTGRES_PASSWORD` и адреса `alpha-postgres`. Остальные ключи секрета (например, будущий токен Jev) попадут в окружение server и worker как есть.
+`DATABASE_URL` при встроенной PostgreSQL собирается из `POSTGRES_PASSWORD` и
+`alpha-postgres`; Python получает тот же DSN явно для своей схемы и чтения Go.
+`ORCHESTRATOR_TOKEN` передаётся Python как `AI_SERVICE_TOKEN`. `INTERNAL_API_TOKEN`
+обязателен для чтения загруженных файлов воркером. Добавьте `AI_API_KEY` в существующий
+Secret для модельных задач; без него сервисы запускаются, чтение работает, анализ
+ждёт настройки. Не пересоздавайте пароль PostgreSQL при обновлении уже работающего
+окружения. После изменения Secret перезапустите соответствующие deployments.
+
+Перед обновлением проверьте [миграцию email и назначение паролей](../backend/API.md).
+Уже существующая БД с PostgreSQL 16 продолжает использовать major 16; образ
+`pgvector/pgvector:pg16` добавляет extension. Python init containers применяют
+миграции с общим advisory lock. API и worker используют один RWO PVC документов:
+одна API-реплика, Recreate и совместное размещение на узле. Увеличивать replicas
+до перехода на подходящее общее хранилище чарт не разрешает.
 
 Если раньше применяли манифесты из старого `deploy/k8s`, удалите их до первой синхронизации: `kubectl -n alpha delete deploy app worker`, `kubectl -n alpha delete sts postgres rustfs`, `kubectl -n alpha delete svc app postgres rustfs`, `kubectl -n alpha delete ingress app`, `kubectl -n alpha delete cm alpha-config`. Тома старой базы (`data-postgres-0`) новый чарт не подхватит, у него свой `data-alpha-postgres-0`.
 
@@ -184,7 +212,8 @@ git commit -m "CI/CD: Helm chart, Argo CD, GitHub Actions"
 git push origin main
 ```
 
-Дальше GitHub → Actions → CI-CD: должны пройти три job, последняя (`update-image-tag`) сама закоммитит в `main` тег образа. Заберите этот коммит: `git pull --rebase`.
+Дальше GitHub → Actions → CI-CD: должны пройти все quality gates, публикация обоих
+образов и `update-image-tag`. Бот закоммитит оба тега; заберите коммит `git pull --ff-only`.
 
 ### 7. Подключить приложение к Argo CD
 
@@ -234,8 +263,8 @@ kubectl -n argocd logs statefulset/argocd-application-controller --tail=50  # о
 
 * **Выкатить новую версию:** push в main. Через несколько минут после зелёного workflow Argo CD раскатит образ. Что сейчас в кластере: `kubectl -n alpha get deploy alpha -o jsonpath='{.spec.template.spec.containers[0].image}'`.
 * **Бот коммитит в main**, поэтому перед своим push делайте `git pull --rebase`.
-* **Поменять настройки** (домен, реплики, `JEV_URL`, ресурсы): правка `values.yaml` и push. Образ не пересобирается, Argo CD применит изменения сам. Поды server и worker перезапустятся, если поменялся ConfigMap.
-* **Откатиться на прошлый образ:** вписать старый sha в `image.tag` в `values.yaml` и запушить. Сборка не запустится, Argo CD раскатит указанный образ. Откатить код насовсем: `git revert` коммита с кодом, CI соберёт и выкатит новый образ.
+* **Поменять настройки** (домен, `ORCHESTRATOR_URL`, ресурсы): правка `values.yaml` и push. Образы не пересобираются, ConfigMap меняет checksum и перезапускает процессы.
+* **Откатить приложение:** вписать совместимые прежние `image.tag` и `analytics.image.tag` в values и запушить. Сборка не запустится. Миграции additive; код должен быть совместим с текущей схемой. Перед откатом сохраняйте backup БД и файлов.
 * **Не ждать опроса:** в UI Argo CD кнопка Refresh, или `kubectl -n argocd annotate application alpha-hackaton argocd.argoproj.io/refresh=normal --overwrite`.
 * **Ручные правки в кластере** (`kubectl edit`, `kubectl scale`) Argo CD откатит из-за `selfHeal`. Меняйте `values.yaml`.
 

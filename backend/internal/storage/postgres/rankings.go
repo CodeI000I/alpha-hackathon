@@ -140,8 +140,8 @@ func (s *Store) ImportNews(ctx context.Context, items []domain.NewsItem) ([]Impo
 	defer tx.Rollback(ctx)
 	out := make([]ImportedNews, len(items))
 	for i, n := range items {
-		err := tx.QueryRow(ctx, upsertNews,
-			n.SourceID, n.ExternalID, n.URL, n.Title, n.Summary, n.Body, n.PublishedAt).Scan(&out[i].ID, &out[i].Created)
+		var err error
+		out[i].ID, _, out[i].Created, err = upsertNewsTx(ctx, tx, n)
 		if pgCode(err) == "23503" {
 			return nil, ErrNotFound
 		}

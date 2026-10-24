@@ -45,10 +45,14 @@ func (s *Store) GetUser(ctx context.Context, id int64) (domain.User, error) {
 // не оставлял пользователя, email которого уже занят. ErrEmailTaken — email уже есть,
 // ErrNotFound — нет компании companyId.
 func (s *Store) CreateUser(ctx context.Context, u domain.User) (domain.User, error) {
+	return s.CreateUserWithPassword(ctx, u, "")
+}
+
+func (s *Store) CreateUserWithPassword(ctx context.Context, u domain.User, passwordHash string) (domain.User, error) {
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		err := tx.QueryRow(ctx,
-			`INSERT INTO users (company_id, email, full_name) VALUES ($1, $2, $3) RETURNING id`,
-			u.CompanyID, u.Email, u.FullName).Scan(&u.ID)
+			`INSERT INTO users (company_id, email, full_name, password_hash) VALUES ($1, $2, $3, $4) RETURNING id`,
+			u.CompanyID, u.Email, u.FullName, passwordHash).Scan(&u.ID)
 		switch pgCode(err) {
 		case "23505":
 			return ErrEmailTaken
@@ -58,7 +62,10 @@ func (s *Store) CreateUser(ctx context.Context, u domain.User) (domain.User, err
 		if err != nil {
 			return err
 		}
-		return replaceRoles(ctx, tx, u.ID, u.Roles)
+		if err := replaceRoles(ctx, tx, u.ID, u.Roles); err != nil {
+			return err
+		}
+		return enqueueUserNewsDeliveries(ctx, tx, u.ID)
 	})
 	if err != nil {
 		return u, err
@@ -79,7 +86,17 @@ func (s *Store) SetUserRoles(ctx context.Context, userID int64, codes []string) 
 		if err != nil {
 			return err
 		}
-		return replaceRoles(ctx, tx, userID, codes)
+		if err := replaceRoles(ctx, tx, userID, codes); err != nil {
+			return err
+		}
+		var companyID *int64
+		if err := tx.QueryRow(ctx, `SELECT company_id FROM users WHERE id=$1`, userID).Scan(&companyID); err != nil {
+			return err
+		}
+		if companyID != nil {
+			return requeueCompanyNewsDeliveries(ctx, tx, *companyID)
+		}
+		return nil
 	})
 }
 

@@ -17,15 +17,29 @@ export function dateLabel(value: string): string {
 export function relevance(score: number): string {
   return Number.isFinite(score) && score >= 0 && score <= 1 ? Math.round(score * 100) + '%' : 'не передана';
 }
+export function priority(score: number): string {
+  const urgency = Number.isFinite(score) ? ({ 0: 'Без срочности', 25: 'Срочность не указана', 50: 'Наблюдать', 80: 'Скоро', 100: 'Срочно' } as Record<number, string>)[Math.round(score * 100)] : undefined;
+  return urgency ?? 'Срочность не указана';
+}
 export function assignedFeed(items: readonly FeedItem[] | null | undefined, roles: readonly string[]): FeedItem[] {
   return (items ?? []).filter(item => roles.includes(item.role));
 }
 export function dailySummary(items: readonly FeedItem[], now: number) {
   const start = now - 24 * 60 * 60 * 1000;
   const recent = items.filter(item => { const time = Date.parse(item.news.publishedAt); return Number.isFinite(time) && time >= start && time <= now; });
+  // The backend creates a separate FeedItem per role. Count a news event once,
+  // representing it by its highest-scoring analysis across the assigned roles.
+  // The score is ordinal urgency in live mode and relevance in demo mode.
+  const unique = new Map<string, FeedItem>();
+  for (const item of recent) {
+    const key = item.news.id > 0 ? 'news:' + item.news.id : 'feed:' + item.id;
+    const previous = unique.get(key);
+    if (!previous || item.score > previous.score || (item.score === previous.score && item.id < previous.id)) unique.set(key, item);
+  }
+  const events = [...unique.values()];
   const counts = { event: 0, risk: 0, opportunity: 0 };
-  recent.forEach(item => { if (item.kind in counts) counts[item.kind]++; });
-  return { items: recent, counts, start, end: now };
+  events.forEach(item => { if (item.kind in counts) counts[item.kind]++; });
+  return { items: events, counts, start, end: now };
 }
 export function exportReport(item: FeedItem, context: { company?: Company; roleName: string; demo: boolean }): string {
   return [
@@ -35,13 +49,13 @@ export function exportReport(item: FeedItem, context: { company?: Company; roleN
     'Компания: ' + (context.company?.name ?? 'не указана'),
     'Ракурс: ' + context.roleName,
     'Тип: ' + (KIND_LABELS[item.kind] ?? 'неизвестен'),
-    'Релевантность: ' + relevance(item.score),
+    (context.demo ? 'Релевантность: ' + relevance(item.score) : 'Приоритет (срочность): ' + priority(item.score)),
     'Опубликовано: ' + dateLabel(item.news.publishedAt),
     '', 'Что произошло [Сообщение источника / news.summary]', item.news.summary || 'Сообщение источника не передано.',
     '', 'Значение для бизнеса [Интерпретация / insight]', item.insight || 'Интерпретация не передана.',
     '', 'Что может измениться [Гипотеза]', 'Отдельные гипотезы, сценарии и расчёты сервером не переданы.',
     '', 'Документы компании [Основания]', 'API не сообщает, какие документы использованы в разборе. Наличие загруженного файла не подтверждает его анализ.',
-    '', 'Материалы банка [Основания]', context.demo ? BANK_NOT_USED : BANK_UNKNOWN,
+    '', 'Аналитика от Альфа-Банка [Основания]', context.demo ? BANK_NOT_USED : BANK_UNKNOWN,
     '', 'Источник: ' + (item.news.sourceId || 'не указан'), 'Ссылка: ' + (sourceUrl(item.news.url) ?? 'не передана или имеет неподдерживаемый формат'),
     'Элементы профиля: ' + ((item.elements ?? []).join(', ') || 'не переданы'),
     '', 'Чат, закладки, графики и предложения банка — отдельные локальные демофункции; их данные не включены в выводы этого разбора.',

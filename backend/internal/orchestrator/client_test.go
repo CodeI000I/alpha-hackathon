@@ -87,3 +87,25 @@ func TestRetryAfterDate(t *testing.T) {
 		t.Fatalf("got %v", got)
 	}
 }
+
+func TestRankDoesNotFollowRedirectWithServiceToken(t *testing.T) {
+	redirectTargetCalled := false
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		redirectTargetCalled = true
+		if r.Header.Get("Authorization") != "" {
+			t.Error("service token leaked across redirect")
+		}
+	}))
+	defer target.Close()
+	origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL+"/rank", http.StatusTemporaryRedirect)
+	}))
+	defer origin.Close()
+	_, err := New(origin.URL, "secret", time.Minute).Rank(context.Background(), feed.Request{})
+	if err == nil {
+		t.Fatal("redirect response was accepted")
+	}
+	if redirectTargetCalled {
+		t.Fatal("rank client followed redirect")
+	}
+}

@@ -46,6 +46,7 @@ describe("browser session", () => {
     for (const value of ["", "0", "-1", "1.5", "NaN", "9007199254740992"]) {
       localStorage.setItem("signal.session.v2.api.userId", value);
       expect(currentUserId("api")).toBeNull();
+      expect(localStorage.getItem("signal.session.v2.api.userId")).toBeNull();
     }
 
     setCurrentUserId(0, "api");

@@ -118,8 +118,8 @@ func TestRankQueue(t *testing.T) {
 	if err := p.Rank(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if got := ranker.calls[news]; len(got) != 1 || !slices.Equal(got[0], []string{"ceo", "cfo"}) {
-		t.Fatalf("want one call with the union of roles, got %v", got)
+	if got := ranker.calls[news]; len(got) != 2 || !slices.Equal(got[0], []string{"ceo", "cfo"}) || !slices.Equal(got[1], []string{"ceo", "cfo"}) {
+		t.Fatalf("want each user delivery to request the union of roles, got %v", got)
 	}
 	if items := feedOf(cfo); len(items) != 1 || items[0].Role != "cfo" || items[0].Kind != "risk" ||
 		!slices.Equal(items[0].Elements, []string{"Б3"}) || items[0].News.ID != news {
@@ -140,7 +140,7 @@ func TestRankQueue(t *testing.T) {
 	if err := p.Rank(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if ranker.count(news) != 1 || len(feedOf(late)) != 1 {
+	if ranker.count(news) != 5 || len(feedOf(late)) != 1 {
 		t.Fatalf("calls=%d, late feed=%+v", ranker.count(news), feedOf(late))
 	}
 	// Новая роль в компании — переоценка по полному набору ролей.
@@ -150,8 +150,14 @@ func TestRankQueue(t *testing.T) {
 	if err := p.Rank(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if got := ranker.calls[news]; len(got) != 2 || !slices.Equal(got[1], []string{"ceo", "cfo", "sales"}) {
-		t.Fatalf("want re-rank with the new role, got %v", got)
+	if got := ranker.calls[news]; len(got) != 8 {
+		t.Fatalf("want all three user deliveries to be re-ranked, got %v", got)
+	} else {
+		for _, roles := range got[5:] {
+			if !slices.Equal(roles, []string{"ceo", "cfo", "sales"}) {
+				t.Fatalf("want re-rank with the new role union, got %v", got)
+			}
+		}
 	}
 
 	// Отказы: 422 снимает новость с очереди, сбой сети — повтор позже, Retry-After — пауза всех оценок.
@@ -175,7 +181,7 @@ func TestRankQueue(t *testing.T) {
 		}
 	}
 	if ranker.count(rejected) != 1 || ranker.count(broken) != 1 {
-		t.Fatalf("each failing news must be tried once: rejected=%d broken=%d", ranker.count(rejected), ranker.count(broken))
+		t.Fatalf("one failed request should defer all sibling deliveries: rejected=%d broken=%d", ranker.count(rejected), ranker.count(broken))
 	}
 	limited = addNews("Лимит")
 	for range 2 {
@@ -193,6 +199,15 @@ func TestRankQueue(t *testing.T) {
 	}
 	if ranker.count(rejected)+ranker.count(broken)+ranker.count(limited) != 3 {
 		t.Fatal("failed rankings must wait for their next attempt")
+	}
+}
+
+func TestClaimOrderAlternatesAcrossWorkerRuns(t *testing.T) {
+	p := &Pipeline{}
+	for i, want := range []bool{true, false, true, false} {
+		if got := p.nextClaimNewestFirst(); got != want {
+			t.Fatalf("claim %d newestFirst=%v, want %v", i+1, got, want)
+		}
 	}
 }
 

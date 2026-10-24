@@ -127,6 +127,37 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(self.delays, [4])
         self.assertEqual(len(self.requests), 2)
 
+    def test_malformed_success_payloads_are_reported_as_invalid_response(self):
+        malformed = [
+            None,
+            [],
+            'not-an-object',
+            {"choices": {"x": 1}},
+            {"choices": "not-a-list"},
+            {"choices": [{"message": "not-an-object", "finish_reason": "stop"}]},
+            {"choices": [{"message": {"content": ["not", "text"]}, "finish_reason": "stop"}]},
+        ]
+        for payload in malformed:
+            with self.subTest(payload=payload):
+                self.replies = [httpx.Response(200, json=payload)]
+                with self.assertRaises(AIError) as caught:
+                    self.complete()
+                self.assertEqual(caught.exception.code, 'invalid_response')
+                with self.store.connect() as db:
+                    status = db.execute('SELECT status FROM calls ORDER BY id DESC LIMIT 1').fetchone()[0]
+                self.assertEqual(status, 'invalid_response')
+
+    def test_truncated_success_response_is_not_counted_as_ok(self):
+        self.replies = [httpx.Response(200, json={
+            'choices': [{'message': {'content': 'partial'}, 'finish_reason': 'length'}],
+        })]
+        with self.assertRaises(AIError) as caught:
+            self.complete()
+        self.assertEqual(caught.exception.code, 'incomplete_response')
+        with self.store.connect() as db:
+            status = db.execute('SELECT status FROM calls ORDER BY id DESC LIMIT 1').fetchone()[0]
+        self.assertEqual(status, 'incomplete_response')
+
     def test_long_retry_after_defers_without_sleeping(self):
         self.replies = [httpx.Response(429, headers={'Retry-After': '120'}, json={'error': 'rate limit'})]
         with self.assertRaises(AIError) as caught:

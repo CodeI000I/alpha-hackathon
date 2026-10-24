@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/devowt/alpha-hackaton/backend/internal/storage/postgres"
@@ -22,11 +23,17 @@ type FileStore interface {
 }
 
 type Server struct {
-	Store         *postgres.Store
-	Files         FileStore // nil, если объектное хранилище не настроено
-	StaticDir     string
-	InternalToken string // токен служебных маршрутов; пусто = выключены
-	Log           *slog.Logger
+	Store            *postgres.Store
+	Files            FileStore // nil, если объектное хранилище не настроено
+	StaticDir        string
+	InternalToken    string // токен служебных маршрутов; пусто = выключены
+	RequireAuth      bool
+	CookieSecure     bool
+	AnalyticsURL     string
+	AnalyticsToken   string
+	Log              *slog.Logger
+	loginLimiterOnce sync.Once
+	loginLimiter     *loginLimiterState
 }
 
 func (s *Server) Handler() http.Handler {
@@ -38,18 +45,26 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/v1/roles", s.listRoles)
 	mux.HandleFunc("GET /api/v1/profile-elements", s.listProfileElements)
 
-	mux.HandleFunc("POST /api/v1/users", s.createUser)
-	mux.HandleFunc("GET /api/v1/users/{id}", s.getUser)
-	mux.HandleFunc("PUT /api/v1/users/{id}/roles", s.setUserRoles)
-	mux.HandleFunc("GET /api/v1/users/{id}/feed", s.getFeed)
+	mux.Handle("POST /api/v1/auth/login", http.HandlerFunc(s.login))
+	mux.Handle("GET /api/v1/auth/me", s.requireAuth(http.HandlerFunc(s.me)))
+	mux.Handle("POST /api/v1/auth/logout", s.requireAuth(http.HandlerFunc(s.logout)))
+	mux.Handle("POST /api/v1/users", s.guard(http.HandlerFunc(s.createUser)))
+	mux.HandleFunc("POST /api/v1/onboarding", s.createOnboarding)
+	mux.Handle("GET /api/v1/users/{id}", s.guard(http.HandlerFunc(s.getUser)))
+	mux.Handle("PUT /api/v1/users/{id}/roles", s.guard(http.HandlerFunc(s.setUserRoles)))
+	mux.Handle("GET /api/v1/users/{id}/feed", s.guard(http.HandlerFunc(s.getFeed)))
 
-	mux.HandleFunc("POST /api/v1/companies", s.createCompany)
-	mux.HandleFunc("GET /api/v1/companies/{id}", s.getCompany)
-	mux.HandleFunc("PATCH /api/v1/companies/{id}/profile", s.patchProfile)
-	mux.HandleFunc("GET /api/v1/companies/{id}/files", s.listFiles)
-	mux.HandleFunc("POST /api/v1/companies/{id}/files", s.uploadFile)
+	mux.Handle("POST /api/v1/companies", s.guard(http.HandlerFunc(s.createCompany)))
+	mux.Handle("GET /api/v1/companies/{id}", s.guard(http.HandlerFunc(s.getCompany)))
+	mux.Handle("PATCH /api/v1/companies/{id}/profile", s.guard(http.HandlerFunc(s.patchProfile)))
+	mux.Handle("GET /api/v1/companies/{id}/files", s.guard(http.HandlerFunc(s.listFiles)))
+	mux.Handle("POST /api/v1/companies/{id}/files", s.guard(http.HandlerFunc(s.uploadFile)))
+	mux.Handle("GET /api/v1/analytics/{rest...}", s.requireAuth(http.HandlerFunc(s.analyticsProxy)))
+	mux.Handle("POST /api/v1/analytics/{rest...}", s.requireAuth(http.HandlerFunc(s.analyticsProxy)))
+	mux.Handle("PATCH /api/v1/analytics/{rest...}", s.requireAuth(http.HandlerFunc(s.analyticsProxy)))
 
 	mux.HandleFunc("POST /api/v1/internal/news", s.internalOnly(s.importNews))
+	mux.HandleFunc("GET /api/v1/internal/files/{id}/content", s.internalOnly(s.fileContent))
 
 	// Неизвестный метод API — JSON 404, а не index.html со статусом 200 из SPA.
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {

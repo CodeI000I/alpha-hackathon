@@ -84,6 +84,43 @@ describe("API mode", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    "<!doctype html><html><body>Сигнал</body></html>",
+    "upstream unavailable",
+    "",
+    "true",
+    '"unexpected string"',
+    '{"items": []}',
+    '{"error": "backend unavailable"}',
+  ])("does not turn a successful non-JSON/invalid payload into an empty feed: %s", async (body) => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(body, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { createApiClient } = await loadClient();
+
+    await expect(createApiClient("api").feed(1, undefined, 200)).rejects.toEqual(
+      expect.objectContaining({ name: "ApiError", status: 200, message: expect.stringContaining("JSON") }),
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves non-JSON HTTP error messages and their status", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("upstream unavailable", { status: 502 })));
+    const { createApiClient } = await loadClient();
+
+    await expect(createApiClient("api").feed(1)).rejects.toEqual(
+      expect.objectContaining({ name: "ApiError", status: 502, message: "upstream unavailable" }),
+    );
+  });
+
+  it.each([null, []])("rejects an invalid entity response instead of restoring an incomplete user: %s", async (value) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json(value)));
+    const { createApiClient } = await loadClient();
+
+    await expect(createApiClient("api").user(1)).rejects.toEqual(
+      expect.objectContaining({ name: "ApiError", status: 200, message: expect.stringContaining("JSON") }),
+    );
+  });
+
   it("normalizes nullable Go collections at the client boundary", async () => {
     const feedItem = {
       id: 10,

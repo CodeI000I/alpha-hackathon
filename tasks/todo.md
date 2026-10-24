@@ -1,5 +1,18 @@
 # Analytics implementation checklist
 
+## Frontend follow-up integration (2026-10-24)
+
+- [x] Fetch remote branches; retain successful CI tags from `origin/main`.
+- [x] Merge three frontend commits, preserving auth and live analytics behavior.
+- [x] Review API shapes, role/score semantics, feed states and focus behavior.
+- [x] Pass frontend unit/type/build/browser checks and isolated unified HTTP/DB smoke.
+- [x] Review, update the report, commit and push the complete integration to main.
+
+Verification for this follow-up: 148 frontend unit tests, TypeScript, production
+build, 46 Playwright scenarios (23 demo + 23 API), unified HTTP/PostgreSQL smoke.
+Backend/Python code and dependency locks are unchanged; full historical audit
+counts below are not a new rerun. Remote CI/deploy for this merge is separate.
+
 ## Main integration (2026-10-24)
 
 - [x] Fetch all remotes and map changes already merged into main.

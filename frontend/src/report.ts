@@ -27,9 +27,19 @@ export function assignedFeed(items: readonly FeedItem[] | null | undefined, role
 export function dailySummary(items: readonly FeedItem[], now: number) {
   const start = now - 24 * 60 * 60 * 1000;
   const recent = items.filter(item => { const time = Date.parse(item.news.publishedAt); return Number.isFinite(time) && time >= start && time <= now; });
+  // The backend creates a separate FeedItem per role. Count a news event once,
+  // representing it by its highest-scoring analysis across the assigned roles.
+  // The score is ordinal urgency in live mode and relevance in demo mode.
+  const unique = new Map<string, FeedItem>();
+  for (const item of recent) {
+    const key = item.news.id > 0 ? 'news:' + item.news.id : 'feed:' + item.id;
+    const previous = unique.get(key);
+    if (!previous || item.score > previous.score || (item.score === previous.score && item.id < previous.id)) unique.set(key, item);
+  }
+  const events = [...unique.values()];
   const counts = { event: 0, risk: 0, opportunity: 0 };
-  recent.forEach(item => { if (item.kind in counts) counts[item.kind]++; });
-  return { items: recent, counts, start, end: now };
+  events.forEach(item => { if (item.kind in counts) counts[item.kind]++; });
+  return { items: events, counts, start, end: now };
 }
 export function exportReport(item: FeedItem, context: { company?: Company; roleName: string; demo: boolean }): string {
   return [

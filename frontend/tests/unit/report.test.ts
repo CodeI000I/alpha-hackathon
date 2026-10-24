@@ -47,6 +47,23 @@ const company: Company = {
 };
 
 describe('24-hour summary', () => {
+  it('counts one news event across roles and uses its highest-scoring analysis', () => {
+    const risk = item(1, 'cfo', new Date(NOW).toISOString(), 'risk');
+    const opportunity = { ...risk, id: 2, role: 'strategy', score: .95, kind: 'opportunity' as const };
+    const result = dailySummary([risk, opportunity], NOW);
+    expect(result.items).toEqual([opportunity]);
+    expect(result.counts).toEqual({ event: 0, risk: 0, opportunity: 1 });
+  });
+
+  it('uses stable tie-breaking and never merges different events with missing news IDs', () => {
+    const first = item(1, 'cfo', new Date(NOW).toISOString(), 'risk');
+    const otherRole = { ...first, id: 2, role: 'strategy' };
+    expect(dailySummary([otherRole, first], NOW).items).toEqual([first]);
+    const unknownA = { ...first, news: { ...first.news, id: 0 } };
+    const unknownB = { ...otherRole, news: { ...otherRole.news, id: 0 } };
+    expect(dailySummary([unknownA, unknownB], NOW).items).toHaveLength(2);
+  });
+
   it('includes both boundaries and excludes older, future, and invalid dates', () => {
     const values = [
       item(1, 'cfo', new Date(NOW - 24 * HOUR).toISOString(), 'risk'),

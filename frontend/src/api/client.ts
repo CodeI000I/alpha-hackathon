@@ -110,7 +110,7 @@ async function responseBody(response: Response): Promise<unknown> {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, init: RequestInit = {}, shape: "object" | "collection" | "empty" = "object"): Promise<T> {
   const headers = new Headers(init.headers);
   const isFormData = typeof FormData !== "undefined" && init.body instanceof FormData;
   if (init.body !== undefined && !isFormData && !headers.has("Content-Type")) {
@@ -121,6 +121,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const body = await responseBody(response);
   if (!response.ok) {
     throw new ApiError(errorMessage(body, response.statusText), response.status, body);
+  }
+  // A proxy can return the SPA HTML with HTTP 200. An unexpected JSON envelope
+  // is not an empty collection either; only Go's explicit null means an empty list.
+  const validShape = shape === "empty"
+    ? body == null
+    : shape === "collection"
+      ? body === null || Array.isArray(body)
+      : body !== null && typeof body === "object" && !Array.isArray(body);
+  if (!validShape) {
+    throw new ApiError("Сервер вернул некорректный JSON-ответ. Попробуйте обновить данные.", response.status, body);
   }
   return body as T;
 }
@@ -175,14 +185,14 @@ export function createApiClient(mode: DataMode = dataMode) {
       const signal = toAbortSignal(signalInput);
       return mode === "demo"
         ? demoCall(() => normalizeRoles(demoStore.roles()), signal)
-        : request<WireRole[] | null>("/roles", { signal }).then(normalizeRoles);
+        : request<WireRole[] | null>("/roles", { signal }, "collection").then(normalizeRoles);
     },
 
     profileElements(signalInput?: SignalInput): Promise<ProfileElement[]> {
       const signal = toAbortSignal(signalInput);
       return mode === "demo"
         ? demoCall(() => normalizeCollection(demoStore.profileElements()), signal)
-        : request<ProfileElement[] | null>("/profile-elements", { signal }).then(normalizeCollection);
+        : request<ProfileElement[] | null>("/profile-elements", { signal }, "collection").then(normalizeCollection);
     },
 
     user(id: number, signalInput?: SignalInput): Promise<User> {
@@ -227,13 +237,13 @@ export function createApiClient(mode: DataMode = dataMode) {
 
     logout(signalInput?: SignalInput): Promise<void> {
       const signal = toAbortSignal(signalInput);
-      return request<void>("/auth/logout", { method: "POST", signal });
+      return request<void>("/auth/logout", { method: "POST", signal }, "empty");
     },
 
     analytics: {
       documents(role: string, signalInput?: SignalInput): Promise<AnalyticsDocument[]> {
         const signal = toAbortSignal(signalInput);
-        return request(`/analytics/documents?role=${encodeURIComponent(role)}`, { signal });
+        return request(`/analytics/documents?role=${encodeURIComponent(role)}`, { signal }, "collection");
       },
       situation(role: string, signalInput?: SignalInput): Promise<CompanySituation> {
         const signal = toAbortSignal(signalInput);
@@ -242,7 +252,7 @@ export function createApiClient(mode: DataMode = dataMode) {
       issues(role: string, offset = 0, limit = 50, signalInput?: SignalInput): Promise<BusinessIssue[]> {
         const signal = toAbortSignal(signalInput);
         const params = new URLSearchParams({ role, offset: String(offset), limit: String(limit) });
-        return request(`/analytics/issues?${params.toString()}`, { signal });
+        return request(`/analytics/issues?${params.toString()}`, { signal }, "collection");
       },
       issue(issueId: string, role: string, signalInput?: SignalInput): Promise<BusinessIssue> {
         const signal = toAbortSignal(signalInput);
@@ -250,11 +260,11 @@ export function createApiClient(mode: DataMode = dataMode) {
       },
       evidence(issueId: string, role: string, signalInput?: SignalInput): Promise<AnalyticsEvidencePack[]> {
         const signal = toAbortSignal(signalInput);
-        return request(`/analytics/issues/${encodeURIComponent(issueId)}/evidence?role=${encodeURIComponent(role)}`, { signal });
+        return request(`/analytics/issues/${encodeURIComponent(issueId)}/evidence?role=${encodeURIComponent(role)}`, { signal }, "collection");
       },
       history(issueId: string, role: string, signalInput?: SignalInput): Promise<BusinessIssue[]> {
         const signal = toAbortSignal(signalInput);
-        return request(`/analytics/issues/${encodeURIComponent(issueId)}/history?role=${encodeURIComponent(role)}`, { signal });
+        return request(`/analytics/issues/${encodeURIComponent(issueId)}/history?role=${encodeURIComponent(role)}`, { signal }, "collection");
       },
       state(issueId: string, role: string, signalInput?: SignalInput): Promise<AnalyticsUserState> {
         const signal = toAbortSignal(signalInput);
@@ -297,7 +307,7 @@ export function createApiClient(mode: DataMode = dataMode) {
       const normalizedLimit = normalizeFeedLimit(limit);
       return mode === "demo"
         ? demoCall(() => normalizeFeed(demoStore.feed(id, role, normalizedLimit)), signal)
-        : request<WireFeedItem[] | null>(feedPath(id, role, normalizedLimit), { signal }).then(normalizeFeed);
+        : request<WireFeedItem[] | null>(feedPath(id, role, normalizedLimit), { signal }, "collection").then(normalizeFeed);
     },
 
     company(id: number, signalInput?: SignalInput): Promise<Company> {
@@ -331,7 +341,7 @@ export function createApiClient(mode: DataMode = dataMode) {
       const signal = toAbortSignal(signalInput);
       return mode === "demo"
         ? demoCall(() => normalizeCollection(demoStore.files(id)), signal)
-        : request<CompanyFile[] | null>(`/companies/${id}/files`, { signal }).then(normalizeCollection);
+        : request<CompanyFile[] | null>(`/companies/${id}/files`, { signal }, "collection").then(normalizeCollection);
     },
 
     uploadFile(id: number, file: File, signalInput?: SignalInput): Promise<CompanyFile> {

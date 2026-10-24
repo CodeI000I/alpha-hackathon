@@ -20,6 +20,10 @@ export default function FeedDetailPage({ userId }: { userId: number }) {
   const items = assignedFeed(feed.data, user.roles); const item = items.find(value => String(value.id) === itemId);
   const showSources = () => { returnFocus.current = document.activeElement as HTMLElement; dialog.current?.showModal(); };
   const closeSources = () => dialog.current?.close();
+  const restoreSourcesFocus = () => {
+    const active = document.activeElement;
+    if (!active || active === document.body || dialog.current?.contains(active)) returnFocus.current?.focus();
+  };
   if (feed.isPending) return <StatePanel title="Открываем разбор…" text="Это займёт несколько секунд." />;
   if (feed.isError && !feed.data) return <StatePanel tone="error" title="Не удалось загрузить разбор" text={feed.error.message} action={<Button onClick={() => feed.refetch()}>Повторить</Button>} />;
   if (!item) return <StatePanel title="Событие не найдено" text="Событие недоступно или его нет среди последних 200 событий вашей ленты." action={<Link className="button button--secondary" to="/dashboard">Вернуться в обзор</Link>} />;
@@ -51,11 +55,11 @@ export default function FeedDetailPage({ userId }: { userId: number }) {
       </article>
       {isDemoMode ? <DemoChat key={item.id} userId={userId} companyId={user.companyId} itemId={item.id} itemTitle={item.news.title} roleName={roleName} /> : <aside className="w-panel"><h2>Вопросы по ситуации</h2><p>Если это событие вошло в бизнес-ситуацию, вы найдёте чат и его основания в разборе ситуации на странице обзора.</p><Link className="action-link" to="/dashboard">К ситуациям <ActionIcon /></Link></aside>}
     </div>
-    <dialog className="w-dialog w-source-dialog" ref={dialog} aria-labelledby="sources-title" onClose={() => returnFocus.current?.focus()} onClick={event => { if (event.target === event.currentTarget) closeSources(); }}>
+    <dialog className="w-dialog w-source-dialog" ref={dialog} aria-labelledby="sources-title" onClose={restoreSourcesFocus} onClick={event => { if (event.target === event.currentTarget) closeSources(); }}>
       <div className="w-dialog-heading w-source-header"><button className="action-back w-source-return" autoFocus onClick={closeSources}><ActionIcon direction="back" />К разбору новости</button><button className="w-icon" aria-label="Закрыть источники" onClick={closeSources}><Icon name="close" /></button></div>
       <div className="w-source-content"><h2 id="sources-title">Источники и основания</h2>{isDemoMode && <DemoBadge>Синтетические данные</DemoBadge>}
         <section className="w-source-section"><AnalysisHeading title="Сообщение источника" /><p>{source || 'Источник не указан.'}</p><p>{item.news.summary || 'Описание отсутствует.'}</p><p>{dateLabel(item.news.publishedAt)}</p>{url ? <a className="action-link" href={url} target="_blank" rel="noopener noreferrer">Открыть первоисточник <ActionIcon direction="external" /></a> : <p>Ссылка на первоисточник недоступна.</p>}</section>
-        <section className="w-source-section"><AnalysisHeading title="Интерпретация и гипотезы" /><p>{isDemoMode ? 'Для демонстрационного разбора релевантность показывает примерное соответствие события выбранной роли, а не вероятность его наступления.' : 'Приоритет показывает порядковую срочность события, а не вероятность его наступления.'} Сведения о проверке вывода, сценарии и расчёты не предоставлены.</p></section>
+        <section className="w-source-section"><AnalysisHeading title="Интерпретация и гипотезы" /><p>{item.insight ? 'Для разбора доступна интерпретация события.' : 'Интерпретация не передана.'} {isDemoMode ? 'Релевантность показывает примерное соответствие события выбранной роли, а не вероятность его наступления.' : 'Приоритет показывает порядковую срочность события, а не вероятность его наступления.'} Сведения о проверке вывода, сценарии и расчёты не предоставлены.</p></section>
         <section className="w-source-section"><AnalysisHeading title="Документы компании" /><p>Список использованных документов и цитаты не переданы. Загрузка файла сама по себе не подтверждает его использование в разборе.</p></section>
         <section className="w-source-section w-source-bank-card"><AnalysisHeading title="Материалы банка" /><p>{isDemoMode ? BANK_NOT_USED : BANK_UNKNOWN}</p></section>
         <p className="w-analysis-disclaimer">{DISCLAIMER}</p>

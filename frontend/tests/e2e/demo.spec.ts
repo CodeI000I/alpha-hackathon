@@ -99,10 +99,10 @@ test('filters, searches, and persists local bookmarks', async ({ page }) => {
   await expect(page.locator('.w-event')).toHaveCount(1);
 
   const dailySummary = page.getByRole('region', { name: 'Сводка за 24 часа' });
-  await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
+  await expect(dailySummary.locator('.daily-total')).toHaveText('3');
   await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await expect(page.locator('.w-event')).toHaveCount(2);
-  await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
+  await expect(dailySummary.locator('.daily-total')).toHaveText('3');
   await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('strategy');
   await expect(page.locator('.w-event')).toHaveCount(1);
 
@@ -296,10 +296,12 @@ test('source modal and chat composer remain keyboard reachable in a low window',
   const input = page.getByRole('textbox', { name: 'Вопрос по событию' });
   const sendButton = page.getByRole('button', { name: 'Отправить' });
   await input.focus();
-  await input.fill('Что проверить?');
+  await page.locator('dialog.w-source-dialog').dispatchEvent('close');
   await expect(input).toBeFocused();
+  await page.keyboard.type('Что проверить?');
+  await expect(input).toHaveValue('Что проверить?');
   await expect(sendButton).toBeEnabled();
-  await input.press('Tab');
+  await page.keyboard.press('Tab');
   await expect(sendButton).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('.w-message-user')).toContainText('Что проверить?');
@@ -381,7 +383,7 @@ test('header shows a named role, preserves its choice, and falls back after that
 
   await selector.selectOption('cfo');
   await expect(page.locator('.w-event')).toHaveCount(2);
-  await expect(page.locator('.daily-balance > strong')).toHaveText('3');
+  await expect(page.locator('.daily-total')).toHaveText('3');
   await page.reload();
   await expect(selector).toHaveValue('cfo');
   await page.goto('/profile?tab=roles');
@@ -395,11 +397,35 @@ test('header shows a named role, preserves its choice, and falls back after that
   await expect(header).toContainText('Директор по стратегии и развитию');
   await page.goto('/dashboard');
   await expect(page.locator('.w-event')).toHaveCount(1);
-  await expect(page.locator('.daily-balance > strong')).toHaveText('1');
+  await expect(page.locator('.daily-total')).toHaveText('1');
   await expect(page.getByRole('heading', { name: DEMO_ACCOUNTS.finance.event })).toHaveCount(0);
   await page.reload();
   await expect(header).toContainText('Директор по стратегии и развитию');
   expect(await page.evaluate(() => localStorage.getItem('alpha.insights.v2.demo.company.1.user.1.activeRole'))).toBe('"strategy"');
+});
+
+test('summary arrows filter real events across roles and clear incompatible local filters', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  await page.getByRole('link', { name: /Закладки/ }).click();
+  await page.getByLabel('Поиск по событиям').fill('нет совпадений');
+
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await expect(summary.locator('.daily-trend-down')).toBeVisible();
+  await expect(summary.locator('.daily-trend-up')).toBeVisible();
+  await summary.getByRole('button', { name: '1 риск', exact: true }).focus();
+  await page.keyboard.press('Enter');
+
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('cfo');
+  await expect(page.getByLabel('Поиск по событиям')).toHaveValue('');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'События для вас' })).toBeFocused();
+  await expect(summary.locator('.daily-total')).toHaveText('3');
+  await expect(summary.locator('.daily-focus')).toContainText('Ключевая ставка');
+
+  await summary.getByRole('link', { name: /Самый релевантный разбор/ }).click();
+  await expect(page).toHaveURL(/\/news\/\d+$/);
+  await expect(page.locator('.w-detail h1')).toBeVisible();
 });
 
 test('profile role editing is a small gray pencil action beside the role heading', async ({ page }) => {

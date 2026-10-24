@@ -1,5 +1,25 @@
 # Unified application — integration into main (2026-10-24)
 
+## Follow-up: incoming frontend updates
+
+Baseline: `main` at `ecfc415` (successful CI image tags). Merge `origin/frontend`
+at `b7e6806`, including `dbb4cf9` and `1cc7ea5`; no new backend or analytics commits
+were found after fetching all remote branches. Preserve both histories.
+
+1. Reconcile frontend merge conflicts while keeping real session authentication,
+   analytics snapshots/issues/evidence/chat and the incoming summary/feed improvements.
+   Acceptance: both UI paths remain available; current API response shapes are supported.
+2. Verify score meaning, role isolation, empty/error states and dialog focus across
+   the new frontend and existing Go/Python contracts. Reuse existing helpers and mocks.
+   Acceptance: no misleading live metrics, false empty responses or auth regressions.
+3. Run frontend unit/type/build/browser suites and isolated unified HTTP/DB smoke;
+   review the final diff and update the integration report before merging/pushing main.
+   Acceptance: merge markers absent, checks pass, branch commits reachable from main.
+
+Frontend agent owns `frontend/`; backend agent reviews contracts without edits.
+Root owns plans/report, integration verification and Git. Every coding agent uses
+Ponytail and Agent Skills. Tests use temporary services and synthetic responses.
+
 The user now authorizes merging all remote work into main and connecting the previously
 isolated services. This supersedes the earlier isolation boundary below. The previous
 prototype checklist is complete; this phase preserves its tests and guarantees.

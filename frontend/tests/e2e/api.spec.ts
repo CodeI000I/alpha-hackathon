@@ -80,6 +80,13 @@ interface MockOptions {
   feedFailure?: { status: number; message: string };
 }
 
+function summaryFeed(): typeof API_FEED {
+  return ['risk', 'risk', 'opportunity', 'opportunity'].map((kind, index) => ({
+    ...structuredClone(API_FEED[0]), id: 601 + index, kind, score: .95 - index * .1,
+    news: { ...API_FEED[0].news, id: 1001 + index, title: ['Партнёр изменил условия оплаты', 'Обновлены сроки поставки', 'Открыта новая программа поддержки', 'Представлены локальные комплектующие'][index] },
+  }));
+}
+
 interface MockState {
   requests: string[];
   unknown: string[];
@@ -182,6 +189,139 @@ test.afterEach(() => {
   const unexpected = browserErrors.filter(error => !expectedHttpStatuses.some(status =>
     error.startsWith('Failed to load resource: the server responded with a status of ' + status + ' ')));
   expect(unexpected, 'unexpected browser console and runtime errors').toEqual([]);
+});
+
+test('restores the four-event overview design at desktop, tablet, mobile and low height', async ({ page }) => {
+  const state = await installApiMocks(page, { feed: summaryFeed() });
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await expect(summary.locator('.daily-total')).toHaveText('4');
+  await expect(summary.getByRole('button', { name: '2 риска', exact: true })).toBeVisible();
+  await expect(summary.getByRole('button', { name: '2 возможности', exact: true })).toBeVisible();
+  await expect(summary.locator('.daily-trend-down')).toBeVisible();
+  await expect(summary.locator('.daily-trend-up')).toBeVisible();
+  await expect(summary.locator('.daily-trend-down')).toHaveCSS('color', 'rgb(231, 139, 130)');
+  await expect(summary.locator('.daily-trend-up')).toHaveCSS('color', 'rgb(134, 199, 173)');
+  await expect(summary.locator('.daily-segment-risk')).toHaveCSS('flex-grow', '2');
+  await expect(summary.locator('.daily-segment-opportunity')).toHaveCSS('flex-grow', '2');
+  await expect(summary.locator('.daily-story')).toHaveCount(2);
+  await expect(summary).toContainText('Требует внимания');
+  await expect(summary).toContainText('Открывает возможности');
+  await expect(summary.locator('.daily-focus')).toContainText(API_ROLE.focus);
+  await expect(summary).not.toContainText('Поставки меняются. Есть альтернативы.');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }, { width: 768, height: 400 }]) {
+    await page.setViewportSize(viewport);
+    await summary.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await expect(summary.locator('.daily-story').first()).toBeVisible();
+    await expect(summary.locator('.daily-next-action')).toBeVisible();
+    if (viewport.width === 1440) await page.screenshot({ path: 'node_modules/.cache/summary-final-desktop.png' });
+    await page.screenshot({ path: `node_modules/.cache/summary-restored-${viewport.width}-${viewport.height}.png`, fullPage: true });
+  }
+  await summary.getByText('О сводке', { exact: true }).click();
+  await expect(summary).toContainText('последние 200 записей');
+  await expect(summary).toContainText('Это не резюме ИИ');
+  expect(state.unknown).toEqual([]);
+});
+
+test('shows all three real types, deduplicates news across roles and excludes old, future and unassigned items', async ({ page }) => {
+  const values = summaryFeed();
+  values[2].kind = 'event';
+  values[3].news.publishedAt = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+  const future = { ...structuredClone(values[3]), id: 610, news: { ...values[3].news, id: 1010, publishedAt: new Date(Date.now() + 3600_000).toISOString() } };
+  const otherRole = { ...structuredClone(values[0]), id: 611, role: 'strategy', score: 1, kind: 'opportunity' };
+  const unassigned = { ...structuredClone(values[0]), id: 612, role: 'not-assigned', news: { ...values[0].news, id: 1012 } };
+  await installApiMocks(page, { feed: [...values, future, otherRole, unassigned] });
+  await page.route('**/api/v1/users/41', route => json(route, { ...API_USER, roles: ['cfo', 'strategy'] }));
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await expect(summary.locator('.daily-total')).toHaveText('3');
+  await expect(summary.getByRole('button', { name: '1 риск', exact: true })).toBeVisible();
+  await expect(summary.getByRole('button', { name: '1 возможность', exact: true })).toBeVisible();
+  await expect(summary.getByRole('button', { name: '1 событие', exact: true })).toBeVisible();
+  await expect(summary.locator('.daily-balance-bar i')).toHaveCount(3);
+  await expect(summary.locator('.daily-next-action')).toHaveAttribute('href', '/news/611');
+  await expect(page.locator('.w-event')).toHaveCount(5);
+});
+
+test('keeps an empty overview compact and refreshes when the backend finishes preparing events', async ({ page }) => {
+  const feed: typeof API_FEED = [];
+  const state = await installApiMocks(page, { feed });
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await expect(summary).toContainText('За сутки новых событий нет');
+  await expect(summary.locator('.daily-balance')).toHaveCount(0);
+  await expect(summary.locator('.daily-story')).toHaveCount(0);
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    expect((await summary.boundingBox())!.height).toBeLessThan(300);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `node_modules/.cache/summary-empty-${viewport.width}.png`, fullPage: true });
+  }
+  const requestsBeforeRefresh = state.requests.filter(value => value.includes('/feed?limit=200')).length;
+  feed.push(...API_FEED);
+  await page.getByRole('button', { name: 'Обновить события' }).click();
+  await expect(summary.locator('.daily-total')).toHaveText('1');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  expect(state.requests.filter(value => value.includes('/feed?limit=200'))).toHaveLength(requestsBeforeRefresh + 1);
+  expect(state.unknown).toEqual([]);
+});
+
+test('rechecks an empty API feed four times then stops without inventing an analysis status', async ({ page }) => {
+  await page.clock.install();
+  const state = await installApiMocks(page, { feed: [] });
+  await openApiSession(page);
+  await expect(page.getByRole('heading', { name: 'За сутки новых событий нет' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Обновить события' })).toBeEnabled();
+  const initialRequests = state.requests.filter(value => value.includes('/feed?limit=200')).length;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const response = page.waitForResponse(value => value.url().includes('/feed?limit=200'));
+    await page.clock.fastForward(15001);
+    await (await response).finished();
+    await expect.poll(() => state.requests.filter(value => value.includes('/feed?limit=200')).length).toBe(initialRequests + attempt + 1);
+    await expect(page.getByRole('button', { name: 'Обновить события' })).toBeEnabled();
+  }
+  await page.clock.fastForward(60000);
+  expect(state.requests.filter(value => value.includes('/feed?limit=200'))).toHaveLength(initialRequests + 4);
+  await expect(page.getByText('Анализ завершён', { exact: true })).toHaveCount(0);
+});
+
+test('an empty active role refreshes even when other assigned roles already have events', async ({ page }) => {
+  await page.clock.install();
+  const feed = structuredClone(API_FEED);
+  const state = await installApiMocks(page, { feed });
+  await page.route('**/api/v1/users/41', route => json(route, { ...API_USER, roles: ['cfo', 'strategy'] }));
+  await openApiSession(page);
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('strategy');
+  await expect(page.getByRole('heading', { name: 'Для этой роли пока нет событий' })).toBeVisible();
+  feed.push({ ...structuredClone(API_FEED[0]), id: 502, role: 'strategy', news: { ...API_FEED[0].news, id: 902, title: 'Новое событие для стратегии' } });
+  const response = page.waitForResponse(value => value.url().includes('/feed?limit=200'));
+  await page.clock.fastForward(15001);
+  await (await response).finished();
+  await expect(page.getByRole('heading', { name: 'Новое событие для стратегии' })).toBeVisible();
+  await expect(page.locator('.daily-total')).toHaveText('2');
+  expect(state.unknown).toEqual([]);
+});
+
+test('an HTML response is an API error, not a fabricated empty overview', async ({ page }) => {
+  await installApiMocks(page);
+  await page.route('**/api/v1/users/41/feed?*', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Proxy fallback</title>' }));
+  await openApiSession(page);
+  await expect(page.getByRole('heading', { name: 'Лента не загрузилась' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Сводка за 24 часа' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'В ленте пока нет событий' })).toHaveCount(0);
+});
+
+test('sources do not claim an interpretation when the API did not provide one', async ({ page }) => {
+  await installApiMocks(page, { feed: [{ ...API_FEED[0], insight: '' }] });
+  await openApiSession(page, '/news/501');
+  await page.getByRole('button', { name: 'Источники и основания', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Источники и основания' });
+  await expect(dialog).toContainText('Интерпретация не передана.');
+  await expect(dialog).not.toContainText('Для разбора доступна интерпретация события.');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
 });
 
 test('API mode exposes no fictitious password login', async ({ page }) => {

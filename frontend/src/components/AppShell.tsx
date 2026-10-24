@@ -37,7 +37,7 @@ export default function AppShell({ children, onLogout }: { children: ReactNode; 
         <div className="w-company"><span className="w-avatar"><Icon name="building" /></span><strong>{company?.name ?? (user.companyId === null ? 'Компания не указана' : 'Компания')}</strong><span>{company?.inn ? 'ИНН ' + company.inn : 'Профиль компании'}</span></div>
         <nav aria-label="Основная навигация">
           <Link className={'w-nav ' + (isDashboard && !saved ? 'active' : '')} to="/dashboard"><Icon name="home" />Обзор</Link>
-          <Link className={'w-nav ' + (isDashboard && saved ? 'active' : '')} to="/dashboard?saved=1"><Icon name="bookmark" />Закладки <small>Демо</small></Link>
+          <Link className={'w-nav ' + (isDashboard && saved ? 'active' : '')} to="/dashboard?saved=1"><Icon name="bookmark" />Закладки</Link>
           <Link className={'w-nav ' + (location.pathname === '/profile' ? 'active' : '')} to="/profile?tab=roles"><Icon name="user" />Личный кабинет</Link>
         </nav>
         <div className="w-sidebar-bottom"><Link to="/landing">О сервисе</Link></div>

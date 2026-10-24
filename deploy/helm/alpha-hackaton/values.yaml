@@ -1,7 +1,7 @@
 # Образ Go backend/frontend. CI обновляет repository и tag после успешной сборки обоих образов.
 image:
   repository: devowt/alpha-hackaton
-  tag: "ce48444f9df135d0a481b455976f02f43540155b"
+  tag: "1a3e2912568e07e65be954302addb71d95b38934"
   pullPolicy: IfNotPresent
 
 # Секрет для pull из приватного Docker Hub, создаётся вручную (см. docs/cd-k3s.md).
@@ -106,7 +106,7 @@ analytics:
   enabled: true
   image:
     repository: devowt/alpha-hackaton
-    tag: "analytics-ce48444f9df135d0a481b455976f02f43540155b"
+    tag: "analytics-1a3e2912568e07e65be954302addb71d95b38934"
     pullPolicy: IfNotPresent
   replicas: 1
   servicePort: 8090

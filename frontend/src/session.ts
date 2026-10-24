@@ -15,7 +15,9 @@ function readPositiveId(key: string): number | null {
     const raw = localStorage.getItem(key);
     if (raw === null) return null;
     const value = Number(raw);
-    return Number.isSafeInteger(value) && value > 0 ? value : null;
+    if (Number.isSafeInteger(value) && value > 0) return value;
+    localStorage.removeItem(key);
+    return null;
   } catch {
     return null;
   }

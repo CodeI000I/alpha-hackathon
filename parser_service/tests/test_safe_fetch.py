@@ -87,7 +87,9 @@ class SourcePolicyTests(unittest.TestCase):
 
 
 class SafeFetcherTests(unittest.TestCase):
-    def _fetch_raw_http(self, raw_http, *, max_bytes=4096, stream_factory=io.BytesIO):
+    def _fetch_raw_http(
+        self, raw_http, *, kind="page", max_bytes=4096, stream_factory=io.BytesIO
+    ):
         observed = {"tls_closed": False}
         self.raw_transport_observed = observed
 
@@ -122,8 +124,10 @@ class SafeFetcherTests(unittest.TestCase):
                    return_value=FakeContext()), \
              patch("parser_service.safe_fetch.http.client.HTTPSConnection", FakeConnection):
             result = _fetch_direct(
-                source_policy(), "https://www.cbr.ru/press/PR/?file=fixture.htm",
-                kind="page", timeout_seconds=2, max_bytes=max_bytes,
+                source_policy(),
+                ("https://www.cbr.ru/robots.txt" if kind == "robots"
+                 else "https://www.cbr.ru/press/PR/?file=fixture.htm"),
+                kind=kind, timeout_seconds=2, max_bytes=max_bytes,
             )
         return result, observed
 
@@ -151,6 +155,24 @@ class SafeFetcherTests(unittest.TestCase):
         self.assertEqual(payload["max_bytes"], 1024 * 1024)
         self.assertEqual(call.kwargs["timeout"], 10.0)
         self.assertNotIn("env", call.kwargs)
+
+    def test_chunked_body_exactly_at_limit_is_accepted(self):
+        response, _ = self._fetch_raw_http(
+            b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n"
+            b"Transfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n",
+            max_bytes=4,
+        )
+        self.assertEqual(response.body, b"test")
+
+    def test_chunked_body_one_byte_over_limit_is_rejected(self):
+        with self.assertRaises(FetchError) as raised:
+            self._fetch_raw_http(
+                b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n"
+                b"Transfer-Encoding: chunked\r\n\r\n5\r\ntests\r\n0\r\n\r\n",
+                max_bytes=4,
+            )
+        self.assertEqual(raised.exception.code, "SIZE_LIMIT")
+        self.assertEqual(raised.exception.bytes_read, 5)
 
     def test_parent_timeout_charges_full_requested_cap(self):
         with patch(
@@ -395,17 +417,65 @@ class SafeFetcherTests(unittest.TestCase):
         self.assertEqual(fetched.body, b"fixture")
         self.assertTrue(observed["tls_closed"])
 
-    def test_stdlib_chunked_body_at_exact_cap_is_conservatively_rejected(self):
+    def test_raw_http_rejects_unsupported_empty_unknown_or_duplicate_charset(self):
+        content_types = [
+            "text/html; charset=windows-1251",
+            "text/html; charset=x-unknown-fixture",
+            "text/html; charset=",
+            "text/html; charset=utf-8; charset=utf-8",
+        ]
+        for content_type in content_types:
+            raw = (
+                "HTTP/1.1 200 OK\r\n"
+                f"Content-Type: {content_type}\r\n"
+                "Content-Length: 7\r\nConnection: close\r\n\r\nfixture"
+            ).encode("ascii")
+            with self.subTest(content_type=content_type):
+                with self.assertRaises(FetchError) as raised:
+                    self._fetch_raw_http(raw)
+                self.assertEqual(raised.exception.code, "ENCODING_UNSUPPORTED")
+                self.assertTrue(self.raw_transport_observed["tls_closed"])
+
+    def test_raw_http_accepts_utf8_aliases_and_returns_bare_mime(self):
+        for charset in ("utf-8", "UTF8", "utf_8_sig"):
+            raw = (
+                "HTTP/1.1 200 OK\r\n"
+                f"Content-Type: text/html; charset={charset}\r\n"
+                "Content-Length: 7\r\nConnection: close\r\n\r\nfixture"
+            ).encode("ascii")
+            with self.subTest(charset=charset):
+                fetched, _observed = self._fetch_raw_http(raw)
+            self.assertEqual(fetched.body, b"fixture")
+            self.assertEqual(fetched.content_type, "text/html")
+
+    def test_raw_http_requires_explicit_valid_robots_mime(self):
+        cases = [
+            b"HTTP/1.1 200 OK\r\nContent-Type: not-a-media-type\r\n"
+            b"Content-Length: 7\r\nConnection: close\r\n\r\nfixture",
+            b"HTTP/1.1 200 OK\r\nContent-Length: 7\r\n"
+            b"Connection: close\r\n\r\nfixture",
+        ]
+        for raw in cases:
+            with self.subTest(raw=raw):
+                with self.assertRaises(FetchError) as raised:
+                    self._fetch_raw_http(raw, kind="robots")
+                self.assertEqual(raised.exception.code, "MIME_UNSUPPORTED")
+
+        valid = (
+            b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n"
+            b"Content-Length: 7\r\nConnection: close\r\n\r\nfixture"
+        )
+        fetched, _observed = self._fetch_raw_http(valid, kind="robots")
+        self.assertEqual(fetched.content_type, "text/plain")
+
+    def test_stdlib_chunked_body_at_exact_cap_is_accepted(self):
         raw = (
             b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n"
             b"Transfer-Encoding: chunked\r\n\r\n7\r\nfixture\r\n0\r\n\r\n"
         )
 
-        with self.assertRaises(FetchError) as raised:
-            self._fetch_raw_http(raw, max_bytes=7)
-
-        self.assertEqual(raised.exception.code, "SIZE_LIMIT")
-        self.assertEqual(raised.exception.bytes_read, 7)
+        fetched, _observed = self._fetch_raw_http(raw, max_bytes=7)
+        self.assertEqual(fetched.body, b"fixture")
 
     def test_certificate_failure_maps_to_tls_error_and_closes_raw_socket(self):
         observed = {"raw_closed": False}

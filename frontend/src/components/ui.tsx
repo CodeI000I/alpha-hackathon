@@ -100,14 +100,6 @@ export function Badge({ tone = "neutral", children, className = "" }: { tone?: B
   return <span className={`ui-badge ui-badge--${tone} ${className}`.trim()}>{children}</span>;
 }
 
-export function DemoBadge({ className = "", children = "Демо" }: { className?: string; children?: ReactNode }) {
-  return (
-    <Badge tone="demo" className={className}>
-      {children}
-    </Badge>
-  );
-}
-
 type StateKind = "loading" | "empty" | "error";
 
 export interface StatePanelProps {

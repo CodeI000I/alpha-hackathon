@@ -18,7 +18,7 @@ export async function loginDemo(page: Page, account: keyof typeof DEMO_ACCOUNTS 
   const details = DEMO_ACCOUNTS[account];
   await page.goto('/login');
   await page.getByLabel('Электронная почта').fill(details.email);
-  await page.getByLabel('Пароль тестового аккаунта').fill(DEMO_PASSWORD);
+  await page.getByRole('textbox', { name: 'Пароль', exact: true }).fill(DEMO_PASSWORD);
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole('heading', { name: 'Обзор событий', level: 1 })).toBeVisible();

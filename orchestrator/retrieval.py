@@ -16,6 +16,16 @@ def tokens(text: str) -> list[str]:
     return stemmer('russian').stemWords([w for w in words if len(w) > 2 and w not in _stop])
 
 
+def profile_evidence(company: Company):
+    """Bounded, traceable profile values shared by legacy and integrated analytics."""
+    for key, value in sorted(company.profile.items()):
+        text = value if isinstance(value, str) else canonical(value)
+        for i in range(0, len(text), 4000):
+            yield Evidence(id=f'profile:{company.id}:{key}:{i // 4000}', kind='company',
+                           text=text[i:i+4000], source=f'company.profile.{key}',
+                           version=digest(value), element=key)
+
+
 class Retriever:
     # shortcut: lexical retrieval with core facts; add dense search if measured recall is insufficient.
     version = 'bm25plus-core-v2'
@@ -25,14 +35,7 @@ class Retriever:
             id=f'company:{company.id}:identity', kind='company',
             text=f'{company.name}; ИНН {company.inn}', source='company:identity', version=company.version,
         )]
-        for key, value in sorted(company.profile.items()):
-            text = value if isinstance(value, str) else canonical(value)
-            # Keep provenance for each bounded chunk, including large profile values.
-            for i in range(0, len(text), 4000):
-                candidates.append(Evidence(
-                    id=f'profile:{company.id}:{key}:{i // 4000}', kind='company', text=text[i:i+4000],
-                    source=f'company.profile.{key}', version=digest(value), element=key,
-                ))
+        candidates.extend(profile_evidence(company))
         for fact in company.facts:
             if fact.valid_from and fact.valid_from > news.analysis_time:
                 continue

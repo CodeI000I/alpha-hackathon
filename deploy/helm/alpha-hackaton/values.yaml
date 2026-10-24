@@ -1,8 +1,7 @@
-# Образ приложения. repository и tag обновляет CI (.github/workflows/ci-cd.yaml) после каждой сборки main,
-# Argo CD видит новый коммит и раскатывает его. Руками менять только для отката.
+# Образ Go backend/frontend. CI обновляет repository и tag после успешной сборки обоих образов.
 image:
   repository: devowt/alpha-hackaton
-  tag: "f77788164a4cd301199b7833f9c797e0a4c2f19c"
+  tag: "5905bea1e48aee1639fd59d55c69f05fa4075af8"
   pullPolicy: IfNotPresent
 
 # Секрет для pull из приватного Docker Hub, создаётся вручную (см. docs/cd-k3s.md).
@@ -11,18 +10,42 @@ imagePullSecrets:
 
 # Secret с паролями, создаётся вручную из deploy/secrets.example.yaml.
 # Ключи: POSTGRES_PASSWORD, S3_ACCESS_KEY, S3_SECRET_KEY; DATABASE_URL — только если postgres.enabled=false;
-# ORCHESTRATOR_TOKEN (= AI_SERVICE_TOKEN оркестратора) и INTERNAL_API_TOKEN (служебный импорт) — необязательны.
-# Все ключи секрета попадают в окружение server и worker.
+# ORCHESTRATOR_TOKEN обязателен для Go → analytics вызова; AI_API_KEY нужен только для LLM-задач.
+# INTERNAL_API_TOKEN защищает внутренний импорт и загрузку исходных документов.
 existingSecret: alpha-secrets
 
 # Несекретные настройки приложения (ConfigMap). S3_ENDPOINT подставляется сам, если включён rustfs.
 config:
   S3_BUCKET: company-files
-  ORCHESTRATOR_URL: "" # адрес AI-оркестратора (LangGraph); пусто = заглушка по ключевым словам
+  SESSION_COOKIE_SECURE: "true"
+  ORCHESTRATOR_URL: "" # заполняется именем analytics Service из Helm release
   ORCHESTRATOR_TIMEOUT: 5m # синхронный /rank: до двух вызовов LLM на каждую роль компании
   INGEST_PERIOD: 15m
   RANK_MAX_PER_RUN: 20 # оценок новостей за проход воркера: бережёт суточный бюджет LLM
   RANK_LOOKBACK: 168h # оцениваются новости, опубликованные за последнюю неделю
+  ANALYTICS_CHECKPOINTS: "true"
+  ANALYTICS_OPERATIONAL_RETENTION_DAYS: "30"
+  ANALYTICS_TOP_K: "12"
+  ANALYTICS_GRAPH_DEPTH: "2"
+  ANALYTICS_GRAPH_ENABLED: "true"
+  ANALYTICS_TRIAGE_ENABLED: "false"
+  ANALYTICS_DEBOUNCE_SECONDS: "30"
+  ANALYTICS_MAX_JOB_ATTEMPTS: "3"
+  EMBEDDING_BACKEND: lexical
+  PARSER_CONNECT_TIMEOUT_SECONDS: "5"
+  PARSER_STATEMENT_TIMEOUT_MS: "10000"
+  PARSER_LEASE_SECONDS: "150"
+  PARSER_MAX_ATTEMPTS: "3"
+  PARSER_CBR_ALLOW_FETCH: "false"
+  PARSER_CBR_ALLOW_PERSIST: "false"
+  PARSER_CBR_POLICY_VERSION: cbr-press-v1
+  PARSER_CBR_USER_AGENT: AlphaHackathon/1.0
+  PARSER_CBR_MAX_ITEMS: "10"
+  PARSER_CBR_MAX_RESPONSE_BYTES: "2000000"
+  PARSER_CBR_MAX_TOTAL_BYTES: "5000000"
+  PARSER_CBR_REQUEST_TIMEOUT_SECONDS: "10"
+  PARSER_CBR_JOB_TIMEOUT_SECONDS: "120"
+  PARSER_CBR_MIN_INTERVAL_SECONDS: "1"
 
 server:
   replicas: 2
@@ -57,7 +80,7 @@ ingress:
 
 postgres:
   enabled: true
-  image: postgres:16-alpine
+  image: pgvector/pgvector:pg16
   user: app
   database: alpha
   storageClass: local-path      # провайдер томов, встроенный в k3s
@@ -77,3 +100,25 @@ rustfs:
     limits: { memory: 512Mi }
   # Если rustfs выключен, адрес внешнего S3:
   externalEndpoint: ""
+
+# Private in-cluster analytics API and background worker. API is not exposed by ingress.
+analytics:
+  enabled: true
+  image:
+    repository: devowt/alpha-hackaton
+    tag: "analytics-5905bea1e48aee1639fd59d55c69f05fa4075af8"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  servicePort: 8090
+  objectStorageClass: local-path
+  objectStorage: 10Gi
+  pollSeconds: 5
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 1Gi }
+  workerResources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 1Gi }
+  parser:
+    enabled: false
+    pollSeconds: 900

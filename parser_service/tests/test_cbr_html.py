@@ -66,6 +66,14 @@ class CbrHtmlTests(unittest.TestCase):
                     article["content_text"], "Текст всей страницы не является статьёй"
                 )
 
+    def test_deep_unmatched_closing_tags_mark_the_article_incomplete(self):
+        malformed = (
+            '<html><body><h1>Title</h1><div class="landing-text">'
+            + '<x>' * 6000 + '</z>' * 6000 + 'payload</div></body></html>'
+        )
+        article = extract_article(malformed)
+        self.assertIs(article["complete"], False)
+
 
 if __name__ == "__main__":
     unittest.main()

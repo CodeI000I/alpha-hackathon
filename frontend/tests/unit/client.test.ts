@@ -84,6 +84,43 @@ describe("API mode", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    "<!doctype html><html><body>Сигнал</body></html>",
+    "upstream unavailable",
+    "",
+    "true",
+    '"unexpected string"',
+    '{"items": []}',
+    '{"error": "backend unavailable"}',
+  ])("does not turn a successful non-JSON/invalid payload into an empty feed: %s", async (body) => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(body, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { createApiClient } = await loadClient();
+
+    await expect(createApiClient("api").feed(1, undefined, 200)).rejects.toEqual(
+      expect.objectContaining({ name: "ApiError", status: 200, message: expect.stringContaining("JSON") }),
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves non-JSON HTTP error messages and their status", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("upstream unavailable", { status: 502 })));
+    const { createApiClient } = await loadClient();
+
+    await expect(createApiClient("api").feed(1)).rejects.toEqual(
+      expect.objectContaining({ name: "ApiError", status: 502, message: "upstream unavailable" }),
+    );
+  });
+
+  it.each([null, []])("rejects an invalid entity response instead of restoring an incomplete user: %s", async (value) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json(value)));
+    const { createApiClient } = await loadClient();
+
+    await expect(createApiClient("api").user(1)).rejects.toEqual(
+      expect.objectContaining({ name: "ApiError", status: 200, message: expect.stringContaining("JSON") }),
+    );
+  });
+
   it("normalizes nullable Go collections at the client boundary", async () => {
     const feedItem = {
       id: 10,
@@ -135,6 +172,55 @@ describe("API mode", () => {
     const api = createApiClient("api");
 
     await expect(api.feed(1, undefined, 200, controller.signal)).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("sends one idempotent atomic onboarding request and includes the session cookie", async () => {
+    const user = { id: 4, companyId: 9, email: "owner@example.test", fullName: "Owner", roles: ["cfo"], createdAt: DEMO_NOW };
+    const company = { id: 9, inn: "7707083893", ogrn: "", name: "Company", profile: {}, createdAt: DEMO_NOW, updatedAt: DEMO_NOW };
+    const fetchMock = vi.fn().mockResolvedValue(json({ company, user }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { createApiClient } = await loadClient();
+    const api = createApiClient("api");
+    const request = { company: { name: "Company", inn: "7707083893" }, user: { email: user.email, fullName: user.fullName, roles: ["cfo"], password: "long-enough-password" } };
+
+    await expect(api.onboard(request, "575f4e25-e79b-4184-aed2-5f0cfa7fb53f")).resolves.toMatchObject({ user });
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/onboarding");
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(init).toMatchObject({ method: "POST", credentials: "same-origin", body: JSON.stringify(request) });
+    expect(new Headers(init.headers).get("Idempotency-Key")).toBe("575f4e25-e79b-4184-aed2-5f0cfa7fb53f");
+  });
+
+  it("uses cookie-backed auth endpoints in API mode", async () => {
+    const user = { id: 4, companyId: 9, email: "owner@example.test", fullName: "Owner", roles: ["cfo"], createdAt: DEMO_NOW };
+    const fetchMock = vi.fn().mockResolvedValueOnce(json(user)).mockResolvedValueOnce(json(user)).mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { createApiClient } = await loadClient();
+    const api = createApiClient("api");
+
+    await expect(api.login({ email: user.email, password: "password" })).resolves.toMatchObject({ id: user.id });
+    await expect(api.me()).resolves.toMatchObject({ id: user.id });
+    await expect(api.logout()).resolves.toBeUndefined();
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual(["/api/v1/auth/login", "/api/v1/auth/me", "/api/v1/auth/logout"]);
+    expect(fetchMock.mock.calls.every(([, init]) => init?.credentials === "same-origin")).toBe(true);
+  });
+
+  it("requests role-scoped document analysis status without company identifiers", async () => {
+    const statuses = [{ file_id: "file-1", filename: "Отчёт.pdf", document_id: "doc-1", status: "failed", attempts: 2, error: "parser unavailable", retry_at: null }];
+    const fetchMock = vi.fn().mockResolvedValue(json(statuses));
+    vi.stubGlobal("fetch", fetchMock);
+    const { createApiClient } = await loadClient();
+    const api = createApiClient("api");
+
+    await expect(api.analytics.documents("cfo")).resolves.toEqual(statuses);
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/analytics/documents?role=cfo");
+  });
+
+  it("extracts a friendly Python detail message", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json({ detail: { code: "document_not_ready", message: "Файл ещё обрабатывается" } }, 409)));
+    const { createApiClient } = await loadClient();
+
+    await expect(createApiClient("api").analytics.documents("cfo")).rejects.toMatchObject({ message: "Файл ещё обрабатывается", status: 409 });
   });
 });
 

@@ -17,10 +17,10 @@ test.afterEach(() => {
 
 test('bank demo opens registration in an isolated new tab', async ({ page, context }) => {
   await page.goto('/bank.html');
-  await expect(page.getByText('Демонстрационный прототип', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Доступный остаток', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Создать платёж' }).click();
-  await expect(page.getByRole('status')).toContainText('Банковские операции недоступны в демоверсии');
+  await expect(page.getByRole('status')).toContainText('Банковские операции здесь недоступны');
 
   const nextPagePromise = context.waitForEvent('page');
   await page.getByRole('link', { name: 'Сигнал — откроется в новой вкладке' }).click();
@@ -35,7 +35,7 @@ test('bank demo opens registration in an isolated new tab', async ({ page, conte
 test('rejects arbitrary demo credentials', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Электронная почта').fill('someone@example.test');
-  await page.getByLabel('Пароль тестового аккаунта').fill('not-a-demo-password');
+  await page.getByRole('textbox', { name: 'Пароль', exact: true }).fill('not-a-demo-password');
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
 
   await expect(page).toHaveURL(/\/login$/);
@@ -53,7 +53,7 @@ for (const account of ['finance', 'operations'] as const) {
   });
 }
 
-test('completes the required two-step company and role setup without a password', async ({ page }) => {
+test('completes the required two-step company and role setup with a password', async ({ page }) => {
   await page.goto('/register');
   await expect(page.getByText('Шаг 1 из 2 · Данные пользователя', { exact: true })).toBeVisible();
   await page.getByLabel('Как вас зовут').fill('Анна Петрова');
@@ -65,6 +65,7 @@ test('completes the required two-step company and role setup without a password'
   await expect(page.getByText('Шаг 2 из 2 · Компания и роли', { exact: true })).toBeVisible();
   await page.getByLabel('Название компании').fill('ООО «Новый профиль»');
   await page.getByLabel('ИНН компании').fill('7707083893');
+  await page.getByLabel('Пароль · не менее 10 символов').fill('demo-registration-password');
   await page.getByRole('checkbox', { name: /Финансовый директор/ }).check({ force: true });
   await page.getByRole('checkbox', { name: /Директор по стратегии и развитию/ }).check({ force: true });
   await page.getByRole('button', { name: 'Завершить настройку' }).click();
@@ -95,13 +96,16 @@ test('restores and then clears the local demo session', async ({ page }) => {
 
 test('filters, searches, and persists local bookmarks', async ({ page }) => {
   await loginDemo(page, 'finance');
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await summary.getByText('О сводке', { exact: true }).click();
+  await expect(summary).toContainText('События подготовлены для примера и не отражают актуальную ленту.');
   await expect(page.locator('.w-event')).toHaveCount(1);
 
   const dailySummary = page.getByRole('region', { name: 'Сводка за 24 часа' });
-  await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
+  await expect(dailySummary.locator('.daily-total')).toHaveText('3');
   await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await expect(page.locator('.w-event')).toHaveCount(2);
-  await expect(dailySummary.locator('.daily-balance > strong')).toHaveText('3');
+  await expect(dailySummary.locator('.daily-total')).toHaveText('3');
   await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('strategy');
   await expect(page.locator('.w-event')).toHaveCount(1);
 
@@ -117,7 +121,7 @@ test('filters, searches, and persists local bookmarks', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Все', exact: true }).click();
   const eventCard = page.locator('.w-event').filter({ hasText: DEMO_ACCOUNTS.finance.event });
-  await eventCard.getByRole('button', { name: 'Сохранить в закладки (демо)' }).click();
+  await eventCard.getByRole('button', { name: 'Сохранить в закладки' }).click();
   await page.getByRole('link', { name: /Закладки/ }).click();
   await expect(page).toHaveURL(/\/dashboard\?saved=1$/);
   await expect(page.locator('.w-event')).toHaveCount(1);
@@ -125,7 +129,7 @@ test('filters, searches, and persists local bookmarks', async ({ page }) => {
 
   await page.reload();
   await expect(page.locator('.w-event')).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Убрать из закладок (демо)' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Убрать из закладок' })).toBeVisible();
 });
 
 test('removing an assigned role updates the feed and role selection persists', async ({ page }) => {
@@ -206,7 +210,7 @@ test('key pages have no horizontal overflow at desktop, tablet, mobile, and low 
     await page.setViewportSize(viewport);
     for (const path of paths) {
       await page.goto(path);
-      if (path === '/bank.html') await expect(page.getByText('Демонстрационный прототип', { exact: true })).toBeVisible();
+      if (path === '/bank.html') await expect(page.getByRole('heading', { name: 'Доступный остаток', exact: true })).toBeVisible();
       else await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
       if (path === '/dashboard') await expect(page.locator('.w-event')).toHaveCount(1);
       expect(
@@ -243,7 +247,7 @@ test('registration validates identity first, restores its draft, and cannot skip
 
 test('saved items and role-scoped chats never carry into another demo company', async ({ page }) => {
   await loginDemo(page, 'finance');
-  await page.locator('.w-event').first().getByRole('button', { name: 'Сохранить в закладки (демо)' }).click();
+  await page.locator('.w-event').first().getByRole('button', { name: 'Сохранить в закладки' }).click();
   await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await page.getByRole('button', { name: 'Как это влияет на мою роль?' }).click();
   await expect(page.locator('.w-message-user')).toHaveCount(1);
@@ -272,7 +276,7 @@ test('legacy hash routes retain real event IDs and the bank remains a separate d
   await expect(page.getByRole('heading', { name: 'Аналитика компании' })).toBeVisible();
   await page.goto('/#/bank');
   await expect(page).toHaveURL(/\/bank\.html$/);
-  await expect(page.getByText('Демонстрационный прототип', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Доступный остаток', exact: true })).toBeVisible();
 });
 
 test('source modal and chat composer remain keyboard reachable in a low window', async ({ page }) => {
@@ -293,10 +297,15 @@ test('source modal and chat composer remain keyboard reachable in a low window',
   await page.keyboard.press('Escape');
   await expect(sourceTrigger).toBeFocused();
   const input = page.getByRole('textbox', { name: 'Вопрос по событию' });
+  const sendButton = page.getByRole('button', { name: 'Отправить' });
   await input.focus();
+  await page.locator('dialog.w-source-dialog').dispatchEvent('close');
+  await expect(input).toBeFocused();
   await page.keyboard.type('Что проверить?');
+  await expect(input).toHaveValue('Что проверить?');
+  await expect(sendButton).toBeEnabled();
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: 'Отправить' })).toBeFocused();
+  await expect(sendButton).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('.w-message-user')).toContainText('Что проверить?');
 });
@@ -377,7 +386,7 @@ test('header shows a named role, preserves its choice, and falls back after that
 
   await selector.selectOption('cfo');
   await expect(page.locator('.w-event')).toHaveCount(2);
-  await expect(page.locator('.daily-balance > strong')).toHaveText('3');
+  await expect(page.locator('.daily-total')).toHaveText('3');
   await page.reload();
   await expect(selector).toHaveValue('cfo');
   await page.goto('/profile?tab=roles');
@@ -391,11 +400,35 @@ test('header shows a named role, preserves its choice, and falls back after that
   await expect(header).toContainText('Директор по стратегии и развитию');
   await page.goto('/dashboard');
   await expect(page.locator('.w-event')).toHaveCount(1);
-  await expect(page.locator('.daily-balance > strong')).toHaveText('1');
+  await expect(page.locator('.daily-total')).toHaveText('1');
   await expect(page.getByRole('heading', { name: DEMO_ACCOUNTS.finance.event })).toHaveCount(0);
   await page.reload();
   await expect(header).toContainText('Директор по стратегии и развитию');
   expect(await page.evaluate(() => localStorage.getItem('alpha.insights.v2.demo.company.1.user.1.activeRole'))).toBe('"strategy"');
+});
+
+test('summary arrows filter real events across roles and clear incompatible local filters', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  await page.getByRole('link', { name: /Закладки/ }).click();
+  await page.getByLabel('Поиск по событиям').fill('нет совпадений');
+
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await expect(summary.locator('.daily-trend-down')).toBeVisible();
+  await expect(summary.locator('.daily-trend-up')).toBeVisible();
+  await summary.getByRole('button', { name: '1 риск', exact: true }).focus();
+  await page.keyboard.press('Enter');
+
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('cfo');
+  await expect(page.getByLabel('Поиск по событиям')).toHaveValue('');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'События для вас' })).toBeFocused();
+  await expect(summary.locator('.daily-total')).toHaveText('3');
+  await expect(summary.locator('.daily-focus')).toContainText('Ключевая ставка');
+
+  await summary.getByRole('link', { name: /Самый релевантный разбор/ }).click();
+  await expect(page).toHaveURL(/\/news\/\d+$/);
+  await expect(page.locator('.w-detail h1')).toBeVisible();
 });
 
 test('profile role editing is a small gray pencil action beside the role heading', async ({ page }) => {
@@ -509,4 +542,91 @@ test('widget catalog and bank offer dialogs close with Escape and restore their 
   await expect(bankDialog.getByText('Ставка задана для примера', { exact: false })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(bankTrigger).toBeFocused();
+});
+
+test('bank solutions keep the small red letter from widgets and stay below the analytics heading', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await loginDemo(page, 'finance');
+  const widgetLabel = page.locator('.market-widget > .bank-offers > .bank-offers-label').first();
+  const widgetMark = widgetLabel.locator('.bank-offers-mark');
+  const reference = await widgetMark.evaluate(element => {
+    const style = getComputedStyle(element);
+    return { color: style.color, background: style.backgroundColor, fontSize: style.fontSize };
+  });
+  await page.goto('/news/101');
+  const offers = page.locator('.signal-feed-detail > .bank-offers');
+  const label = offers.locator(':scope > .bank-offers-label');
+  const mark = label.locator('.bank-offers-mark');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await expect(label).toContainText('Решения Альфа-Банка');
+    await expect(label).toHaveCSS('font-size', '12px');
+    await expect(page.locator('#analysis-bank-title')).toHaveCSS('font-size', '20px');
+    await expect(mark).toHaveText('А');
+    await expect(mark).toHaveCSS('color', reference.color);
+    await expect(mark).toHaveCSS('background-color', reference.background);
+    await expect(mark).toHaveCSS('font-size', reference.fontSize);
+    await expect(mark).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    expect((await mark.boundingBox())!.height).toBeLessThan(20);
+    await page.locator('.signal-feed-detail > .w-bank').evaluate(element => window.scrollTo(0, scrollY + element.getBoundingClientRect().top - 100));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `node_modules/.cache/solutions-hierarchy-${viewport.width}.png` });
+  }
+  const trigger = page.getByRole('button', { name: 'Посмотреть финансирование', exact: true });
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Овердрафт и кредитная линия' });
+  await expect(dialog.locator('.bank-offers-mark')).toHaveCSS('color', reference.color);
+  await expect(dialog.locator('.bank-offers-mark')).toHaveCSS('background-color', reference.background);
+  await page.keyboard.press('Escape');
+  await expect(trigger).toBeFocused();
+});
+
+test('interface omits demo badges and profile codes while keeping local-feature explanations', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  const paths = ['/dashboard', '/news/101', '/profile?tab=roles', '/profile?tab=company', '/profile?tab=keywords', '/profile?tab=documents', '/landing', '/bank.html'];
+  for (const path of paths) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    await page.locator('details.data-note').evaluateAll(details => details.forEach(detail => { detail.setAttribute('open', ''); }));
+    expect(await page.locator('body').innerText(), path).not.toMatch(/демо/i);
+    await expect(page.locator('.ui-badge--demo, .w-demo, .bank-demo-label')).toHaveCount(0);
+    if (path === '/dashboard') {
+      await expect(page.locator('.w-card-foot')).not.toContainText(/Контекст|Элементы профиля|Б[0-9]|С[0-9]/);
+      await expect(page.getByText('Серверные бизнес-ситуации в этом режиме недоступны.', { exact: false })).toBeVisible();
+      await expect(page.getByText('Здесь используются подготовленные ответы, а не аналитика ИИ.', { exact: false })).toBeVisible();
+      await expect(page.getByText('Виджет не подключён к рынку', { exact: false })).toBeVisible();
+    }
+  }
+});
+
+test('saved chat answers lose only the old presentation prefix without rewriting history', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  const key = 'alpha.insights.v2.demo.company.1.user.1.chat:101';
+  const history = [{ question: 'Что обсудить с командой?', answer: 'Демо-подсказка: обсудите первоисточник с командой. Документы компании не анализировались.' }];
+  await page.evaluate(({ key, history }) => localStorage.setItem(key, JSON.stringify(history)), { key, history });
+  await page.goto('/news/101');
+  await expect(page.locator('.w-message-answer')).toHaveText('Обсудите первоисточник с командой. Документы компании не анализировались.');
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '[]'), key)).toEqual(history);
+});
+
+test('fixed account refresh gives feedback and its role counter never mixes the three summary events', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await loginDemo(page, 'finance');
+  await expect(page.locator('.daily-total')).toHaveText('3');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 1');
+  await page.screenshot({ path: 'node_modules/.cache/signal-final-overview.png' });
+  await page.locator('.daily-segment-risk').hover();
+  await expect(page.locator('.daily-count-opportunity')).toHaveClass(/is-muted/);
+  await page.locator('.daily-summary').screenshot({ path: 'node_modules/.cache/signal-final-summary-hover.png' });
+  await page.getByRole('button', { name: 'Обновить события' }).click();
+  await expect(page.locator('.feed-refresh-notice')).toHaveText('Лента без изменений');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 1');
+  await page.getByRole('button', { name: 'Риски', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Для этой роли рисков нет' })).toBeVisible();
+  await page.getByRole('button', { name: 'Показать риски', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('cfo');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 2');
+  await expect(page.getByRole('heading', { name: 'Банк России сохранил ключевую ставку', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Все', exact: true }).click();
+  await expect(page.locator('.feed-refresh > span')).toHaveText('2 из 2');
 });

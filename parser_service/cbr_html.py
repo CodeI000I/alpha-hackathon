@@ -81,6 +81,8 @@ class _CbrArticleParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.stack = []
+        self.frames_by_tag = {}
+        self.ignored_depth = 0
         self.body_parts = []
         self.title_parts = []
         self.date_parts = []
@@ -132,6 +134,10 @@ class _CbrArticleParser(HTMLParser):
                 self.structural_error = True
 
         self.stack.append(frame)
+        frame["stack_index"] = len(self.stack) - 1
+        self.frames_by_tag.setdefault(tag, []).append(frame)
+        if frame["ignored"]:
+            self.ignored_depth += 1
         if self._captures_body():
             if tag in _BLOCK_TAGS or tag == "tr":
                 self.body_parts.append("\n")
@@ -150,14 +156,11 @@ class _CbrArticleParser(HTMLParser):
         tag = tag.lower()
         if tag in _VOID_TAGS:
             return
-        matching = next(
-            (index for index in range(len(self.stack) - 1, -1, -1)
-             if self.stack[index]["tag"] == tag),
-            None,
-        )
-        if matching is None:
+        matches = self.frames_by_tag.get(tag)
+        if not matches:
             self.structural_error = True
             return
+        matching = matches[-1]["stack_index"]
         if matching != len(self.stack) - 1:
             self.structural_error = True
         for frame in reversed(self.stack[matching:]):
@@ -170,6 +173,11 @@ class _CbrArticleParser(HTMLParser):
             if frame["landing"] and frame["id"] == self.active_landing:
                 self.active_landing = None
                 self.closed_landing = True
+            if frame["ignored"]:
+                self.ignored_depth -= 1
+            self.frames_by_tag[frame["tag"]].pop()
+            if not self.frames_by_tag[frame["tag"]]:
+                del self.frames_by_tag[frame["tag"]]
         del self.stack[matching:]
 
     def handle_data(self, data):
@@ -181,9 +189,7 @@ class _CbrArticleParser(HTMLParser):
             self.body_parts.append(data)
 
     def _captures_body(self):
-        return self.active_landing is not None and not any(
-            frame["ignored"] for frame in self.stack
-        )
+        return self.active_landing is not None and self.ignored_depth == 0
 
     def result(self):
         body = _normalized_text(self.body_parts)

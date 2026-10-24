@@ -26,13 +26,18 @@ env:
   APP_NAME: alpha
   CHART_PATH: deploy/helm/alpha-hackaton
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/alpha-hackaton
+  ANALYTICS_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/alpha-hackaton
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
+  pipeline-tests:
+    name: Go, frontend, and Python quality gates
+    uses: ./.github/workflows/pipeline-tests.yml
+
   test-and-validate:
     name: Test and validate Helm chart
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -62,11 +67,34 @@ jobs:
           npm ci
           npm run build
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Go and frontend image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: alpha-hackaton:ci
+
+      - name: Build analytics image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.analytics
+          push: false
+          tags: alpha-analytics:ci
+
       - name: Install Helm
         uses: azure/setup-helm@v5
 
       - name: Lint Helm chart
-        run: helm lint "$CHART_PATH" --strict --set-string image.tag="$IMAGE_TAG"
+        run: |
+          helm lint "$CHART_PATH" --strict \
+            --set image.repository="$IMAGE_NAME" \
+            --set-string image.tag="$IMAGE_TAG" \
+            --set analytics.image.repository="$ANALYTICS_IMAGE_NAME" \
+            --set-string analytics.image.tag="analytics-$IMAGE_TAG"
 
       - name: Render Helm templates
         run: |
@@ -74,6 +102,8 @@ jobs:
             --namespace alpha \
             --set image.repository="$IMAGE_NAME" \
             --set-string image.tag="$IMAGE_TAG" \
+            --set analytics.image.repository="$ANALYTICS_IMAGE_NAME" \
+            --set-string analytics.image.tag="analytics-$IMAGE_TAG" \
             > rendered-manifests.yaml
 
       - name: Upload rendered manifests
@@ -85,10 +115,12 @@ jobs:
 
   build-and-push:
     name: Build and publish Docker image
-    needs: test-and-validate
-    if: github.ref == 'refs/heads/main'
+    needs: [test-and-validate, pipeline-tests]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -110,8 +142,21 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=alpha-app
+          # Кеш ускоряет сборку, но отказ сервиса кеша не должен блокировать выпуск.
+          cache-to: type=gha,scope=alpha-app,mode=max,ignore-error=true,timeout=2m
+
+      - name: Build and push analytics image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.analytics
+          push: true
+          tags: |
+            ${{ env.ANALYTICS_IMAGE_NAME }}:analytics-${{ env.IMAGE_TAG }}
+            ${{ env.ANALYTICS_IMAGE_NAME }}:analytics-latest
+          cache-from: type=gha,scope=alpha-analytics
+          cache-to: type=gha,scope=alpha-analytics,mode=max,ignore-error=true,timeout=2m
 
   update-image-tag:
     name: Update image tag for Argo CD
@@ -135,6 +180,12 @@ jobs:
           }" "$CHART_PATH/values.yaml"
           test "$(yq '.image.repository' "$CHART_PATH/values.yaml")" = "$IMAGE_NAME"
           test "$(yq '.image.tag' "$CHART_PATH/values.yaml")" = "$IMAGE_TAG"
+          sed -i -E "/^analytics:/,/^[^[:space:]#]/ {
+            s|^(    repository:).*|\1 ${ANALYTICS_IMAGE_NAME}|
+            s|^(    tag:).*|\1 \"analytics-${IMAGE_TAG}\"|
+          }" "$CHART_PATH/values.yaml"
+          test "$(yq '.analytics.image.repository' "$CHART_PATH/values.yaml")" = "$ANALYTICS_IMAGE_NAME"
+          test "$(yq '.analytics.image.tag' "$CHART_PATH/values.yaml")" = "analytics-$IMAGE_TAG"
 
       - name: Commit and push
         run: |
@@ -204,4 +255,4 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
           gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes \
-            --notes "Образ: тег \`$GITHUB_SHA\` в Docker Hub, его же раскатывает Argo CD."
+            --notes "Образы Go и analytics: тег \`$GITHUB_SHA\` в Docker Hub, их раскатывает Argo CD."

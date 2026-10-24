@@ -15,6 +15,8 @@ import (
 	"github.com/devowt/alpha-hackaton/backend/internal/domain"
 )
 
+const maxJSONBody = 1 << 20
+
 // Те же правила, что у формы регистрации во фронтенде (frontend/src/pages/OnboardingPage.tsx,
 // frontend/src/auth/onboardingDraft.ts), чтобы сервер не принимал то, что форма бы отклонила.
 var (
@@ -48,13 +50,17 @@ func (s *Server) listProfileElements(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
-	var in domain.User
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
+	var in struct {
+		domain.User
+		Password string `json:"password"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		badRequest(w, "Ожидается JSON с полями fullName, email, companyId и roles")
 		return
 	}
-	in.FullName = strings.TrimSpace(in.FullName)
-	in.Email = strings.TrimSpace(in.Email)
+	in.User.FullName = strings.TrimSpace(in.FullName)
+	in.User.Email = strings.ToLower(strings.TrimSpace(in.Email))
 	switch {
 	case in.FullName == "" || utf8.RuneCountInString(in.FullName) > maxFullName:
 		badRequest(w, fmt.Sprintf("Укажите имя не длиннее %d символов", maxFullName))
@@ -63,7 +69,28 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, "Укажите корректную электронную почту")
 		return
 	}
-	u, err := s.Store.CreateUser(r.Context(), in)
+	if s.RequireAuth {
+		if in.CompanyID == nil || !s.authorizeCompanyID(w, r, *in.CompanyID) {
+			return
+		}
+		if len(in.Password) < 10 || len(in.Password) > 72 {
+			badRequest(w, "password must be between 10 and 72 bytes")
+			return
+		}
+	} else if in.Password != "" && (len(in.Password) < 10 || len(in.Password) > 72) {
+		badRequest(w, "password must be between 10 and 72 bytes")
+		return
+	}
+	passwordHash := ""
+	var err error
+	if in.Password != "" {
+		passwordHash, err = hashPassword(in.Password)
+		if err != nil {
+			s.fail(w, err, msgCompanyNotFound)
+			return
+		}
+	}
+	u, err := s.Store.CreateUserWithPassword(r.Context(), in.User, passwordHash)
 	if err != nil {
 		s.fail(w, err, msgCompanyNotFound) // 404 здесь возможен только из-за companyId
 		return
@@ -78,6 +105,9 @@ func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, msgBadID)
 		return
 	}
+	if !s.authorizeUserID(w, r, id) {
+		return
+	}
 	u, err := s.Store.GetUser(r.Context(), id)
 	if err != nil {
 		s.fail(w, err, msgUserNotFound)
@@ -87,9 +117,17 @@ func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) setUserRoles(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	id, ok := pathID(r)
 	if !ok {
 		badRequest(w, msgBadID)
+		return
+	}
+	if !s.authorizeUserID(w, r, id) {
+		return
+	}
+	if s.RequireAuth {
+		writeJSON(w, http.StatusForbidden, apiError{"Изменение ролей доступно администратору компании"})
 		return
 	}
 	var in struct {
@@ -123,6 +161,9 @@ func (s *Server) getFeed(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, msgBadID)
 		return
 	}
+	if !s.authorizeUserID(w, r, id) {
+		return
+	}
 	limit := defaultFeedLimit
 	if v, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && v > 0 {
 		limit = min(v, maxFeedLimit)
@@ -136,6 +177,11 @@ func (s *Server) getFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) createCompany(w http.ResponseWriter, r *http.Request) {
+	if s.RequireAuth {
+		writeJSON(w, http.StatusForbidden, apiError{"Создание компании доступно через регистрацию или приглашение"})
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	var in domain.Company
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		badRequest(w, "Ожидается JSON с полями inn и name")
@@ -174,6 +220,9 @@ func (s *Server) getCompany(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, msgBadID)
 		return
 	}
+	if !s.authorizeCompanyID(w, r, id) {
+		return
+	}
 	c, err := s.Store.GetCompany(r.Context(), id)
 	if err != nil {
 		s.fail(w, err, msgCompanyNotFound)
@@ -184,9 +233,13 @@ func (s *Server) getCompany(w http.ResponseWriter, r *http.Request) {
 
 // patchProfile принимает {"Б1": {...}, "Г3": {...}} и сливает с текущим профилем.
 func (s *Server) patchProfile(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	id, ok := pathID(r)
 	if !ok {
 		badRequest(w, msgBadID)
+		return
+	}
+	if !s.authorizeCompanyID(w, r, id) {
 		return
 	}
 	var patch map[string]json.RawMessage
@@ -208,6 +261,9 @@ func (s *Server) listFiles(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, msgBadID)
 		return
 	}
+	if !s.authorizeCompanyID(w, r, id) {
+		return
+	}
 	fs, err := s.Store.ListCompanyFiles(r.Context(), id)
 	if err != nil {
 		s.fail(w, err, msgCompanyNotFound)
@@ -216,7 +272,7 @@ func (s *Server) listFiles(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, fs)
 }
 
-const maxUpload = 50 << 20
+const maxUpload = 12 << 20
 
 // uploadFile принимает multipart/form-data с полем "file".
 func (s *Server) uploadFile(w http.ResponseWriter, r *http.Request) {
@@ -227,6 +283,9 @@ func (s *Server) uploadFile(w http.ResponseWriter, r *http.Request) {
 	id, ok := pathID(r)
 	if !ok {
 		badRequest(w, msgBadID)
+		return
+	}
+	if !s.authorizeCompanyID(w, r, id) {
 		return
 	}
 	// Проверяем компанию до загрузки, чтобы не оставлять в хранилище файлы без записи в БД.
@@ -249,6 +308,9 @@ func (s *Server) uploadFile(w http.ResponseWriter, r *http.Request) {
 		}
 		badRequest(w, "Ожидается multipart/form-data с полем file")
 		return
+	}
+	if r.MultipartForm != nil {
+		defer r.MultipartForm.RemoveAll()
 	}
 	defer file.Close()
 

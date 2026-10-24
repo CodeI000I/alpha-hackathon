@@ -103,3 +103,13 @@ func (s *Store) ListCompanyFiles(ctx context.Context, companyID int64) ([]domain
 	}
 	return out, rows.Err()
 }
+
+func (s *Store) GetCompanyFile(ctx context.Context, id int64) (domain.CompanyFile, error) {
+	var f domain.CompanyFile
+	err := s.pool.QueryRow(ctx, `SELECT id, company_id, object_key, filename, content_type, size_bytes, created_at FROM company_files WHERE id=$1`, id).
+		Scan(&f.ID, &f.CompanyID, &f.ObjectKey, &f.Filename, &f.ContentType, &f.SizeBytes, &f.CreatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return f, ErrNotFound
+	}
+	return f, err
+}

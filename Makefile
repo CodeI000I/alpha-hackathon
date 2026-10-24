@@ -1,10 +1,11 @@
 -include .env
+ORCHESTRATOR_TOKEN ?= $(AI_SERVICE_TOKEN)
 export
 
-.PHONY: deps up down server worker web build seed image chart
+.PHONY: deps up down server worker web build seed image chart analytics-server analytics-worker analytics-migrate analytics-image
 
-up:            ## поднять Postgres и RustFS (S3)
-	docker compose up -d
+up:            ## собрать и поднять полный локальный стек
+	docker compose up --build -d
 
 down:
 	docker compose down
@@ -18,6 +19,12 @@ worker:        ## сбор новостей и построение лент
 web:           ## фронтенд на :5173, /api проксируется на :8080
 	cd frontend && npm install && npm run dev
 
+analytics-server: ## Python analytics API на :8090 (сначала make analytics-migrate)
+	python3 -m uvicorn orchestrator.analytics.app:create_app --factory --host 127.0.0.1 --port 8090
+
+analytics-worker: ## Python analytics worker
+	python3 -m orchestrator.analytics.worker
+
 build:
 	cd backend && go build ./... && go vet ./...
 	cd frontend && npm ci && npm run build
@@ -27,6 +34,13 @@ seed:          ## пересобрать справочники из company_res
 
 image:
 	docker build -t alpha-hackaton:dev .
+	$(MAKE) analytics-image
+
+analytics-image:
+	docker build -f Dockerfile.analytics -t alpha-analytics:dev .
+
+analytics-migrate:
+	docker compose run --rm analytics-migrate
 
 chart:         ## проверить Helm-чарт (нужен helm)
 	helm lint deploy/helm/alpha-hackaton --strict

@@ -3,8 +3,11 @@ import threading
 import unittest
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from unittest.mock import patch
+
 import psycopg
-from psycopg.conninfo import conninfo_to_dict
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
+
 from parser_service.migrate import apply_migrations
 from parser_service.repository import JobConflict, JobRepository, RepositoryUnavailable
 
@@ -16,6 +19,28 @@ PAYLOAD = {
     "policy_version": "cbr-v1",
 }
 
+
+class TestDatabaseUrlTests(unittest.TestCase):
+    def test_database_url_pins_local_address_and_rejects_overrides(self):
+        with patch.dict(os.environ, {"PARSER_TEST_DATABASE_URL":
+                                     "postgresql://localhost/kib_parser_test"}):
+            dsn = test_database_url()
+        parts = conninfo_to_dict(dsn)
+        self.assertEqual(parts["host"], "localhost")
+        self.assertEqual(parts["hostaddr"], "127.0.0.1")
+
+    def test_database_url_rejects_remote_address_service_and_multihost(self):
+        rejected = [
+            "host=localhost hostaddr=203.0.113.2 dbname=kib_parser_test",
+            "host=localhost service=external dbname=kib_parser_test",
+            "host=localhost,127.0.0.1 dbname=kib_parser_test",
+        ]
+        for value in rejected:
+            with self.subTest(value=value), patch.dict(os.environ,
+                    {"PARSER_TEST_DATABASE_URL": value}):
+                with self.assertRaises(RuntimeError):
+                    test_database_url()
+
 def test_database_url():
     dsn = os.environ.get("PARSER_TEST_DATABASE_URL")
     if not dsn:
@@ -23,9 +48,13 @@ def test_database_url():
     parts = conninfo_to_dict(dsn)
     if parts.get("dbname") != "kib_parser_test":
         raise RuntimeError("PARSER_TEST_DATABASE_URL must select kib_parser_test")
-    if parts.get("host") not in {"localhost", "127.0.0.1", "::1"}:
+    host = parts.get("host")
+    if host not in {"localhost", "127.0.0.1", "::1"}:
         raise RuntimeError("PARSER_TEST_DATABASE_URL must use an explicit loopback host")
-    return dsn
+    if parts.get("service") or parts.get("hostaddr") not in (None, "127.0.0.1", "::1"):
+        raise RuntimeError("PARSER_TEST_DATABASE_URL must not override its loopback target")
+    # Pin localhost to a loopback address before any migration or cleanup runs.
+    return make_conninfo(dsn, hostaddr="::1" if host == "::1" else "127.0.0.1")
 
 class DatabaseTestCase(unittest.TestCase):
     owned_ids, lock = set(), threading.Lock()

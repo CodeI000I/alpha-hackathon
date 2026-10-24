@@ -49,7 +49,7 @@ type NewsItem struct {
 	URL         string    `json:"url"`
 	Title       string    `json:"title"`
 	Summary     string    `json:"summary"`
-	Body        string    `json:"-"`
+	Body        string    `json:"body,omitempty"`
 	PublishedAt time.Time `json:"publishedAt"`
 }
 

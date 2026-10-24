@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -25,7 +26,10 @@ type Client struct {
 // New — клиент с таймаутом на один запрос. /rank синхронный: на каждую важную для роли
 // новость оркестратор делает два вызова LLM, поэтому таймаут — минуты, а не секунды.
 func New(baseURL, token string, timeout time.Duration) *Client {
-	return &Client{BaseURL: strings.TrimRight(baseURL, "/"), Token: token, HTTP: &http.Client{Timeout: timeout}}
+	return &Client{BaseURL: strings.TrimRight(baseURL, "/"), Token: token, HTTP: &http.Client{
+		Timeout:       timeout,
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse },
+	}}
 }
 
 // Rank — оценка одной новости для компании и ролей: POST {ORCHESTRATOR_URL}/rank,
@@ -33,7 +37,41 @@ func New(baseURL, token string, timeout time.Duration) *Client {
 // Реализует feed.Ranker. Отказы оркестратора возвращаются как *feed.Error.
 func (c *Client) Rank(ctx context.Context, req feed.Request) ([]feed.Match, error) {
 	var out []feed.Match
-	return out, c.post(ctx, "/rank", req, &out)
+	if err := c.post(ctx, "/rank", req, &out); err != nil {
+		return nil, err
+	}
+	if err := validateMatches(req.Roles, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+const maxResponseBytes = 1 << 20
+
+func validateMatches(roles []string, matches []feed.Match) error {
+	allowed := make(map[string]struct{}, len(roles))
+	for _, role := range roles {
+		allowed[role] = struct{}{}
+	}
+	seen := make(map[string]struct{}, len(matches))
+	for _, match := range matches {
+		if _, ok := allowed[match.Role]; !ok {
+			return fmt.Errorf("orchestrator: response contains an unrequested role")
+		}
+		if _, ok := seen[match.Role]; ok {
+			return fmt.Errorf("orchestrator: response contains duplicate roles")
+		}
+		seen[match.Role] = struct{}{}
+		switch match.Kind {
+		case "event", "risk", "opportunity":
+		default:
+			return fmt.Errorf("orchestrator: response contains an unsupported kind")
+		}
+		if math.IsNaN(float64(match.Score)) || math.IsInf(float64(match.Score), 0) || match.Score < 0 || match.Score > 1 {
+			return fmt.Errorf("orchestrator: response contains an invalid score")
+		}
+	}
+	return nil
 }
 
 func (c *Client) post(ctx context.Context, path string, in, out any) error {
@@ -63,7 +101,20 @@ func (c *Client) post(ctx context.Context, path string, in, out any) error {
 			Err:        fmt.Errorf("orchestrator %s: %s: %s", path, resp.Status, strings.TrimSpace(string(msg))),
 		}
 	}
-	return json.NewDecoder(resp.Body).Decode(out)
+	body, err = io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
+	if err != nil {
+		return fmt.Errorf("orchestrator %s: read response: %w", path, err)
+	}
+	if len(body) > maxResponseBytes {
+		return fmt.Errorf("orchestrator %s: response exceeds %d bytes", path, maxResponseBytes)
+	}
+	if len(strings.TrimSpace(string(body))) == 0 || strings.TrimSpace(string(body))[0] != '[' {
+		return fmt.Errorf("orchestrator %s: expected JSON array", path)
+	}
+	if err := json.Unmarshal(body, out); err != nil {
+		return fmt.Errorf("orchestrator %s: invalid response JSON: %w", path, err)
+	}
+	return nil
 }
 
 // retryAfter разбирает заголовок Retry-After: число секунд или HTTP-дата. 0 — заголовка нет.

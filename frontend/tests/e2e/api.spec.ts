@@ -65,6 +65,13 @@ const API_FEED = [{
   readAt: null,
 }];
 
+function summaryFeed(): typeof API_FEED {
+  return ['risk', 'risk', 'opportunity', 'opportunity'].map((kind, index) => ({
+    ...structuredClone(API_FEED[0]), id: 601 + index, kind, score: .95 - index * .1,
+    news: { ...API_FEED[0].news, id: 1001 + index, title: ['Партнёр изменил условия оплаты', 'Обновлены сроки поставки', 'Открыта новая программа поддержки', 'Представлены локальные комплектующие'][index] },
+  }));
+}
+
 const EXISTING_FILE = {
   id: 70,
   companyId: 9,
@@ -117,6 +124,12 @@ async function installApiMocks(page: Page, options: MockOptions = {}): Promise<M
     if (method === 'GET' && path === '/api/v1/roles') {
       return json(route, options.roles === undefined ? [API_ROLE, API_STRATEGY_ROLE] : options.roles);
     }
+    if (method === 'GET' && path === '/api/v1/auth/me') return json(route, user);
+    if (method === 'POST' && path === '/api/v1/auth/login') return json(route, user);
+    if (method === 'POST' && path === '/api/v1/auth/logout') return route.fulfill({ status: 204 });
+    if (method === 'GET' && path === '/api/v1/analytics/documents') return json(route, []);
+    if (method === 'GET' && path === '/api/v1/analytics/situation') return json(route, { snapshot: null, current: false, status: 'pending' });
+    if (method === 'GET' && path === '/api/v1/analytics/issues') return json(route, []);
     if (method === 'GET' && path === '/api/v1/profile-elements') {
       return json(route, PROFILE_ELEMENTS);
     }
@@ -164,8 +177,6 @@ async function installApiMocks(page: Page, options: MockOptions = {}): Promise<M
 }
 
 async function openApiSession(page: Page, path = '/dashboard') {
-  await page.goto('/landing');
-  await page.evaluate(() => localStorage.setItem('signal.session.v2.api.userId', '41'));
   await page.goto(path);
   await expect(page.getByRole('button', { name: 'Меню пользователя' })).toBeVisible();
 }
@@ -184,19 +195,334 @@ test.afterEach(() => {
   expect(unexpected, 'unexpected browser console and runtime errors').toEqual([]);
 });
 
-test('API mode exposes no fictitious password login', async ({ page }) => {
+test('API mode logs in and restores a cookie-backed session through auth endpoints', async ({ page }) => {
+  expectedHttpStatuses = [401];
   const state = await installApiMocks(page);
+  const authRequests: string[] = [];
+  await page.route('**/api/v1/auth/me', route => json(route, { error: 'unauthenticated' }, 401));
+  await page.route('**/api/v1/auth/login', async route => { authRequests.push(route.request().method() + ' ' + route.request().url()); return json(route, API_USER); });
   await page.goto('/login');
 
   await expect(page.getByRole('heading', { name: 'Войти в аккаунт', level: 1 })).toBeVisible();
-  await expect(page.getByText('Вход в существующий аккаунт пока недоступен. Вы можете зарегистрировать новый профиль.')).toBeVisible();
-  await expect(page.getByLabel('Электронная почта')).toHaveCount(0);
-  await expect(page.getByLabel('Пароль тестового аккаунта')).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'Перейти к регистрации' })).toHaveAttribute('href', '/register');
-  expect(state.requests).toEqual([]);
+  await page.getByLabel('Электронная почта').fill(API_USER.email);
+  await page.getByLabel('Пароль', { exact: true }).fill('password-for-api-test');
+  expect(authRequests).toHaveLength(0);
+  expect(state.requests.filter(request => request.startsWith('POST '))).toEqual([]);
+  await page.getByRole('button', { name: 'Войти' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  expect(authRequests).toHaveLength(1);
+  expect(state.unknown).toEqual([]);
 });
 
-test('normalizes null role and feed collections without demo fallback', async ({ page }) => {
+test('keeps the session visible when server logout fails', async ({ page }) => {
+  expectedHttpStatuses = [503];
+  const state = await installApiMocks(page);
+  await page.route('**/api/v1/auth/logout', route => json(route, { error: 'выход временно недоступен' }, 503));
+  await openApiSession(page);
+
+  await page.getByRole('button', { name: 'Меню пользователя' }).click();
+  await page.getByRole('button', { name: 'Выйти' }).click();
+
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole('alert')).toContainText('выход временно недоступен');
+  await expect(page.getByRole('button', { name: 'Меню пользователя' })).toBeVisible();
+  expect(state.unknown).toEqual([]);
+});
+
+test('renders the deduplicated 24-hour overview across desktop, tablet, mobile and short screens', async ({ page }) => {
+  const state = await installApiMocks(page, { feed: summaryFeed() });
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  const refresh = page.getByRole('button', { name: 'Обновить события' });
+  await expect(refresh).toHaveText('');
+  await expect(refresh.locator('svg')).toHaveAttribute('width', '20');
+  await expect(refresh.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+  await expect(refresh.locator('svg path')).toHaveCount(2);
+  await expect(summary.locator('.daily-total')).toHaveText('4');
+  await expect(summary.getByRole('button', { name: '2 риска', exact: true })).toBeVisible();
+  await expect(summary.getByRole('button', { name: '2 возможности', exact: true })).toBeVisible();
+  await expect(summary.locator('.daily-trend-down')).toBeVisible();
+  await expect(summary.locator('.daily-trend-up')).toBeVisible();
+  await expect(summary.locator('.daily-story')).toHaveCount(2);
+  await expect(summary).toContainText('Требует внимания');
+  await expect(summary).toContainText('Открывает возможности');
+  await expect(summary.locator('.daily-focus')).toContainText(API_ROLE.focus);
+  await expect(summary).not.toContainText('Поставки меняются. Есть альтернативы.');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }, { width: 768, height: 400 }]) {
+    await page.setViewportSize(viewport);
+    await summary.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const headingBox = (await page.getByRole('heading', { name: 'События для вас', exact: true }).boundingBox())!;
+    const controlsBox = (await page.locator('.feed-refresh').boundingBox())!;
+    expect(controlsBox.x - headingBox.x - headingBox.width).toBeCloseTo(16, 0);
+    expect(Math.abs(controlsBox.y + controlsBox.height / 2 - headingBox.y - headingBox.height / 2)).toBeLessThan(1);
+    await expect(summary.locator('.daily-story').first()).toBeVisible();
+    await expect(summary.locator('.daily-next-action')).toBeVisible();
+  }
+  await summary.getByText('О сводке', { exact: true }).click();
+  await expect(summary).toContainText('последние 200 записей');
+  await expect(summary).toContainText('Это не резюме ИИ');
+  expect(state.unknown).toEqual([]);
+});
+
+test('deduplicates role analyses and excludes old, future, and unassigned events from the overview', async ({ page }) => {
+  const values = summaryFeed();
+  values[2].kind = 'event';
+  values[3].news.publishedAt = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+  const future = { ...structuredClone(values[3]), id: 610, news: { ...values[3].news, id: 1010, publishedAt: new Date(Date.now() + 3600_000).toISOString() } };
+  const otherRole = { ...structuredClone(values[0]), id: 611, role: 'strategy', score: 1, kind: 'opportunity' as const };
+  const unassigned = { ...structuredClone(values[0]), id: 612, role: 'not-assigned', news: { ...values[0].news, id: 1012 } };
+  await installApiMocks(page, { feed: [...values, future, otherRole, unassigned] });
+  await page.route('**/api/v1/users/41', route => json(route, { ...API_USER, roles: ['cfo', 'strategy'] }));
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await expect(summary.locator('.daily-total')).toHaveText('3');
+  await expect(summary.getByRole('button', { name: '1 риск', exact: true })).toBeVisible();
+  await expect(summary.getByRole('button', { name: '1 возможность', exact: true })).toBeVisible();
+  await expect(summary.getByRole('button', { name: '1 событие', exact: true })).toBeVisible();
+  await expect(summary.locator('.daily-balance-bar i')).toHaveCount(3);
+  await expect(summary.locator('.daily-next-action')).toHaveAttribute('href', '/news/611');
+  await expect(page.locator('.w-event')).toHaveCount(5);
+});
+
+test('renders the four-event overview across screen sizes with a live urgency link', async ({ page }) => {
+  const state = await installApiMocks(page, { feed: summaryFeed() });
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  const refresh = page.getByRole('button', { name: 'Обновить события' });
+  await expect(refresh).toHaveText('');
+  await expect(refresh.locator('svg')).toHaveAttribute('width', '20');
+  await expect(refresh.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+  await expect(refresh.locator('svg path')).toHaveCount(2);
+  await expect(summary.locator('.daily-total')).toHaveText('4');
+  await expect(summary.getByRole('button', { name: '2 риска', exact: true })).toBeVisible();
+  await expect(summary.getByRole('button', { name: '2 возможности', exact: true })).toBeVisible();
+  await expect(summary.locator('.daily-trend-down')).toBeVisible();
+  await expect(summary.locator('.daily-trend-up')).toBeVisible();
+  await expect(summary.locator('.daily-segment-risk')).toHaveCSS('flex-grow', '2');
+  await expect(summary.locator('.daily-segment-opportunity')).toHaveCSS('flex-grow', '2');
+  await expect(summary.locator('.daily-story')).toHaveCount(2);
+  await expect(summary).toContainText('Требует внимания');
+  await expect(summary).toContainText('Открывает возможности');
+  await expect(summary.locator('.daily-focus')).toContainText(API_ROLE.focus);
+  await expect(summary.locator('.daily-next-action')).toContainText('Самый срочный разбор за сутки');
+  await expect(summary).not.toContainText('Поставки меняются. Есть альтернативы.');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }, { width: 768, height: 400 }]) {
+    await page.setViewportSize(viewport);
+    await summary.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const headingBox = (await page.getByRole('heading', { name: 'События для вас', exact: true }).boundingBox())!;
+    const controlsBox = (await page.locator('.feed-refresh').boundingBox())!;
+    expect(controlsBox.x - headingBox.x - headingBox.width).toBeCloseTo(16, 0);
+    expect(Math.abs(controlsBox.y + controlsBox.height / 2 - headingBox.y - headingBox.height / 2)).toBeLessThan(1);
+    await expect(summary.locator('.daily-story').first()).toBeVisible();
+    await expect(summary.locator('.daily-next-action')).toBeVisible();
+  }
+  await summary.getByText('О сводке', { exact: true }).click();
+  await expect(summary).toContainText('последние 200 записей');
+  await expect(summary).toContainText('Это не резюме ИИ');
+  expect(state.unknown).toEqual([]);
+});
+
+test('counts the active role consistently and offers an explicit switch for a missing category', async ({ page }) => {
+  const values = summaryFeed().slice(0, 3);
+  values[0].role = 'strategy'; values[0].kind = 'opportunity';
+  values[2].kind = 'event';
+  await installApiMocks(page, { feed: [...values, { ...values[0], id: 700, role: 'unassigned' }] });
+  await page.route('**/api/v1/users/41', route => json(route, { ...API_USER, roles: ['strategy', 'cfo'] }));
+  await openApiSession(page);
+  await expect(page.locator('.daily-total')).toHaveText('3');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 1');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Риски', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Для этой роли рисков нет' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Лента событий' }).locator('.state-panel')).toContainText('Финансовый директор');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('0 из 1');
+  await page.getByRole('button', { name: 'Показать риски', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('cfo');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 2');
+  await page.getByRole('button', { name: 'Все', exact: true }).click();
+  await expect(page.locator('.feed-refresh > span')).toHaveText('2 из 2');
+  await expect(page.locator('.w-event')).toHaveCount(2);
+  await expect(page.locator('.daily-total')).toHaveText('3');
+});
+
+test('summary segments highlight matching categories, align numbers and support keyboard filtering', async ({ page }) => {
+  const values = summaryFeed().slice(0, 3);
+  values[1].kind = 'event';
+  await installApiMocks(page, { feed: values });
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  const balance = summary.locator('.daily-balance');
+  for (const kind of ['risk', 'opportunity', 'event']) {
+    const segment = summary.locator('.daily-segment-' + kind);
+    await segment.hover();
+    await expect(balance).toHaveAttribute('data-highlighted-kind', kind);
+    await expect(summary.locator('.daily-count-' + kind)).toHaveClass(/is-highlighted/);
+    await expect(summary.locator('.daily-counts .is-muted')).toHaveCount(2);
+    await expect(summary.locator('.daily-counts .is-muted svg').first()).toHaveCSS('color', 'rgb(119, 119, 131)');
+    await expect(summary.locator('.daily-balance-bar .is-muted > i').first()).toHaveCSS('background-color', 'rgb(119, 119, 131)');
+    if (kind === 'risk') await summary.screenshot({ path: 'node_modules/.cache/summary-hover-risk.png' });
+  }
+  await page.getByRole('heading', { name: 'Обзор событий' }).hover();
+  await expect(balance).not.toHaveAttribute('data-highlighted-kind', /.+/);
+  const starts = await summary.locator('.daily-counts button').evaluateAll(buttons => buttons.map(button => {
+    const textNode = [...button.childNodes].find(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
+    const range = document.createRange(); range.selectNodeContents(textNode!);
+    return range.getBoundingClientRect().x;
+  }));
+  expect(Math.max(...starts) - Math.min(...starts)).toBeLessThan(1);
+  await expect(summary.locator('.daily-event-icon')).toHaveAttribute('width', '18');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await summary.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const buttons = await summary.locator('.daily-balance-bar button').all();
+    for (const button of buttons) {
+      expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(24);
+      await expect(button).toBeVisible();
+    }
+    await summary.screenshot({ path: `node_modules/.cache/summary-three-types-${viewport.width}.png` });
+  }
+  await summary.locator('.daily-segment-risk').focus();
+  await expect(balance).toHaveAttribute('data-highlighted-kind', 'risk');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Риски', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'События для вас' })).toBeFocused();
+});
+
+test('manual refresh shows progress and confirms unchanged data without hiding API errors', async ({ page }) => {
+  const options: MockOptions = {};
+  await installApiMocks(page, options);
+  await openApiSession(page);
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  const refresh = page.getByRole('button', { name: 'Обновить события' });
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const holdResponse = async (route: Route) => { await gate; await json(route, API_FEED); };
+  await page.route('**/api/v1/users/41/feed?*', holdResponse);
+  await refresh.click();
+  await expect(refresh).toBeDisabled();
+  await expect(refresh).toHaveAttribute('aria-busy', 'true');
+  release();
+  await expect(page.locator('.feed-refresh-notice')).toHaveText('Лента без изменений');
+  await expect(refresh).toBeEnabled();
+  await page.unroute('**/api/v1/users/41/feed?*', holdResponse);
+  expectedHttpStatuses = [503]; options.feedFailure = { status: 503, message: 'не удалось обновить данные' };
+  await refresh.click();
+  await expect(page.getByRole('alert')).toContainText('Обновление ленты не удалось');
+  await expect(page.locator('.feed-refresh-notice')).toHaveCount(0);
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(refresh).toBeEnabled();
+});
+
+test('keeps the empty overview compact and refreshes after the backend fills the feed', async ({ page }) => {
+  const feed: typeof API_FEED = [];
+  const state = await installApiMocks(page, { feed });
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  await expect(summary).toContainText('За сутки новых событий нет');
+  await expect(summary.locator('.daily-balance')).toHaveCount(0);
+  await expect(summary.locator('.daily-story')).toHaveCount(0);
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    expect((await summary.boundingBox())!.height).toBeLessThan(300);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  const requestsBeforeRefresh = state.requests.filter(value => value.includes('/feed?limit=200')).length;
+  feed.push(...API_FEED);
+  await page.getByRole('button', { name: 'Обновить события' }).click();
+  await expect(summary.locator('.daily-total')).toHaveText('1');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.locator('.feed-refresh-notice')).toHaveText('Лента обновлена');
+  expect(state.requests.filter(value => value.includes('/feed?limit=200'))).toHaveLength(requestsBeforeRefresh + 1);
+  expect(state.unknown).toEqual([]);
+});
+
+test('rechecks an empty API feed four times and stops without inventing a finished analysis', async ({ page }) => {
+  await page.clock.install();
+  const state = await installApiMocks(page, { feed: [] });
+  await openApiSession(page);
+  await expect(page.getByRole('heading', { name: 'За сутки новых событий нет' })).toBeVisible();
+  const initialRequests = state.requests.filter(value => value.includes('/feed?limit=200')).length;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const response = page.waitForResponse(value => value.url().includes('/feed?limit=200'));
+    await page.clock.fastForward(15_001);
+    await (await response).finished();
+    await expect.poll(() => state.requests.filter(value => value.includes('/feed?limit=200')).length).toBe(initialRequests + attempt + 1);
+  }
+  await page.clock.fastForward(60_000);
+  expect(state.requests.filter(value => value.includes('/feed?limit=200'))).toHaveLength(initialRequests + 4);
+  await expect(page.getByText('Анализ завершён', { exact: true })).toHaveCount(0);
+});
+
+test('refreshes an empty active role while other assigned roles have events', async ({ page }) => {
+  await page.clock.install();
+  const feed = structuredClone(API_FEED);
+  const state = await installApiMocks(page, { feed });
+  await page.route('**/api/v1/users/41', route => json(route, { ...API_USER, roles: ['cfo', 'strategy'] }));
+  await openApiSession(page);
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('strategy');
+  await expect(page.getByRole('heading', { name: 'Для этой роли пока нет событий' })).toBeVisible();
+  feed.push({ ...structuredClone(API_FEED[0]), id: 502, role: 'strategy', news: { ...API_FEED[0].news, id: 902, title: 'Новое событие для стратегии' } });
+  const response = page.waitForResponse(value => value.url().includes('/feed?limit=200'));
+  await page.clock.fastForward(15_001);
+  await (await response).finished();
+  await expect(page.getByRole('heading', { name: 'Новое событие для стратегии' })).toBeVisible();
+  await expect(page.locator('.daily-total')).toHaveText('2');
+  expect(state.unknown).toEqual([]);
+});
+
+test('treats a successful HTML response as an API error instead of an empty overview', async ({ page }) => {
+  await installApiMocks(page);
+  await page.route('**/api/v1/users/41/feed?*', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Proxy fallback</title>' }));
+  await openApiSession(page);
+  await expect(page.getByRole('heading', { name: 'Лента не загрузилась' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Сводка за 24 часа' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'В ленте пока нет событий' })).toHaveCount(0);
+});
+
+test('does not claim an interpretation in sources when the API omitted it', async ({ page }) => {
+  await installApiMocks(page, { feed: [{ ...API_FEED[0], insight: '' }] });
+  await openApiSession(page, '/news/501');
+  await page.getByRole('button', { name: 'Источники и основания', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Источники и основания' });
+  await expect(dialog).toContainText('Интерпретация не передана.');
+  await expect(dialog).not.toContainText('Для разбора доступна интерпретация события.');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+});
+
+test('source and Alfa analytics blocks keep their icons, balanced edges and keyboard access', async ({ page }) => {
+  await installApiMocks(page);
+  await openApiSession(page, '/news/501');
+  const source = page.getByRole('button', { name: /^Источник:/ });
+  await expect(source.locator('.source-logo svg')).toBeVisible();
+  await expect(page.locator('.signal-feed-detail .w-bank-icon')).toHaveText('А');
+  await expect(page.locator('.signal-feed-detail .w-bank')).toContainText('Аналитика от Альфа-Банка');
+  await expect(page.locator('.signal-feed-detail .w-bank')).toContainText('не переданы сервером');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }, { width: 390, height: 400 }]) {
+    await page.setViewportSize(viewport);
+    await source.click();
+    const dialog = page.getByRole('dialog', { name: 'Источники и основания' });
+    await expect(dialog.locator('.w-bank-icon')).toHaveText('А');
+    await expect(dialog).toContainText('Аналитика от Альфа-Банка');
+    const dialogBox = (await dialog.boundingBox())!;
+    const bankBox = (await dialog.locator('.w-source-bank-card').boundingBox())!;
+    expect(Math.abs(bankBox.x - dialogBox.x - (dialogBox.x + dialogBox.width - bankBox.x - bankBox.width))).toBeLessThan(2);
+    await dialog.locator('.w-source-bank-card').scrollIntoViewIfNeeded();
+    const close = dialog.getByRole('button', { name: 'Закрыть источники' });
+    await expect(close).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `node_modules/.cache/source-dialog-final-${viewport.width}-${viewport.height}.png` });
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(source).toBeFocused();
+  }
+});test('normalizes null role and feed collections without demo fallback', async ({ page }) => {
   const state = await installApiMocks(page, { roles: null, feed: null });
   await openApiSession(page);
 
@@ -216,6 +542,126 @@ test('shows an API feed failure instead of silently substituting fixtures', asyn
   await expect(page.getByText('лента временно недоступна', { exact: true })).toBeVisible();
   await expect(page.getByText(API_FEED[0].news.title, { exact: true })).toHaveCount(0);
   expect(state.requests.some(value => value === 'GET /api/v1/users/41/feed?limit=200')).toBe(true);
+  expect(state.unknown).toEqual([]);
+});
+
+test('shows company situations with evidence, history, issue state, chat, and refresh job status', async ({ page }) => {
+  expectedHttpStatuses = [404];
+  const state = await installApiMocks(page);
+  const issue = {
+    issue_id: 'issue-1', title: 'Поставки компонента под риском', summary: 'Изменения могут повлиять на сроки поставок компании.',
+    overall_effect: 'risk', evidence_sufficiency: 'conditional', key_unknowns: ['Неизвестен запас компонентов.'],
+    conditions: ['Если сроки ограничений сохранятся.'], suggested_action: 'Уточнить резервный запас у поставщика.',
+    business_factors: ['supply_availability'], exposure: 'Компания использует импортный компонент.', horizon: 'short',
+    event_ids: ['event-1'], impact_ids: ['impact-1'], impact_versions: { 'impact-1': 1 }, status: 'active',
+    urgency: 'soon', impact_magnitude: 'medium', version: 2, as_of: '2026-10-24T10:00:00Z',
+  };
+  const stateValue = { issue_id: 'issue-1', workflow: 'open', pinned: false, read_version: null, unread: true };
+  const replies: Array<Record<string, unknown>> = [];
+  let stateValueCurrent = stateValue;
+  let jobStatus = 'completed';
+  await page.route('**/api/v1/analytics/situation**', route => json(route, { snapshot: {
+    snapshot_id: 'snapshot-1', as_of: '2026-10-24T10:00:00Z', overall: { summary: 'Проверьте риск задержки поставок.', actions: ['Связаться с поставщиком.'], key_unknowns: ['Срок поставки не подтверждён.'] },
+    priority_issues: [], changes_since_previous: [],
+  }, current: true, status: 'ready' }));
+  await page.route('**/api/v1/analytics/issues?**', route => json(route, [issue]));
+  await page.route('**/api/v1/analytics/issues/issue-1?**', route => json(route, issue));
+  await page.route('**/api/v1/analytics/issues/issue-1/evidence**', route => json(route, [{
+    event: { event_id: 'event-1', summary: 'Экспортные ограничения расширены.', evidence_quote: 'Ограничения вступают в силу в ноябре.', source_news_ids: ['news-1'], modality: 'announcement' },
+    news: [{ title: 'Новые ограничения экспорта', content: 'Поставки компонента могут задержаться.', source_url: 'https://example.test/source', published_at: '2026-10-23T09:00:00Z' }],
+    company_facts: [{ fact_id: 'fact-1', text: 'Компания использует импортный компонент.', source_quote: 'Доля импортных компонентов составляет 40%.', source_refs: ['budget.pdf:p.4'], verification_status: 'source_supported' }],
+    chunks: [{ chunk_id: 'chunk-1', document_id: 'budget-1', locator: 'budget.pdf, стр. 4', text: 'Компания использует импортный компонент в ключевом продукте.' }],
+    candidate_paths: [{ path_id: 'path-1', node_ids: ['supplier', 'component'], relation_types: ['supplies'], evidence_refs: ['fact-1'], status: 'supported' }],
+  }]));
+  await page.route('**/api/v1/analytics/issues/issue-1/history**', route => json(route, [{ ...issue, version: 1, summary: 'Предыдущая версия ситуации.' }, issue]));
+  await page.route('**/api/v1/analytics/issues/issue-1/state**', async route => {
+    if (route.request().method() === 'PATCH') {
+      const body = route.request().postDataJSON() as { workflow: string; pinned: boolean; mark_read?: boolean };
+      stateValueCurrent = { ...stateValueCurrent, ...body, read_version: body.mark_read ? issue.version : stateValueCurrent.read_version, unread: false };
+      return json(route, stateValueCurrent);
+    }
+    return json(route, stateValueCurrent);
+  });
+  await page.route('**/api/v1/analytics/conversations/**', route => replies.length
+    ? json(route, { issue_id: 'issue-1', issue_version: issue.version, replies })
+    : json(route, { detail: 'not found' }, 404));
+  await page.route('**/api/v1/analytics/issues/issue-1/questions**', async route => {
+    const body = route.request().postDataJSON() as { question: string; request_id: string };
+    const reply = { request_id: body.request_id, question: body.question, answer: { text: 'Проверьте сроки и договорные условия.', evidence_ids: ['fact-1'], missing_facts: ['Сроки поставщика'] }, created_at: '2026-10-24T10:10:00Z' };
+    replies.push(reply);
+    return json(route, reply);
+  });
+  await page.route('**/api/v1/analytics/refresh**', route => json(route, { job_id: 'job-1', status: 'queued' }, 202));
+  await page.route('**/api/v1/analytics/jobs/job-1**', route => json(route, { job_id: 'job-1', status: jobStatus }));
+
+  await openApiSession(page);
+  await expect(page.getByText('Проверьте риск задержки поставок.')).toBeVisible();
+  await expect(page.getByRole('link', { name: /Поставки компонента под риском/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Обновить анализ' }).click();
+  await expect(page.getByText('Обновление: завершено')).toBeVisible();
+  await page.getByRole('link', { name: /Поставки компонента под риском/ }).click();
+  await expect(page.getByRole('heading', { name: 'Поставки компонента под риском', level: 1 })).toBeVisible();
+  await expect(page.getByText('Ограничения вступают в силу в ноябре.')).toBeVisible();
+  await page.getByText('Факт компании · source_supported').click();
+  await expect(page.getByText('Доля импортных компонентов составляет 40%.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'История изменений' })).toBeVisible();
+  await page.getByRole('button', { name: 'Закрепить ситуацию' }).click();
+  await expect(page.getByRole('button', { name: 'Снять закрепление' })).toBeVisible();
+  await page.getByLabel('Вопрос об этой ситуации').fill('Какие сроки стоит проверить?');
+  await page.getByRole('button', { name: 'Задать вопрос' }).click();
+  await expect(page.getByText('Проверьте сроки и договорные условия.')).toBeVisible();
+  expect(replies).toHaveLength(1);
+  expect(state.unknown).toEqual([]);
+});
+
+test('starts a fresh pinned conversation when the issue version has changed', async ({ page }) => {
+  expectedHttpStatuses = [404];
+  const state = await installApiMocks(page);
+  const staleConversationId = 'conversation-v1';
+  const postedQuestions: Array<{ question: string; conversation_id: string; request_id: string; version: number }> = [];
+  const newReplies: Array<Record<string, unknown>> = [];
+  await page.addInitScript(() => {
+    localStorage.setItem('alpha.insights.v2.api.company.9.user.41.issue-chat-issue-versioned-cfo', JSON.stringify('conversation-v1'));
+  });
+  const issue = {
+    issue_id: 'issue-versioned', title: 'Ситуация с новой версией', summary: 'Обновлённый разбор.',
+    overall_effect: 'risk', evidence_sufficiency: 'conditional', key_unknowns: [], conditions: [], suggested_action: 'Проверить изменения.',
+    business_factors: [], exposure: '', horizon: 'short', event_ids: [], impact_ids: [], impact_versions: {}, status: 'active',
+    urgency: 'soon', impact_magnitude: 'medium', version: 2, as_of: '2026-10-24T10:00:00Z',
+  };
+  await page.route('**/api/v1/analytics/issues/issue-versioned?**', route => json(route, issue));
+  await page.route('**/api/v1/analytics/issues/issue-versioned/evidence**', route => json(route, []));
+  await page.route('**/api/v1/analytics/issues/issue-versioned/history**', route => json(route, [issue]));
+  await page.route('**/api/v1/analytics/issues/issue-versioned/state**', route => json(route, { issue_id: issue.issue_id, workflow: 'open', pinned: false, read_version: 2, unread: false }));
+  await page.route('**/api/v1/analytics/conversations/**', route => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/' + staleConversationId)) {
+      return json(route, { issue_id: issue.issue_id, issue_version: 1, replies: [] });
+    }
+    if (newReplies.length) return json(route, { issue_id: issue.issue_id, issue_version: 2, replies: newReplies });
+    return json(route, { detail: 'not found' }, 404);
+  });
+  await page.route('**/api/v1/analytics/issues/issue-versioned/questions**', async route => {
+    postedQuestions.push(route.request().postDataJSON() as typeof postedQuestions[number]);
+    const reply = { request_id: postedQuestions.at(-1)?.request_id, question: postedQuestions.at(-1)?.question, answer: { text: 'Ответ для версии 2.', evidence_ids: [], missing_facts: [] }, created_at: '2026-10-24T10:10:00Z' };
+    newReplies.push(reply);
+    return json(route, reply);
+  });
+
+  await page.goto('/issues/issue-versioned');
+  await expect(page.getByRole('heading', { name: issue.title, level: 1 })).toBeVisible();
+  await expect(page.getByText(/Этот диалог относится к версии 1/)).toBeVisible();
+  await expect(page.getByLabel('Вопрос об этой ситуации')).toBeDisabled();
+  await page.getByRole('button', { name: 'Начать новый диалог для версии 2' }).click();
+  await expect(page.getByText('Новый диалог для версии 2')).toBeVisible();
+  const question = page.getByLabel('Вопрос об этой ситуации');
+  await expect(question).toBeEnabled();
+  await question.fill('Что изменилось?');
+  await page.getByRole('button', { name: 'Задать вопрос' }).click();
+  await expect(page.getByText('Ответ для версии 2.')).toBeVisible();
+  expect(postedQuestions).toHaveLength(1);
+  expect(postedQuestions[0]).toMatchObject({ question: 'Что изменилось?', version: 2 });
+  expect(postedQuestions[0].conversation_id).not.toBe(staleConversationId);
   expect(state.unknown).toEqual([]);
 });
 
@@ -298,74 +744,67 @@ test('uploads a document as multipart to the mocked API and never contacts a liv
   expect(state.unknown).toEqual([]);
 });
 
-test('creates no account on step one and resumes company creation after a partial API failure', async ({ page }) => {
-  expectedHttpStatuses = [503];
+test('shows server document analysis status and retries failed files through a role-scoped job', async ({ page }) => {
   const state = await installApiMocks(page);
-  const companies: unknown[] = [];
-  const users: unknown[] = [];
-  await page.route('**/api/v1/companies', async route => {
-    expect(route.request().method()).toBe('POST');
-    companies.push(route.request().postDataJSON());
-    return json(route, API_COMPANY, 201);
+  const refreshBodies: unknown[] = [];
+  await page.route('**/api/v1/analytics/documents?**', route => json(route, [
+    { file_id: 'file-1', filename: 'budget-api.xlsx', document_id: 'doc-1', status: 'failed', attempts: 2, error: 'Не удалось извлечь текст', retry_at: null },
+  ]));
+  await page.route('**/api/v1/analytics/refresh?**', async route => {
+    refreshBodies.push(route.request().postDataJSON());
+    return json(route, { job_id: 'retry-job', status: 'queued' }, 202);
   });
-  await page.route('**/api/v1/users', async route => {
-    expect(route.request().method()).toBe('POST');
-    users.push(route.request().postDataJSON());
-    return users.length === 1
-      ? json(route, { error: 'создание пользователя временно недоступно' }, 503)
-      : json(route, API_USER, 201);
-  });
-  await page.goto('/register');
-  await page.getByLabel('Как вас зовут').fill('  Алексей Серверов  ');
-  await page.getByLabel('Электронная почта').fill('api-user@example.test');
-  expect(companies).toEqual([]);
-  expect(users).toEqual([]);
-  expect(state.requests).toEqual([]);
-  await page.getByRole('button', { name: 'Продолжить' }).click();
-  await page.getByLabel('Название компании').fill(API_COMPANY.name);
-  await page.getByLabel('ИНН компании').fill(API_COMPANY.inn);
-  await page.getByRole('checkbox', { name: /^Финансовый директор/ }).check({ force: true });
-  await page.getByRole('button', { name: 'Завершить настройку' }).click();
-  await expect(page.getByRole('alert')).toContainText('создание пользователя временно недоступно');
-  expect(companies).toEqual([{ name: API_COMPANY.name, inn: API_COMPANY.inn }]);
-  expect(users).toEqual([{ fullName: API_USER.fullName, email: API_USER.email, companyId: 9, roles: ['cfo'] }]);
-  expect(await page.evaluate(() => localStorage.getItem('signal.session.v2.api.userId'))).toBeNull();
-  expect(await page.evaluate(() => localStorage.getItem('signal.session.v2.api.pendingCompanyId'))).toBe('9');
+  await page.route('**/api/v1/analytics/jobs/retry-job?**', route => json(route, { job_id: 'retry-job', status: 'completed' }));
 
-  await page.reload();
-  await expect(page.getByRole('heading', { name: 'Настройте профиль' })).toBeVisible();
-  await expect(page.getByText(/Компания уже создана:/)).toContainText(API_COMPANY.name);
-  await expect(page.getByLabel('Название компании')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Завершить настройку' }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  expect(companies).toHaveLength(1);
-  expect(users).toHaveLength(2);
-  expect(users[1]).toEqual(users[0]);
-  expect(await page.evaluate(() => localStorage.getItem('signal.session.v2.api.pendingCompanyId'))).toBeNull();
-  expect(await page.evaluate(() => sessionStorage.getItem('signal.registration-draft.v1.api'))).toBeNull();
+  await openApiSession(page, '/profile?tab=documents');
+  await expect(page.getByText('Ошибка анализа', { exact: true })).toBeVisible();
+  await expect(page.getByText('Не удалось извлечь текст')).toBeVisible();
+  await page.getByRole('button', { name: 'Повторить сбойные' }).click();
+  await expect(page.getByText('Повторная обработка: завершена')).toBeVisible();
+  expect(refreshBodies).toEqual([{ reason: 'retry_failed_documents', retry_failed: true }]);
   expect(state.unknown).toEqual([]);
 });
 
-test('a deleted pending company blocks submission and can be reset explicitly', async ({ page }) => {
-  expectedHttpStatuses = [404];
+test('onboarding retries the atomic endpoint with a persisted key and never stores the password', async ({ page }) => {
+  expectedHttpStatuses = [401, 503];
   const state = await installApiMocks(page);
-  await page.route('**/api/v1/companies/666', route => json(route, { error: 'not found' }, 404));
-  await page.goto('/landing');
-  await page.evaluate(() => {
-    localStorage.setItem('signal.session.v2.api.pendingCompanyId', '666');
-    sessionStorage.setItem('signal.registration-draft.v1.api', JSON.stringify({
-      step: 2,
-      form: { fullName: 'Алексей Серверов', email: 'api-user@example.test', companyName: 'Старая компания', inn: '7707083893' },
-      selectedRoles: ['cfo'],
-    }));
+  const requests: Array<{ key: string | undefined; body: unknown }> = [];
+  await page.route('**/api/v1/auth/me', route => json(route, { error: 'unauthenticated' }, 401));
+  await page.route('**/api/v1/onboarding', async route => {
+    requests.push({ key: route.request().headers()['idempotency-key'], body: route.request().postDataJSON() });
+    return requests.length === 1
+      ? json(route, { error: 'результат регистрации пока не подтверждён' }, 503)
+      : json(route, { company: API_COMPANY, user: API_USER }, 201);
   });
+
   await page.goto('/register');
-  await expect(page.getByRole('alert')).toContainText('Сохранённая компания больше не найдена');
-  await expect(page.getByRole('button', { name: 'Завершить настройку' })).toBeDisabled();
-  expect(state.requests.filter(request => request.startsWith('POST '))).toEqual([]);
-  await page.getByRole('button', { name: 'Начать настройку компании заново' }).click();
-  await expect(page.getByLabel('Название компании')).toHaveValue('Старая компания');
-  expect(await page.evaluate(() => localStorage.getItem('signal.session.v2.api.pendingCompanyId'))).toBeNull();
+  await page.getByLabel('Как вас зовут').fill('  Алексей Серверов  ');
+  await page.getByLabel('Электронная почта').fill('api-user@example.test');
+  await page.getByRole('button', { name: 'Продолжить' }).click();
+  await page.getByLabel('Название компании').fill(API_COMPANY.name);
+  await page.getByLabel('ИНН компании').fill(API_COMPANY.inn);
+  await page.getByLabel(/Пароль/).fill('password-for-api-test');
+  await page.getByRole('checkbox', { name: /^Финансовый директор/ }).check({ force: true });
+  await page.getByRole('button', { name: 'Завершить настройку' }).click();
+  await expect(page.getByRole('alert')).toContainText('результат регистрации пока не подтверждён');
+  const key = requests[0].key;
+  expect(key).toMatch(/^[0-9a-f-]{36}$/i);
+  expect(await page.evaluate(() => localStorage.getItem('signal.registration-request.v1.api'))).toBe(key);
+  expect(await page.evaluate(() => sessionStorage.getItem('signal.registration-draft.v1.api'))).not.toContain('password-for-api-test');
+
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Настройте профиль' })).toBeVisible();
+  await page.getByLabel(/Пароль/).fill('password-for-api-test');
+  await page.getByRole('button', { name: 'Завершить настройку' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  expect(requests).toHaveLength(2);
+  expect(requests[1].key).toBe(key);
+  expect(requests[1].body).toEqual({
+    company: { name: API_COMPANY.name, inn: API_COMPANY.inn },
+    user: { fullName: API_USER.fullName, email: API_USER.email, roles: ['cfo'], password: 'password-for-api-test' },
+  });
+  expect(await page.evaluate(() => localStorage.getItem('signal.registration-request.v1.api'))).toBeNull();
+  expect(await page.evaluate(() => sessionStorage.getItem('signal.registration-draft.v1.api'))).toBeNull();
   expect(state.unknown).toEqual([]);
 });
 
@@ -457,11 +896,11 @@ test('rejects unsupported and oversized documents before an API upload', async (
   await openApiSession(page, '/profile?tab=documents');
   await page.locator('input[type="file"]').setInputFiles([
     { name: 'unsafe.exe', mimeType: 'application/octet-stream', buffer: Buffer.from('not a supported document') },
-    { name: 'too-large.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(10 * 1024 * 1024 + 1) },
+    { name: 'too-large.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(12 * 1024 * 1024 + 1) },
   ]);
   await expect(page.locator('.signal-upload-result.is-error')).toHaveCount(2);
   await expect(page.getByText('Допустимы только PDF, TXT, DOCX и XLSX.', { exact: true })).toBeVisible();
-  await expect(page.getByText('Файл больше 10 МБ. Выберите файл меньшего размера.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Файл больше 12 МБ. Выберите файл меньшего размера.', { exact: true })).toBeVisible();
   expect(state.uploadContentTypes).toEqual([]);
   expect(state.unknown).toEqual([]);
 });

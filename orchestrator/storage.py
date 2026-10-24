@@ -91,8 +91,10 @@ class Store:
             result[name] = json.loads(result[name]) if result[name] else None
         return result
 
-    def current(self, job):
+    def current(self, job, policy=None):
         payload = job['payload']
+        if policy is not None and payload['policy'] != policy:
+            return False
         with self.connect() as db:
             for kind, field in [('news', 'news'), ('company', 'company')]:
                 row = db.execute('SELECT version FROM latest WHERE kind=? AND entity=?',
@@ -176,6 +178,8 @@ class Store:
                    (canonical({'code': 'attempts_exhausted', 'message': 'Job recovery limit reached'}), now))
 
     def finish(self, job_id, status, result=None, error=None, retry_at=0, *, attempt=None):
+        if status == 'budget_exceeded' and attempt is not None and attempt >= 3:
+            status = 'failed'
         with self.connect() as db:
             query = 'UPDATE jobs SET status=?, result=?, error=?, retry_at=?, lease_until=0 WHERE id=?'
             values = (status, canonical(result) if result is not None else None,

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, isDemoMode } from "../api/client";
 import type { ProfileElement } from "../api/types";
+import { useWorkspace } from "../appContext";
 import RolePicker from "../components/RolePicker";
 import { StatePanel } from "../components/ui";
 import { Button } from "../signal/components/ui";
@@ -18,7 +19,7 @@ const tabLabels: Record<Tab, string> = { roles: "Моя роль", company: "К�
 interface UploadTask { id: number; file: File; state: "sending" | "success" | "error"; message?: string; retryable?: boolean }
 export function validateDocument(file: Pick<File, "name" | "size">): string | undefined {
   if (!/\.(pdf|txt|docx|xlsx)$/i.test(file.name)) return "Допустимы только PDF, TXT, DOCX и XLSX.";
-  if (file.size > 10 * 1024 * 1024) return "Файл больше 10 МБ. Выберите файл меньшего размера.";
+  if (file.size > 12 * 1024 * 1024) return "Файл больше 12 МБ. Выберите файл меньшего размера.";
   if (file.size === 0) return "Файл пуст. Выберите документ с содержимым.";
   return undefined;
 }
@@ -30,8 +31,10 @@ function formatDate(value: string): string {
 }
 
 export default function CompanyPage({ userId }: { userId: number }) {
+  const { activeRole } = useWorkspace();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [retryJobId, setRetryJobId] = useState("");
   const rawTab = searchParams.get("tab");
   const tab: Tab = tabs.includes(rawTab as Tab) ? rawTab as Tab : rawTab === "analytics" ? "company" : "roles";
   const user = useQuery({ queryKey: ["user", userId], queryFn: ({ signal }) => api.user(userId, signal) });
@@ -40,6 +43,18 @@ export default function CompanyPage({ userId }: { userId: number }) {
   const company = useQuery({ queryKey: ["company", companyId], queryFn: ({ signal }) => api.company(companyId!, signal), enabled: companyId !== null });
   const elements = useQuery({ queryKey: ["profile-elements"], queryFn: api.profileElements, enabled: tab === "company" });
   const files = useQuery({ queryKey: ["files", companyId], queryFn: ({ signal }) => api.files(companyId!, signal), enabled: companyId !== null });
+  const analyticsDocuments = useQuery({ queryKey: ["analytics", "documents", activeRole], queryFn: ({ signal }) => api.analytics.documents(activeRole, signal), enabled: tab === "documents" && Boolean(activeRole) && !isDemoMode, refetchInterval: (query) => query.state.data?.some((document) => document.status === "queued") ? 3000 : false });
+  const retryJob = useQuery({ queryKey: ["analytics", "document-retry-job", activeRole, retryJobId], queryFn: ({ signal }) => api.analytics.job(retryJobId, activeRole, signal), enabled: Boolean(retryJobId) && !isDemoMode, refetchInterval: (query) => query.state.data && ["completed", "failed"].includes(query.state.data.status) ? false : 1500 });
+  const retryFailedDocuments = useMutation({
+    mutationFn: () => api.analytics.refresh(activeRole, { reason: "retry_failed_documents", retry_failed: true }),
+    onSuccess: (job) => {
+      setRetryJobId(job.job_id);
+      void queryClient.invalidateQueries({ queryKey: ["analytics", "documents", activeRole] });
+    },
+  });
+  useEffect(() => {
+    if (retryJob.data?.status === "completed") void queryClient.invalidateQueries({ queryKey: ["analytics", "documents", activeRole] });
+  }, [retryJob.data?.status, queryClient, activeRole]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const roleDialog = useRef<HTMLDialogElement>(null);
@@ -79,6 +94,7 @@ export default function CompanyPage({ userId }: { userId: number }) {
       await api.uploadFile(companyId, task.file);
       setUploads((current) => current.map((item) => item.id === task.id ? { ...item, state: "success", message: "Загружен. Анализ пока не подтверждён." } : item));
       await queryClient.invalidateQueries({ queryKey: ["files", companyId] });
+      if (!isDemoMode) await queryClient.invalidateQueries({ queryKey: ["analytics", "documents", activeRole] });
     } catch (error) {
       setUploads((current) => current.map((item) => item.id === task.id ? { ...item, state: "error", retryable: true, message: error instanceof Error ? error.message : "Не удалось загрузить документ." } : item));
     }
@@ -108,32 +124,41 @@ export default function CompanyPage({ userId }: { userId: number }) {
         {roles.isError && <StatePanel tone="error" title="Роли не загрузились" text={roles.error.message} action={<Button onClick={() => roles.refetch()}>Повторить</Button>} />}
         {roles.data && <>{user.data.roles.length ? <ul className="profile-current-roles">{user.data.roles.map((code) => <li key={code}>{roles.data.find((role) => role.code === code)?.name || "Название роли недоступно"}</li>)}</ul> : <p className="w-muted">Роль пока не выбрана.</p>}</>}
         </section>
-        <section className="profile-demo-section"><span className="w-demo">Демо</span><Directions values={directions} onChange={setDirections} editable /></section>
+        <section className="profile-demo-section"><Directions values={directions} onChange={setDirections} editable /></section>
       </div>}
       {tab === "company" && (companyState || (company.data && <>
-        <h2>{company.data.name}</h2>{isDemoMode && <span className="w-demo">Демо</span>}
+        <h2>{company.data.name}</h2>
         <dl className="w-company-details"><div><dt>ИНН</dt><dd>{company.data.inn || "Не указан"}</dd></div><div><dt>ОГРН</dt><dd>{company.data.ogrn || "Не указан"}</dd></div><div><dt>Обновлено</dt><dd>{formatDate(company.data.updatedAt)}</dd></div></dl>
         <h3>О компании</h3>
         {elements.isLoading && <p role="status">Загружаем сведения…</p>}
         {elements.isError && <StatePanel tone="error" title="Сведения не загрузились" text={elements.error.message} action={<Button onClick={() => elements.refetch()}>Повторить</Button>} />}
         <div className="signal-profile-elements">{Object.entries(grouped).map(([block, blockElements], index) => <details key={block} open={index === 0}><summary>{profileBlockLabel(block)}</summary><dl>{blockElements.map((element) => <div key={element.code}><dt>{element.name}</dt><dd>{profileValueText(company.data.profile[element.code], isDemoMode) ?? "Сведения получены · см. «О данных и сохранении»"}</dd></div>)}</dl></details>)}</div>
         {!Object.keys(company.data.profile).length && <p className="w-muted">Профиль компании пока не заполнен.</p>}
-        <section className="company-analytics"><span className="w-demo">Демо</span><h3>Аналитика компании</h3><p className="w-muted">Пример с вымышленными показателями.</p><Chart /><div className="analytics-kpis"><div><span>Операционные расходы · пример</span><strong>31,5 млн ₽</strong><small>Синтетические данные</small></div><div><span>Денежный поток · пример</span><strong>+8,2 млн ₽</strong><small>Синтетические данные</small></div></div><Chart kind="supply" /></section>
+        {isDemoMode && <section className="company-analytics"><h3>Аналитика компании</h3><p className="w-muted">Пример с вымышленными показателями.</p><Chart /><div className="analytics-kpis"><div><span>Операционные расходы · пример</span><strong>31,5 млн ₽</strong><small>Синтетические данные</small></div><div><span>Денежный поток · пример</span><strong>+8,2 млн ₽</strong><small>Синтетические данные</small></div></div><Chart kind="supply" /></section>}
       </>))}
-      {tab === "keywords" && <><span className="w-demo">Демо</span><Keywords words={keywords} onChange={setKeywords} /></>}
+      {tab === "keywords" && <><Keywords words={keywords} onChange={setKeywords} /></>}
       {tab === "documents" && (companyState || <>
-        <h2>Документы компании</h2>{isDemoMode && <p className="w-muted">В деморежиме файлы не отправляются.</p>}
-        {isDemoMode && <span className="w-demo">Демо</span>}
-        <label className="w-upload"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 13h8m-8 4h6" /></svg><strong>Выбрать документы</strong><span>PDF, TXT, DOCX, XLSX · до 10 МБ на файл</span><input type="file" multiple accept=".pdf,.txt,.docx,.xlsx" aria-label="Выбрать документы" onChange={(event) => { enqueue(Array.from(event.target.files ?? [])); event.target.value = ""; }} /></label>
+        <h2>Документы компании</h2>{isDemoMode && <p className="w-muted">Файлы не отправляются на сервер.</p>}
+        <label className="w-upload"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 13h8m-8 4h6" /></svg><strong>Выбрать документы</strong><span>PDF, TXT, DOCX, XLSX · до 12 МБ на файл</span><input type="file" multiple accept=".pdf,.txt,.docx,.xlsx" aria-label="Выбрать документы" onChange={(event) => { enqueue(Array.from(event.target.files ?? [])); event.target.value = ""; }} /></label>
         <p className="w-small">«Загружен» не означает «Проанализирован».</p>
         {!!uploads.length && <section className="signal-upload-results" aria-label="Результаты загрузки" aria-live="polite">{uploads.map((task) => <article key={task.id} className={`signal-upload-result is-${task.state}`}><strong>{task.file.name}</strong><p>{task.state === "sending" ? "Отправка…" : task.message}</p>{task.state === "error" && task.retryable && <Button variant="secondary" onClick={() => void uploadFile(task)}>Повторить загрузку</Button>}</article>)}</section>}
         <h3>Загруженные документы</h3>{files.isLoading && <p role="status">Загружаем список…</p>}
         {files.isError && <StatePanel tone="error" title="Список документов не загрузился" text={files.error.message} action={<Button onClick={() => files.refetch()}>Повторить</Button>} />}
-        {files.data?.map((file) => <article className="w-document signal-document" key={file.id}><div><strong>{file.filename}</strong><small>{Math.max(1, Math.round(file.sizeBytes / 1024))} КБ · {formatDate(file.createdAt)}</small><span>Загружен · анализ не подтверждён</span></div></article>)}
+        {!isDemoMode && activeRole && <section className="signal-document-analysis" aria-label="Статус анализа документов">
+          <header><div><h3>Статус анализа</h3><p className="w-muted">Состояние обработки документов для выбранной роли.</p></div><Button variant="secondary" disabled={retryFailedDocuments.isPending || !analyticsDocuments.data?.some((document) => document.status === "failed")} onClick={() => retryFailedDocuments.mutate()}>{retryFailedDocuments.isPending ? "Ставим в очередь…" : "Повторить сбойные"}</Button></header>
+          {analyticsDocuments.isPending && <p role="status">Загружаем статусы анализа…</p>}
+          {analyticsDocuments.isError && <StatePanel tone="error" title="Статусы анализа не загрузились" text={analyticsDocuments.error.message} action={<Button onClick={() => analyticsDocuments.refetch()}>Повторить</Button>} />}
+          {retryFailedDocuments.isError && <p className="integration-warning" role="alert">Не удалось повторить анализ: {retryFailedDocuments.error.message}</p>}
+          {retryJob.data && <p role="status">Повторная обработка: {retryJob.data.status === "queued" ? "в очереди" : retryJob.data.status === "running" ? "выполняется" : retryJob.data.status === "completed" ? "завершена" : retryJob.data.status === "failed" ? "завершилась с ошибкой" : retryJob.data.status}</p>}
+          {retryJob.isError && <p className="integration-warning" role="alert">Не удалось проверить повторную обработку: {retryJob.error.message}</p>}
+          {analyticsDocuments.data?.map((document) => <article className={`w-document signal-document-analysis-item is-${document.status}`} key={`${document.file_id}-${document.document_id ?? "pending"}`}><div><strong>{document.filename}</strong><span>{document.status === "queued" ? "Ожидает анализа" : document.status === "ready" ? "Анализ завершён" : "Ошибка анализа"}</span>{document.status === "failed" && <small>{document.error || "Не удалось обработать файл"}{document.attempts > 0 ? ` · попыток: ${document.attempts}` : ""}</small>}{document.status === "queued" && document.retry_at && <small>Повтор после {new Date(document.retry_at * 1000).toLocaleString("ru-RU")}</small>}</div></article>)}
+          {!analyticsDocuments.isLoading && !analyticsDocuments.isError && analyticsDocuments.data?.length === 0 && <p className="w-muted">Для этой роли документов пока нет.</p>}
+        </section>}
+        {files.data?.map((file) => <article className="w-document signal-document" key={file.id}><div><strong>{file.filename}</strong><small>{Math.max(1, Math.round(file.sizeBytes / 1024))} КБ · {formatDate(file.createdAt)}</small><span>{isDemoMode ? "Файл и его сведения сохранены локально · анализ сервера недоступен" : "Загружен"}</span></div></article>)}
         {!files.isLoading && !files.isError && files.data?.length === 0 && <StatePanel title="Документов пока нет" text="Здесь появятся добавленные вами материалы." />}
         <section className="signal-bank-materials"><h3>Материалы банка</h3><p className="w-muted">Сведения о материалах банка пока не переданы.</p></section>
       </>)}
-    </section><aside className="w-panel w-profile-help"><h3>{tab === "company" ? "О компании" : tab === "keywords" ? "Темы для наблюдения" : tab === "roles" ? "Ваша роль" : "Документы"}</h3><p>{tab === "documents" ? "Добавьте отчёты и другие материалы вашей компании." : tab === "roles" ? "От вашей роли зависит подбор событий. Если обязанности изменились, обновите выбор." : tab === "company" ? "Сведения о вашей компании доступны для просмотра." : "Добавьте важные темы через запятую. Совпадения будут подсвечиваться в карточках событий."}</p><Link className="w-text-btn action-back" to="/dashboard"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>Вернуться к событиям</Link><details className="data-note"><summary>О данных и сохранении</summary><p>{isDemoMode ? "Здесь используются подготовленные демонстрационные данные. Файлы и настройки остаются в этом браузере." : "Сведения о компании, роли и документы загружаются с сервера. При ошибке демонстрационные данные не подставляются."}</p><p>Ключевые слова и направления внимания сохраняются в этом браузере. Они не меняют подбор событий на сервере. Вход через Альфа-Бизнес пока не подключён.</p>{tab === "company" && <><p>Сведения доступны только для просмотра. Формат подробных данных ещё согласуется с командой backend.</p>{company.data && <details className="profile-raw-data"><summary>Полученные данные компании</summary><pre>{JSON.stringify(company.data.profile, null, 2)}</pre></details>}</>}{tab === "documents" && <p>Загрузка не подтверждает использование файла в разборе. Статус анализа, удаление и скачивание пока недоступны.</p>}</details></aside></div>
+    </section><aside className="w-panel w-profile-help"><h3>{tab === "company" ? "О компании" : tab === "keywords" ? "Темы для наблюдения" : tab === "roles" ? "Ваша роль" : "Документы"}</h3><p>{tab === "documents" ? "Добавьте отчёты и другие материалы вашей компании." : tab === "roles" ? "От вашей роли зависит подбор событий. Если обязанности изменились, обновите выбор." : tab === "company" ? "Сведения о вашей компании доступны для просмотра." : "Добавьте важные темы через запятую. Совпадения будут подсвечиваться в карточках событий."}</p><Link className="w-text-btn action-back" to="/dashboard"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>Вернуться к событиям</Link><details className="data-note"><summary>О данных и сохранении</summary><p>{isDemoMode ? "Здесь используются подготовленные данные. Сохраняются только сведения о файлах и настройки в этом браузере." : "Сведения о компании, роли и документы загружаются с сервера. При ошибке показаны сведения о проблеме и возможность повторить запрос."}</p><p>Закладки, ключевые слова и направления внимания сохраняются в этом браузере. Они не меняют подбор событий на сервере. API-сессия подтверждается Go через HttpOnly cookie.</p>{tab === "company" && <><p>{isDemoMode ? "Показатели в этом разделе — вымышленный пример, они не получены из отчётности компании." : "Структурированные показатели компании не переданы сервером."}</p>{company.data && <details className="profile-raw-data"><summary>Полученные данные компании</summary><pre>{JSON.stringify(company.data.profile, null, 2)}</pre></details>}</>}{tab === "documents" && <p>Загрузка не подтверждает использование файла в разборе. Статусы анализа доступны в блоке выше; скачивание и удаление документа не поддержаны.</p>}</details></aside></div>
     <dialog ref={roleDialog} className="w-dialog profile-role-dialog" aria-labelledby="role-dialog-title" aria-describedby="role-dialog-description" onCancel={(event) => { event.preventDefault(); if (!saveRoles.isPending) setRoleDialogOpen(false); }}>
       <div className="profile-role-dialog-head"><h2 id="role-dialog-title">Роли в компании</h2><button type="button" className="w-icon" aria-label="Закрыть выбор ролей" disabled={saveRoles.isPending} onClick={() => setRoleDialogOpen(false)}>×</button></div>
       <div className="profile-role-dialog-body"><p id="role-dialog-description">Выберите одну или несколько ролей.</p>{roles.data && <RolePicker roles={roles.data} selected={selectedRoles} onChange={setSelectedRoles} disabled={saveRoles.isPending} />}{saveRoles.error && <div className="auth-problem" role="alert"><strong>Не удалось сохранить роли</strong>{saveRoles.error.message}</div>}</div>

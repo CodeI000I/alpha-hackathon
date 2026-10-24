@@ -1,5 +1,9 @@
 # Оркестратор новостной аналитики
 
+Новый прототип по спецификации «Альфа-Будущее» с PostgreSQL, документами, графом,
+BusinessIssue и SituationSnapshot находится в [analytics/README.md](analytics/README.md).
+Он запускается отдельно; ниже описан сохранённый совместимый `/rank`-контур.
+
 Проверенный банком материал + снимок компании → retrieval → типизированная оценка →
 готовый персонализированный разбор → сохранение. Открытие карточки только читает;
 чат делает отдельный запрос. Используется существующая топология пяти LangGraph-графов.
@@ -34,6 +38,47 @@ python3 -m venv .venv
 .venv/bin/python -m orchestrator submit --file orchestrator/examples/bank-request.json
 ```
 
+## Jev / Clef System One adapter
+
+`orchestrator.decision` предоставляет один контракт триажа для hosted Jev,
+локального Clef и fallback на существующий `LLMClient`. Результат содержит только
+`relevance`, `kind` и `priority`; полный evidence-grounded `ImpactAssessment` и
+текст разбора остаются отдельным аналитическим этапом. Нерелевантная новость —
+обычный результат primary provider, а не ошибка.
+
+Для Jev добавьте в локальный `.env.local`:
+
+```dotenv
+AI_SYSTEMONE_URL=https://api.typesafe.ai
+AI_SYSTEMONE_MODEL=jev-latest
+AI_SYSTEMONE_API_KEY=<ключ TypeSafe>
+```
+
+Для совместимого локального Clef укажите адрес его System One server и имя модели,
+например `http://127.0.0.1:30000` и `Cloudflare/clef-flash`; ключ можно оставить
+пустым. Любой внешний URL разрешён только по HTTPS, redirects отключены.
+
+После настройки доступ проверяется через список моделей; решение при этом не
+вызывается и модельные токены не расходуются:
+
+```bash
+.venv/bin/python -m orchestrator check-systemone
+```
+
+`DecisionRouter` один раз проверяет primary, использует LLM при ошибке доступа или
+недоступности, временно открывает circuit после сетевых/5xx/429 ошибок и повторяет
+проверку после `AI_SYSTEMONE_COOLDOWN_SECONDS`. Ошибки 401/403 и отсутствие модели
+отключают primary до пересоздания процесса после исправления конфигурации. В лог
+попадают только provider и код отказа — без ключа и текста новости.
+
+В изолированном analytics workflow адаптер включается через
+`ANALYTICS_TRIAGE_ENABLED=true`: retrieval → triage → полный `ImpactAssessment` → save.
+По умолчанию этот шаг выключен. Его verdict сохраняется и передаётся как непроверенная
+подсказка; он не отбрасывает новости и не задаёт срочность для бизнеса. Конфигурация,
+автономные демо и ограничения описаны в [analytics/README.md](analytics/README.md#предварительный-триаж-system-one).
+Существующий legacy `/rank` сохраняет свой pipeline; регистрация analytics router
+в backend/frontend остаётся отдельным шагом.
+
 Следующие команды обращаются к реальному API и расходуют общий бюджет:
 
 ```bash
@@ -51,7 +96,7 @@ python3 -m venv .venv
 
 ## Модели и ограничения расходов
 
-Jev не используется. `LLMClient.structured()` вызывает Chat Completions шлюза
+Основной `ImpactAssessment` пока выполняет `LLMClient.structured()` через Chat Completions шлюз
 `https://changellenge.up.railway.app/v1` и проверяет JSON через Pydantic.
 Шесть допустимых имён моделей перечислены в `.env.example`; по умолчанию выбран
 `deepseek/deepseek-v4.1-flash`. `AI_DECISION_MODEL`, `AI_ANALYSIS_MODEL`, `AI_CHAT_MODEL`
@@ -147,13 +192,13 @@ budget_exceeded доступен следующему worker после `retry_a
 Для реального потока остаётся подключить банковский источник с ID/ревизиями и
 полным текстом, парсер документов компании, фоновую доставку/retry, backend ACL
 и отображение report/history/chat. `backend/internal/ingest/alfa.go` пока заглушка;
-Go `NewsItem.Body` не сериализуется в нынешнем контракте, его нужно передавать явно.
+Go `NewsItem.Body` передаётся в поле `body` внутреннего `/rank`-контракта.
 
-В `origin/backend` клиент уже использует `ORCHESTRATOR_URL` и `/rank`, но не
-отправляет служебный токен и ограничен 60 секундами. Для готового разбора из нескольких
-LLM-вызовов нужен фоновый путь jobs либо согласованный timeout. Ingest пока пропускает
-повторы новости; UpsertNews обновляет лишь title, AddFeedItem не обновляет конфликт.
-Команде нужно связать версии и обновление карточки. Go/frontend/deployment здесь не меняются.
+В текущем Go-клиенте используется `JEV_URL` и внутренний `/rank`, но пока не
+отправляется служебный токен; HTTP timeout составляет 30 секунд. Для готового разбора
+из нескольких LLM-вызовов нужен согласованный фоновый путь jobs либо другой timeout.
+Новый analytics router остаётся незарегистрированным. Последующие исправления Go/UI
+и проверки описаны в [отчёте аудита](../docs/pipeline-audit-2026-10-23.md).
 
 Справка: [Chat Completions](https://developers.openai.com/api/reference/resources/chat),
 [LangGraph Graph API](https://docs.langchain.com/oss/python/langgraph/graph-api),

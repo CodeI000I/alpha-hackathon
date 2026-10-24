@@ -26,6 +26,7 @@ class Settings(BaseModel):
     default_model: ModelID = 'deepseek/deepseek-v4.1-flash'
     decision_model: ModelID | None = None
     analysis_model: ModelID | None = None
+    synthesis_model: ModelID | None = None
     chat_model: ModelID | None = None
     request_timeout_seconds: float = Field(default=60, gt=0, le=180)
     max_retries: int = Field(default=2, ge=0, le=3)
@@ -40,6 +41,11 @@ class Settings(BaseModel):
     policy_version: str = 'bank-analysis-v1'
     db_path: Path = ROOT / 'orchestrator/data/analytics.sqlite3'
     service_token: SecretStr = SecretStr('')
+    systemone_url: str = ''
+    systemone_model: str = 'jev-latest'
+    systemone_api_key: SecretStr = SecretStr('')
+    systemone_timeout_seconds: float = Field(default=10, gt=0, le=60)
+    systemone_cooldown_seconds: float = Field(default=60, gt=0, le=3600)
 
     @model_validator(mode='after')
     def validate_policy(self):
@@ -51,6 +57,8 @@ class Settings(BaseModel):
         return self
 
     def model_for(self, stage: str) -> str:
+        if stage == 'analysis' and self.synthesis_model:
+            return self.synthesis_model
         return getattr(self, f'{stage}_model', None) or self.default_model
 
     def require_key(self):

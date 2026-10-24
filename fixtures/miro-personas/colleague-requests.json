@@ -1,0 +1,34 @@
+[
+  {
+    "persona": "beeline",
+    "fullName": "Ирина Тестовая",
+    "email": "irina.product@example.test",
+    "companyId": null,
+    "password": "DemoProduct2026!",
+    "roles": ["product"]
+  },
+  {
+    "persona": "x5",
+    "fullName": "Павел Тестовый",
+    "email": "pavel.commercial@example.test",
+    "companyId": null,
+    "password": "DemoRetail2026!",
+    "roles": ["commercial"]
+  },
+  {
+    "persona": "rzd",
+    "fullName": "Ольга Тестовая",
+    "email": "olga.operations@example.test",
+    "companyId": null,
+    "password": "DemoOperations2026!",
+    "roles": ["operations"]
+  },
+  {
+    "persona": "etalon",
+    "fullName": "Алексей Тестовый",
+    "email": "alexey.finance@example.test",
+    "companyId": null,
+    "password": "DemoDeveloper2026!",
+    "roles": ["cfo"]
+  }
+]

@@ -542,6 +542,43 @@ test('widget catalog and bank offer dialogs close with Escape and restore their 
   await expect(bankTrigger).toBeFocused();
 });
 
+test('bank solutions keep the small red letter from widgets and stay below the analytics heading', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await loginDemo(page, 'finance');
+  const widgetLabel = page.locator('.market-widget > .bank-offers > .bank-offers-label').first();
+  const widgetMark = widgetLabel.locator('.bank-offers-mark');
+  const reference = await widgetMark.evaluate(element => {
+    const style = getComputedStyle(element);
+    return { color: style.color, background: style.backgroundColor, fontSize: style.fontSize };
+  });
+  await page.goto('/news/101');
+  const offers = page.locator('.signal-feed-detail > .bank-offers');
+  const label = offers.locator(':scope > .bank-offers-label');
+  const mark = label.locator('.bank-offers-mark');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await expect(label).toContainText('Решения Альфа-Банка');
+    await expect(label).toHaveCSS('font-size', '12px');
+    await expect(page.locator('#analysis-bank-title')).toHaveCSS('font-size', '20px');
+    await expect(mark).toHaveText('А');
+    await expect(mark).toHaveCSS('color', reference.color);
+    await expect(mark).toHaveCSS('background-color', reference.background);
+    await expect(mark).toHaveCSS('font-size', reference.fontSize);
+    await expect(mark).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    expect((await mark.boundingBox())!.height).toBeLessThan(20);
+    await page.locator('.signal-feed-detail > .w-bank').evaluate(element => window.scrollTo(0, scrollY + element.getBoundingClientRect().top - 100));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `node_modules/.cache/solutions-hierarchy-${viewport.width}.png` });
+  }
+  const trigger = page.getByRole('button', { name: 'Посмотреть финансирование', exact: true });
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Овердрафт и кредитная линия' });
+  await expect(dialog.locator('.bank-offers-mark')).toHaveCSS('color', reference.color);
+  await expect(dialog.locator('.bank-offers-mark')).toHaveCSS('background-color', reference.background);
+  await page.keyboard.press('Escape');
+  await expect(trigger).toBeFocused();
+});
+
 test('interface omits demo badges and profile codes while keeping local-feature explanations', async ({ page }) => {
   await loginDemo(page, 'finance');
   const paths = ['/dashboard', '/news/101', '/profile?tab=roles', '/profile?tab=company', '/profile?tab=keywords', '/profile?tab=documents', '/landing', '/bank.html'];

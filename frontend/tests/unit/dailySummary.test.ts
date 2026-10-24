@@ -63,6 +63,8 @@ describe('summary type interactions', () => {
       expect(icon.getAttribute('height')).toBe('18');
       expect(icon.getAttribute('aria-hidden')).toBe('true');
     });
+    expect(get('.daily-event-icon').querySelectorAll('rect')).toHaveLength(2);
+    expect(get('.daily-event-icon path').getAttribute('d')).toBe('M13 8h5 M13 12h5 M6 16h12');
     expect(container.textContent).not.toMatch(/демо/i);
   });
 

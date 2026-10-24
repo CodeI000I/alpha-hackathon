@@ -20,7 +20,7 @@ function TrendIcon({ up = false }: { up?: boolean }) {
 }
 
 function EventIcon() {
-  return <svg className="daily-event-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M3 12h18 M15 6l6 6-6 6" /></svg>;
+  return <svg className="daily-event-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2" /><rect x="6" y="8" width="4" height="4" rx=".5" /><path d="M13 8h5 M13 12h5 M6 16h12" /></svg>;
 }
 
 interface Props {

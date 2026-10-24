@@ -218,6 +218,10 @@ test('restores the four-event overview design at desktop, tablet, mobile and low
     await page.setViewportSize(viewport);
     await summary.scrollIntoViewIfNeeded();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const headingBox = (await page.getByRole('heading', { name: 'События для вас', exact: true }).boundingBox())!;
+    const controlsBox = (await page.locator('.feed-refresh').boundingBox())!;
+    expect(controlsBox.x - headingBox.x - headingBox.width).toBeCloseTo(16, 0);
+    expect(Math.abs(controlsBox.y + controlsBox.height / 2 - headingBox.y - headingBox.height / 2)).toBeLessThan(1);
     await expect(summary.locator('.daily-story').first()).toBeVisible();
     await expect(summary.locator('.daily-next-action')).toBeVisible();
     if (viewport.width === 1440) await page.screenshot({ path: 'node_modules/.cache/summary-final-desktop.png' });

@@ -253,6 +253,100 @@ test('shows all three real types, deduplicates news across roles and excludes ol
   await expect(page.locator('.w-event')).toHaveCount(5);
 });
 
+test('counts the active role consistently and offers an explicit switch for a missing category', async ({ page }) => {
+  const values = summaryFeed().slice(0, 3);
+  values[0].role = 'strategy'; values[0].kind = 'opportunity';
+  values[2].kind = 'event';
+  await installApiMocks(page, { feed: [...values, { ...values[0], id: 700, role: 'unassigned' }] });
+  await page.route('**/api/v1/users/41', route => json(route, { ...API_USER, roles: ['strategy', 'cfo'] }));
+  await openApiSession(page);
+  await expect(page.locator('.daily-total')).toHaveText('3');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 1');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Риски', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Для этой роли рисков нет' })).toBeVisible();
+  await expect(page.locator('.state-panel')).toContainText('Финансовый директор');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('0 из 1');
+  await page.getByRole('button', { name: 'Показать риски', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('cfo');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 2');
+  await page.getByRole('button', { name: 'Все', exact: true }).click();
+  await expect(page.locator('.feed-refresh > span')).toHaveText('2 из 2');
+  await expect(page.locator('.w-event')).toHaveCount(2);
+  await expect(page.locator('.daily-total')).toHaveText('3');
+});
+
+test('summary segments highlight matching categories, align numbers and support keyboard filtering', async ({ page }) => {
+  const values = summaryFeed().slice(0, 3);
+  values[1].kind = 'event';
+  await installApiMocks(page, { feed: values });
+  await openApiSession(page);
+  const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  const balance = summary.locator('.daily-balance');
+  for (const kind of ['risk', 'opportunity', 'event']) {
+    const segment = summary.locator('.daily-segment-' + kind);
+    await segment.hover();
+    await expect(balance).toHaveAttribute('data-highlighted-kind', kind);
+    await expect(summary.locator('.daily-count-' + kind)).toHaveClass(/is-highlighted/);
+    await expect(summary.locator('.daily-counts .is-muted')).toHaveCount(2);
+    await expect(summary.locator('.daily-counts .is-muted svg').first()).toHaveCSS('color', 'rgb(119, 119, 131)');
+    await expect(summary.locator('.daily-balance-bar .is-muted > i').first()).toHaveCSS('background-color', 'rgb(119, 119, 131)');
+    if (kind === 'risk') await summary.screenshot({ path: 'node_modules/.cache/summary-hover-risk.png' });
+  }
+  await page.getByRole('heading', { name: 'Обзор событий' }).hover();
+  await expect(balance).not.toHaveAttribute('data-highlighted-kind', /.+/);
+  const starts = await summary.locator('.daily-counts button').evaluateAll(buttons => buttons.map(button => {
+    const textNode = [...button.childNodes].find(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
+    const range = document.createRange(); range.selectNodeContents(textNode!);
+    return range.getBoundingClientRect().x;
+  }));
+  expect(Math.max(...starts) - Math.min(...starts)).toBeLessThan(1);
+  await expect(summary.locator('.daily-event-icon')).toHaveAttribute('width', '18');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await summary.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const buttons = await summary.locator('.daily-balance-bar button').all();
+    for (const button of buttons) {
+      expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(24);
+      await expect(button).toBeVisible();
+    }
+    await summary.screenshot({ path: `node_modules/.cache/summary-three-types-${viewport.width}.png` });
+  }
+  await summary.locator('.daily-segment-risk').focus();
+  await expect(balance).toHaveAttribute('data-highlighted-kind', 'risk');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Риски', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'События для вас' })).toBeFocused();
+});
+
+test('manual refresh shows progress and confirms unchanged data without hiding API errors', async ({ page }) => {
+  const options: MockOptions = {};
+  await installApiMocks(page, options);
+  await openApiSession(page);
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  const refresh = page.getByRole('button', { name: 'Обновить события' });
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const holdResponse = async (route: Route) => { await gate; await json(route, API_FEED); };
+  await page.route('**/api/v1/users/41/feed?*', holdResponse);
+  await refresh.click();
+  await expect(refresh).toBeDisabled();
+  await expect(refresh).toHaveAttribute('aria-busy', 'true');
+  release();
+  await expect(page.locator('.feed-refresh-notice')).toHaveText('Лента актуальна');
+  await expect(refresh).toBeEnabled();
+  await page.unroute('**/api/v1/users/41/feed?*', holdResponse);
+  expectedHttpStatuses = [503]; options.feedFailure = { status: 503, message: 'не удалось обновить данные' };
+  await refresh.click();
+  await expect(page.getByRole('alert')).toContainText('Обновление ленты не удалось');
+  await expect(page.locator('.feed-refresh-notice')).toHaveCount(0);
+  await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(refresh).toBeEnabled();
+});
+
 test('keeps an empty overview compact and refreshes when the backend finishes preparing events', async ({ page }) => {
   const feed: typeof API_FEED = [];
   const state = await installApiMocks(page, { feed });
@@ -272,6 +366,7 @@ test('keeps an empty overview compact and refreshes when the backend finishes pr
   await page.getByRole('button', { name: 'Обновить события' }).click();
   await expect(summary.locator('.daily-total')).toHaveText('1');
   await expect(page.locator('.w-event')).toHaveCount(1);
+  await expect(page.locator('.feed-refresh-notice')).toHaveText('Лента обновлена');
   expect(state.requests.filter(value => value.includes('/feed?limit=200'))).toHaveLength(requestsBeforeRefresh + 1);
   expect(state.unknown).toEqual([]);
 });
@@ -331,6 +426,34 @@ test('sources do not claim an interpretation when the API did not provide one', 
   await expect(dialog).not.toContainText('Для разбора доступна интерпретация события.');
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
+});
+
+test('source and Alfa analytics blocks keep their icons, balanced edges and keyboard access', async ({ page }) => {
+  await installApiMocks(page);
+  await openApiSession(page, '/news/501');
+  const source = page.getByRole('button', { name: /^Источник:/ });
+  await expect(source.locator('.source-logo svg')).toBeVisible();
+  await expect(page.locator('.signal-feed-detail .w-bank-icon')).toHaveText('А');
+  await expect(page.locator('.signal-feed-detail .w-bank')).toContainText('Аналитика от Альфа-Банка');
+  await expect(page.locator('.signal-feed-detail .w-bank')).toContainText('не переданы сервером');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }, { width: 390, height: 400 }]) {
+    await page.setViewportSize(viewport);
+    await source.click();
+    const dialog = page.getByRole('dialog', { name: 'Источники и основания' });
+    await expect(dialog.locator('.w-bank-icon')).toHaveText('А');
+    await expect(dialog).toContainText('Аналитика от Альфа-Банка');
+    const dialogBox = (await dialog.boundingBox())!;
+    const bankBox = (await dialog.locator('.w-source-bank-card').boundingBox())!;
+    expect(Math.abs(bankBox.x - dialogBox.x - (dialogBox.x + dialogBox.width - bankBox.x - bankBox.width))).toBeLessThan(2);
+    await dialog.locator('.w-source-bank-card').scrollIntoViewIfNeeded();
+    const close = dialog.getByRole('button', { name: 'Закрыть источники' });
+    await expect(close).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `node_modules/.cache/source-dialog-final-${viewport.width}-${viewport.height}.png` });
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(source).toBeFocused();
+  }
 });
 
 test('API mode exposes no fictitious password login', async ({ page }) => {

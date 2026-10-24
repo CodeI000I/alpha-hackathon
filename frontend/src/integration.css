@@ -33,6 +33,7 @@
 .w-card-foot { gap: 16px; }
 .w-card-foot > span { overflow-wrap: anywhere; }
 .w-card-foot > a { flex-shrink: 0; }
+.w-card-foot > .action-link { margin-left: auto; }
 .w-filterbar { flex-wrap: wrap; }
 .w-filterbar button.active { background: #3a3a40; color: #fff; }
 .w-search:focus-within { outline: 2px solid #b7b7c1; outline-offset: 3px; }
@@ -73,6 +74,10 @@
 .feed-refresh button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: inherit; }
 .feed-refresh button:hover:not(:disabled) { color: #ff9e95; background: #ffffff08; }
 .feed-refresh button:disabled { opacity: .4; cursor: wait; }
+.feed-refresh button[aria-busy=true] svg { animation: feed-refresh-spin .8s linear infinite; }
+@keyframes feed-refresh-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .feed-refresh button[aria-busy=true] svg { animation: none; } }
+.feed-refresh-notice { pointer-events: none; font-size: 13px; }
 .feed-refresh button:focus-visible, .w-feed-heading h2:focus-visible { outline: 2px solid #b7b7c1; outline-offset: 3px; }
 .w-feed-heading h2 { scroll-margin-top: 120px; }
 .w-chat-title { display: flex; align-items: center; gap: 8px; padding: 20px; }

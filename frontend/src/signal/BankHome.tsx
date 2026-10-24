@@ -4,7 +4,7 @@ import { bankAppUrl, signalAppUrl } from './appLinks';
 import alfaLogo from './assets/bank/alfa-logo.svg';
 import './styles/bank-home.css';
 
-const unavailable = 'Банковские операции недоступны в демоверсии';
+const unavailable = 'Банковские операции здесь недоступны';
 const menuItems: { label: string; icon: BankIconName; group?: boolean }[] = [
   { label: 'Новый платёж', icon: 'plus' },
   { label: 'Лента операций', icon: 'wallet' },
@@ -139,7 +139,7 @@ export function BankHome() {
         <button className="bank-rewards" onClick={notify} aria-label="Альфа-Выгодно"><span>₽</span></button>
         <button className="bank-icon-button bank-mail" onClick={notify} aria-label="Письма"><BankIcon name="mail" /></button>
         <button className="bank-icon-button bank-notification" onClick={notify} aria-label="Уведомления: 3"><BankIcon name="bell" /><span>3</span></button>
-        <button className="bank-identity" onClick={notify} aria-label="Профиль демонстрационной компании"><span className="bank-avatar"><BankIcon name="user" /></span><span><strong>ООО «СЕВЕРНАЯ МАНУФАКТУРА»</strong><small>Морозов А. М.</small></span></button>
+        <button className="bank-identity" onClick={notify} aria-label="Профиль компании"><span className="bank-avatar"><BankIcon name="user" /></span><span><strong>ООО «СЕВЕРНАЯ МАНУФАКТУРА»</strong><small>Морозов А. М.</small></span></button>
         <button className="bank-icon-button bank-logout" onClick={notify} aria-label="Выход из банка"><BankIcon name="logout" /></button>
       </div>
     </header>
@@ -158,7 +158,7 @@ export function BankHome() {
 
     <main className="bank-main" id="bank-main" tabIndex={-1} ref={main}>
       <h1 className="bank-sr-only">Главная — Альфа-Бизнес</h1>
-      <div className="bank-demo-label"><span />Демонстрационный прототип</div>
+
       <form className="bank-smart-search" onSubmit={event => { event.preventDefault(); notify(); }}>
         <span className="bank-search-orb" aria-hidden="true">✦</span>
         <input aria-label="Найти операцию" placeholder="Найти операцию или сервис" autoComplete="off" onFocus={notify} />
@@ -186,7 +186,7 @@ export function BankHome() {
           <div className="bank-balance-footer"><button onClick={notify}>Реквизиты</button><button onClick={notify}>Тарифы и подписки</button><button className="bank-bonus" onClick={notify}>120<span>А</span></button></div>
         </section>
         <section className="bank-work-card" aria-labelledby="bank-work-title"><h2 id="bank-work-title">Дела в работе</h2><div>{workItems.map(([label, count]) => <button key={label} onClick={notify} className={!count ? 'is-empty' : ''}><span>{label}</span><span className={count ? 'bank-work-count has-items' : 'bank-work-count'}>{count}</span></button>)}</div></section>
-        <aside className="bank-promos" aria-label="Предложения банка — демонстрационные примеры">
+        <aside className="bank-promos" aria-label="Предложения банка">
           <button className="bank-promo bank-promo-deposit" onClick={notify}><span><strong>Депозит</strong><span>Ваши деньги работают круглосуточно</span></span><PromoArt kind="deposit" /></button>
           <button className="bank-promo bank-promo-acquiring" onClick={notify}><span><strong>Интернет-эквайринг</strong><span>Подключите для вашего бизнеса</span></span><PromoArt kind="acquiring" /></button>
           <button className="bank-promo bank-promo-cashback" onClick={notify}><span><strong>100% за ЖКУ</strong><span>Вернём до 100% за платёж</span></span><PromoArt kind="cashback" /></button>
@@ -205,14 +205,14 @@ export function BankHome() {
       </section>
 
       <section className="bank-feed" aria-labelledby="bank-feed-title">
-        <div className="bank-feed-title"><h2 id="bank-feed-title">Лента операций</h2><span>Демонстрационные данные</span></div>
+        <div className="bank-feed-title"><h2 id="bank-feed-title">Лента операций</h2></div>
         <div className="bank-feed-search"><button onClick={notify}><span>21–22 октября</span><BankIcon name="calendar" /></button><form onSubmit={event => { event.preventDefault(); notify(); }}><BankIcon name="search" /><input aria-label="Поиск по операциям" placeholder="Контрагент, ИНН, БИК, назначение или номер счёта" onFocus={notify} autoComplete="off" /></form></div>
         <div className="bank-feed-filters"><button onClick={notify} aria-label="Фильтры операций"><BankIcon name="filter" /></button>{['Входящие', 'Исходящие', 'Счёт', 'Контрагент', 'Статус', 'Сумма', 'Тип операции'].map((label, index) => <button key={label} onClick={notify}>{label}{index > 1 && <BankIcon name="chevron" />}</button>)}</div>
         <div className="bank-feed-note">Выберите период и счёт, чтобы увидеть обороты и остатки</div>
         <div className="bank-feed-toolbar"><button onClick={notify}><span className="bank-faux-checkbox" aria-hidden="true" />Показать реестры отдельными платежами</button><div><button onClick={notify}>Настройки</button><button onClick={notify}>Скачать<BankIcon name="chevron" /></button></div></div>
         <div className="bank-table-wrap"><table className="bank-operations"><thead><tr><th>Операция</th><th>Дата</th><th>Статус</th><th>Сумма</th></tr></thead><tbody>{operations.map((operation, index) => <tr key={index}><td><button onClick={notify}><strong>{operation.company}</strong><span>{operation.detail}</span></button></td><td>{operation.date}</td><td><span className={`bank-operation-status${operation.status === 'НА ОБРАБОТКЕ' ? ' is-pending' : ''}`}>{operation.status}</span></td><td className={operation.incoming ? 'bank-incoming' : ''}>{operation.amount}<small> ₽</small></td></tr>)}</tbody></table></div>
       </section>
-      <footer className="bank-demo-footer"><span>Демонстрационный прототип для кейса «Сигнал»</span><span>Все компании, суммы и операции вымышлены. Связи с банковским аккаунтом нет.</span></footer>
+      <footer className="bank-demo-footer"><span>Данные подготовлены для примера. Банковский аккаунт не подключён, операции недоступны.</span></footer>
     </main>
     <button className="bank-help" onClick={notify} aria-label="Помощь" ref={helpButton}><BankIcon name="help" /></button>
     {toast && <div className="bank-toast" role="status"><BankIcon name="help" /><span>{unavailable}</span><button onClick={() => setToast(false)} aria-label="Закрыть уведомление" ref={toastCloseButton}><BankIcon name="close" /></button></div>}

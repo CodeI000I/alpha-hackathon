@@ -17,10 +17,10 @@ test.afterEach(() => {
 
 test('bank demo opens registration in an isolated new tab', async ({ page, context }) => {
   await page.goto('/bank.html');
-  await expect(page.getByText('Демонстрационный прототип', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Доступный остаток', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Создать платёж' }).click();
-  await expect(page.getByRole('status')).toContainText('Банковские операции недоступны в демоверсии');
+  await expect(page.getByRole('status')).toContainText('Банковские операции здесь недоступны');
 
   const nextPagePromise = context.waitForEvent('page');
   await page.getByRole('link', { name: 'Сигнал — откроется в новой вкладке' }).click();
@@ -121,7 +121,7 @@ test('filters, searches, and persists local bookmarks', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Все', exact: true }).click();
   const eventCard = page.locator('.w-event').filter({ hasText: DEMO_ACCOUNTS.finance.event });
-  await eventCard.getByRole('button', { name: 'Сохранить в закладки (демо)' }).click();
+  await eventCard.getByRole('button', { name: 'Сохранить в закладки' }).click();
   await page.getByRole('link', { name: /Закладки/ }).click();
   await expect(page).toHaveURL(/\/dashboard\?saved=1$/);
   await expect(page.locator('.w-event')).toHaveCount(1);
@@ -129,7 +129,7 @@ test('filters, searches, and persists local bookmarks', async ({ page }) => {
 
   await page.reload();
   await expect(page.locator('.w-event')).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Убрать из закладок (демо)' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Убрать из закладок' })).toBeVisible();
 });
 
 test('removing an assigned role updates the feed and role selection persists', async ({ page }) => {
@@ -210,7 +210,7 @@ test('key pages have no horizontal overflow at desktop, tablet, mobile, and low 
     await page.setViewportSize(viewport);
     for (const path of paths) {
       await page.goto(path);
-      if (path === '/bank.html') await expect(page.getByText('Демонстрационный прототип', { exact: true })).toBeVisible();
+      if (path === '/bank.html') await expect(page.getByRole('heading', { name: 'Доступный остаток', exact: true })).toBeVisible();
       else await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
       if (path === '/dashboard') await expect(page.locator('.w-event')).toHaveCount(1);
       expect(
@@ -247,7 +247,7 @@ test('registration validates identity first, restores its draft, and cannot skip
 
 test('saved items and role-scoped chats never carry into another demo company', async ({ page }) => {
   await loginDemo(page, 'finance');
-  await page.locator('.w-event').first().getByRole('button', { name: 'Сохранить в закладки (демо)' }).click();
+  await page.locator('.w-event').first().getByRole('button', { name: 'Сохранить в закладки' }).click();
   await page.getByRole('combobox', { name: 'Ваша роль' }).selectOption('cfo');
   await page.getByRole('button', { name: 'Как это влияет на мою роль?' }).click();
   await expect(page.locator('.w-message-user')).toHaveCount(1);
@@ -276,7 +276,7 @@ test('legacy hash routes retain real event IDs and the bank remains a separate d
   await expect(page.getByRole('heading', { name: 'Аналитика компании' })).toBeVisible();
   await page.goto('/#/bank');
   await expect(page).toHaveURL(/\/bank\.html$/);
-  await expect(page.getByText('Демонстрационный прототип', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Доступный остаток', exact: true })).toBeVisible();
 });
 
 test('source modal and chat composer remain keyboard reachable in a low window', async ({ page }) => {
@@ -540,4 +540,53 @@ test('widget catalog and bank offer dialogs close with Escape and restore their 
   await expect(bankDialog.getByText('Ставка задана для примера', { exact: false })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(bankTrigger).toBeFocused();
+});
+
+test('interface omits demo badges and profile codes while keeping local-feature explanations', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  const paths = ['/dashboard', '/news/101', '/profile?tab=roles', '/profile?tab=company', '/profile?tab=keywords', '/profile?tab=documents', '/landing', '/bank.html'];
+  for (const path of paths) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    await page.locator('details.data-note').evaluateAll(details => details.forEach(detail => { detail.setAttribute('open', ''); }));
+    expect(await page.locator('body').innerText(), path).not.toMatch(/демо/i);
+    await expect(page.locator('.ui-badge--demo, .w-demo, .bank-demo-label')).toHaveCount(0);
+    if (path === '/dashboard') {
+      await expect(page.locator('.w-card-foot')).not.toContainText(/Контекст|Элементы профиля|Б[0-9]|С[0-9]/);
+      await expect(page.getByText('Здесь используются подготовленные ответы, а не аналитика ИИ.', { exact: false })).toBeVisible();
+      await expect(page.getByText('Виджет не подключён к рынку', { exact: false })).toBeVisible();
+    }
+  }
+});
+
+test('saved chat answers lose only the old presentation prefix without rewriting history', async ({ page }) => {
+  await loginDemo(page, 'finance');
+  const key = 'alpha.insights.v2.demo.company.1.user.1.chat:101';
+  const history = [{ question: 'Что обсудить с командой?', answer: 'Демо-подсказка: обсудите первоисточник с командой. Документы компании не анализировались.' }];
+  await page.evaluate(({ key, history }) => localStorage.setItem(key, JSON.stringify(history)), { key, history });
+  await page.goto('/news/101');
+  await expect(page.locator('.w-message-answer')).toHaveText('Обсудите первоисточник с командой. Документы компании не анализировались.');
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '[]'), key)).toEqual(history);
+});
+
+test('fixed account refresh gives feedback and its role counter never mixes the three summary events', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await loginDemo(page, 'finance');
+  await expect(page.locator('.daily-total')).toHaveText('3');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 1');
+  await page.screenshot({ path: 'node_modules/.cache/signal-final-overview.png' });
+  await page.locator('.daily-segment-risk').hover();
+  await expect(page.locator('.daily-count-opportunity')).toHaveClass(/is-muted/);
+  await page.locator('.daily-summary').screenshot({ path: 'node_modules/.cache/signal-final-summary-hover.png' });
+  await page.getByRole('button', { name: 'Обновить события' }).click();
+  await expect(page.locator('.feed-refresh-notice')).toHaveText('Лента актуальна');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 1');
+  await page.getByRole('button', { name: 'Риски', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Для этой роли рисков нет' })).toBeVisible();
+  await page.getByRole('button', { name: 'Показать риски', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'Ваша роль' })).toHaveValue('cfo');
+  await expect(page.locator('.feed-refresh > span')).toHaveText('1 из 2');
+  await expect(page.getByRole('heading', { name: 'Банк России сохранил ключевую ставку', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Все', exact: true }).click();
+  await expect(page.locator('.feed-refresh > span')).toHaveText('2 из 2');
 });

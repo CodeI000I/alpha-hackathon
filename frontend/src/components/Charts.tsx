@@ -1,5 +1,4 @@
 import { useId } from "react";
-import { DemoBadge } from "./ui";
 
 export interface TrendPoint {
   label: string;
@@ -67,7 +66,6 @@ export function TrendChart({
     <section className={`trend-chart${compact ? " trend-chart--compact" : ""}`}>
       <div className="chart-heading">
         <h2>{title}</h2>
-        {demo && <DemoBadge />}
       </div>
       <strong className="trend-chart__value">{currentValue}</strong>
       {change && <span className="trend-chart__change">{change}</span>}
@@ -104,7 +102,7 @@ export function TrendChart({
           {data[data.length - 1].label}
         </text>
       </svg>
-      {demo && <p className="chart-note">Иллюстративные данные хранятся только в этом браузере.</p>}
+      {demo && <><p className="chart-note">Источник данных не подключён</p><details className="data-note"><summary>О данных</summary><p>Подготовленный набор для примера. График не подключён к рыночным данным или показателям компании.</p></details></>}
     </section>
   );
 }
@@ -152,7 +150,6 @@ export function RadarChart({ title = "Направления внимания", 
     <section className="radar-chart">
       <div className="chart-heading">
         <h2>{title}</h2>
-        {demo && <DemoBadge />}
       </div>
       <svg viewBox="0 0 500 380" role="img" aria-label={`${title}: ${data.map((axis) => `${axis.label} ${axis.value}%`).join(", ")}`}>
         <title>{title}</title>
@@ -179,7 +176,7 @@ export function RadarChart({ title = "Направления внимания", 
           );
         })}
       </svg>
-      {demo && <p className="chart-note">Демо-профиль внимания, а не оценка риска.</p>}
+      {demo && <><p className="chart-note">Источник данных не подключён</p><details className="data-note"><summary>О данных</summary><p>Показаны направления внимания, а не оценка риска компании.</p></details></>}
     </section>
   );
 }

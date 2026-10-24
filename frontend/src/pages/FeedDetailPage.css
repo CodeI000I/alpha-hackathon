@@ -1,0 +1,76 @@
+/* Restore the handoff's source pill geometry, without inventing publisher logos. */
+.signal-feed-detail .w-source-pill {
+  gap: 9px;
+  padding: 5px 12px 5px 5px;
+  max-width: 100%;
+  text-align: left;
+}
+
+.signal-feed-detail .w-source-pill > .source-logo {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e7e8ed;
+  color: #24242a;
+}
+
+.signal-feed-detail .w-source-pill > .source-logo > svg {
+  display: block;
+}
+
+.signal-feed-detail .w-source-pill > .action-icon {
+  flex: 0 0 16px;
+}
+
+.signal-feed-detail .w-bank > .bank-title,
+.signal-sources-dialog .w-source-bank-card > .bank-title {
+  align-items: center;
+  gap: 12px;
+}
+
+.signal-feed-detail .w-bank-icon,
+.signal-sources-dialog .w-bank-icon {
+  flex-shrink: 0;
+}
+
+/* Keep the scroll rail and both edges balanced, including a long source URL. */
+.w-dialog.signal-sources-dialog > .w-source-content {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 24px 28px 28px;
+  scrollbar-gutter: stable both-edges;
+}
+
+.signal-sources-dialog .w-source-content > .w-source-section {
+  padding: 24px 0 0;
+  margin-top: 24px;
+}
+
+.signal-sources-dialog .w-source-content > .w-source-bank-card {
+  padding: 20px;
+  margin-top: 26px;
+}
+
+.signal-sources-dialog .bank-title > h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.signal-feed-detail .w-source-pill:focus-visible,
+.signal-sources-dialog :is(button, a):focus-visible {
+  outline: 2px solid #b7b7c1;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .w-dialog.signal-sources-dialog > .w-source-content {
+    padding: 20px;
+  }
+
+  .signal-sources-dialog .w-source-content > .w-source-bank-card {
+    padding: 16px;
+  }
+}

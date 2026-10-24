@@ -116,7 +116,9 @@ jobs:
   build-and-push:
     name: Build and publish Docker image
     needs: [test-and-validate, pipeline-tests]
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -140,8 +142,9 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=alpha-app
+          # Кеш ускоряет сборку, но отказ сервиса кеша не должен блокировать выпуск.
+          cache-to: type=gha,scope=alpha-app,mode=max,ignore-error=true,timeout=2m
 
       - name: Build and push analytics image
         uses: docker/build-push-action@v7
@@ -152,8 +155,8 @@ jobs:
           tags: |
             ${{ env.ANALYTICS_IMAGE_NAME }}:analytics-${{ env.IMAGE_TAG }}
             ${{ env.ANALYTICS_IMAGE_NAME }}:analytics-latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=alpha-analytics
+          cache-to: type=gha,scope=alpha-analytics,mode=max,ignore-error=true,timeout=2m
 
   update-image-tag:
     name: Update image tag for Argo CD

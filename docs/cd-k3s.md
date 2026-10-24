@@ -54,11 +54,21 @@ deploy/
 |---|---|---|
 | `pipeline-tests` | push в main, pull request, ручной запуск | Go race и PG; Python и pgvector/checkpoints; frontend unit/Playwright; сквозной Go/Python HTTP smoke с синтетической моделью |
 | `test-and-validate` | push в main, pull request, ручной запуск | Go vet/tests, frontend build, сборка `Dockerfile` и `Dockerfile.analytics`, Helm lint/render; manifests сохраняются на 7 дней |
-| `build-and-push` | только main, после обеих проверок | Публикует Go/React `:<sha>` и Python `:analytics-<sha>`; также обновляет `latest` и `analytics-latest` |
+| `build-and-push` | push в main или ручной запуск на main, после обеих проверок | Публикует Go/React `:<sha>` и Python `:analytics-<sha>`; также обновляет `latest` и `analytics-latest` |
 | `update-image-tag` | main, после публикации обоих образов | Обновляет `image` и `analytics.image` в values одним коммитом с `[skip ci]` |
 
 Push только с `*.md`, `docs/` или `deploy/` не пересобирает образы: чарт Argo CD
 подхватывает сам. Pull request собирает оба образа для проверки, без публикации.
+
+Кеш BuildKit в GitHub Actions разделён по образам (`alpha-app` и `alpha-analytics`).
+Запись кеша ограничена двумя минутами и необязательна (`ignore-error=true`): ошибка
+`error writing layer blob: failed to reserve cache` при экспорте кеша не должна
+блокировать выпуск успешно собранного и опубликованного образа. Ошибки самих
+тестов, сборки и push по-прежнему останавливают следующие jobs.
+Параметры описаны в [документации Docker](https://docs.docker.com/build/cache/backends/gha/).
+После изменения workflow проверяйте новый запуск на свежем коммите; повтор старого
+запуска использует прежнюю конфигурацию. Зелёный `build-and-push` ещё не подтверждает
+обновление кластера: нужны успешный `update-image-tag` и проверка Argo CD.
 
 В логах Actions имя пользователя Docker Hub замазано как `***`, потому что оно лежит в secrets. Это нормально.
 

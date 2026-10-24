@@ -1,0 +1,22 @@
+[
+  {
+    "persona": "beeline",
+    "company": { "name": "Билайн", "inn": "0000001001" },
+    "user": { "fullName": "Дмитрий Тестовый", "email": "dmitry.strategy@example.test", "password": "DemoStrategy2026!", "roles": ["strategy"] }
+  },
+  {
+    "persona": "x5",
+    "company": { "name": "X5", "inn": "0000001002" },
+    "user": { "fullName": "Анна Тестовая", "email": "anna.finance@example.test", "password": "DemoFinance2026!", "roles": ["cfo"] }
+  },
+  {
+    "persona": "rzd",
+    "company": { "name": "РЖД", "inn": "0000001003" },
+    "user": { "fullName": "Сергей Тестовый", "email": "sergey.procurement@example.test", "password": "DemoSupply2026!", "roles": ["procurement"] }
+  },
+  {
+    "persona": "etalon",
+    "company": { "name": "Группа «Эталон»", "inn": "0000001004" },
+    "user": { "fullName": "Марина Тестовая", "email": "marina.commercial@example.test", "password": "DemoSales2026!", "roles": ["commercial"] }
+  }
+]

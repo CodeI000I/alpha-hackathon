@@ -1,0 +1,8 @@
+{
+  "company": { "name": "X5", "inn": "0000001002" },
+  "user": {
+    "fullName": "Анна Тестовая",
+    "email": "anna.finance@example.test",
+    "roles": ["cfo"]
+  }
+}

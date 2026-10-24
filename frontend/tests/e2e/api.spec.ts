@@ -195,6 +195,11 @@ test('restores the four-event overview design at desktop, tablet, mobile and low
   const state = await installApiMocks(page, { feed: summaryFeed() });
   await openApiSession(page);
   const summary = page.getByRole('region', { name: 'Сводка за 24 часа' });
+  const refresh = page.getByRole('button', { name: 'Обновить события' });
+  await expect(refresh).toHaveText('');
+  await expect(refresh.locator('svg')).toHaveAttribute('width', '20');
+  await expect(refresh.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+  await expect(refresh.locator('svg path')).toHaveCount(2);
   await expect(summary.locator('.daily-total')).toHaveText('4');
   await expect(summary.getByRole('button', { name: '2 риска', exact: true })).toBeVisible();
   await expect(summary.getByRole('button', { name: '2 возможности', exact: true })).toBeVisible();

@@ -1,0 +1,8 @@
+{
+  "company": { "name": "Билайн", "inn": "0000001001" },
+  "user": {
+    "fullName": "Дмитрий Тестовый",
+    "email": "dmitry.strategy@example.test",
+    "roles": ["strategy"]
+  }
+}

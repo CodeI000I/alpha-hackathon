@@ -1,0 +1,8 @@
+{
+  "company": { "name": "Группа «Эталон»", "inn": "0000001004" },
+  "user": {
+    "fullName": "Марина Тестовая",
+    "email": "marina.commercial@example.test",
+    "roles": ["commercial"]
+  }
+}

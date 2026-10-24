@@ -1,0 +1,8 @@
+{
+  "company": { "name": "РЖД", "inn": "0000001003" },
+  "user": {
+    "fullName": "Сергей Тестовый",
+    "email": "sergey.procurement@example.test",
+    "roles": ["procurement"]
+  }
+}

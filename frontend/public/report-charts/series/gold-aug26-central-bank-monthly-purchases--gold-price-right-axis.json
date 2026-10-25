@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-central-bank-monthly-purchases--gold-price-right-axis",
+  "chart_id": "gold-aug26-central-bank-monthly-purchases",
+  "series_id": "gold-price-right-axis",
+  "label": "Цена золота, $/унция (правая шкала)",
+  "unit": "$/унция",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Ежемесячные покупки золота мировыми ЦБ, т",
+    "page": 7,
+    "crop": [
+      0.03,
+      0.62,
+      0.99,
+      0.92
+    ],
+    "image": "images/gold-aug26-central-bank-monthly-purchases.jpg",
+    "image_sha256": "c9be214fa21f7686d76bd86e089b3658a437ce5ee21b685ee3c90d3a52734277"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "Частичное покрытие: внесены все подписанные столбцы покупок. Среднее значение за год на пунктирной линии и цена золота на линии не подписаны точками.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "c9be214fa21f7686d76bd86e089b3658a437ce5ee21b685ee3c90d3a52734277",
+    "plot": [
+      78,
+      72,
+      1108,
+      451
+    ],
+    "x_ticks": [
+      {
+        "position": 0.037864077669902914,
+        "label": "июл.25"
+      },
+      {
+        "position": 0.2689320388349515,
+        "label": "окт.25"
+      },
+      {
+        "position": 0.5,
+        "label": "янв.26"
+      },
+      {
+        "position": 0.7300970873786408,
+        "label": "апр.26"
+      },
+      {
+        "position": 0.9611650485436893,
+        "label": "июл.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "gold-price-right-axis",
+        "mode": "line",
+        "y_axis": {
+          "min": 2400,
+          "max": 5400
+        },
+        "anchors": [
+          [
+            0.03786,
+            0.70712
+          ],
+          [
+            0.11456,
+            0.65435
+          ],
+          [
+            0.19223,
+            0.51979
+          ],
+          [
+            0.26893,
+            0.46702
+          ],
+          [
+            0.34563,
+            0.3905
+          ],
+          [
+            0.4233,
+            0.36412
+          ],
+          [
+            0.5,
+            0.22955
+          ],
+          [
+            0.5767,
+            0.13193
+          ],
+          [
+            0.6534,
+            0.18734
+          ],
+          [
+            0.7301,
+            0.23483
+          ],
+          [
+            0.8068,
+            0.29288
+          ],
+          [
+            0.8835,
+            0.39314
+          ],
+          [
+            0.96117,
+            0.44855
+          ]
+        ],
+        "estimated_error": 35,
+        "note": "Центры видимых маркеров измерены по JPEG; соединение точек повторяет печатную линию. Значения приблизительные, исходный ряд недоступен."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.03786,
+      "value": 3279.0
+    },
+    {
+      "x": 0.11456,
+      "value": 3437.0
+    },
+    {
+      "x": 0.19223,
+      "value": 3841.0
+    },
+    {
+      "x": 0.26893,
+      "value": 3999.0
+    },
+    {
+      "x": 0.34563,
+      "value": 4228.0
+    },
+    {
+      "x": 0.4233,
+      "value": 4308.0
+    },
+    {
+      "x": 0.5,
+      "value": 4711.0
+    },
+    {
+      "x": 0.5767,
+      "value": 5004.0
+    },
+    {
+      "x": 0.6534,
+      "value": 4838.0
+    },
+    {
+      "x": 0.7301,
+      "value": 4696.0
+    },
+    {
+      "x": 0.8068,
+      "value": 4521.0
+    },
+    {
+      "x": 0.8835,
+      "value": 4221.0
+    },
+    {
+      "x": 0.96117,
+      "value": 4054.0
+    }
+  ],
+  "json_file": "series/gold-aug26-central-bank-monthly-purchases--gold-price-right-axis.json",
+  "svg_file": "series/gold-aug26-central-bank-monthly-purchases--gold-price-right-axis.svg"
+}

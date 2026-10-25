@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "id": "inflation-02-weekly-decomposition-by-segment--food-fruit-vegetables-excluded",
+  "chart_id": "inflation-02-weekly-decomposition-by-segment",
+  "series_id": "food-fruit-vegetables-excluded",
+  "label": "Продовольствие (ex. плодоовощи)",
+  "unit": "п.п.",
+  "data_status": "unavailable",
+  "source": {
+    "document": {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    "chart_title": "Недельная инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+    "page": 2,
+    "crop": [
+      0.03,
+      0.1,
+      0.49,
+      0.37
+    ],
+    "image": "images/inflation-02-weekly-decomposition-by-segment.jpg",
+    "image_sha256": "5a472fdab27d4f9011f4ffda208a4dd6e0833fdb3cbde4608c4fd9d7b151dce5"
+  },
+  "x_axis": {
+    "label": "Дата",
+    "kind": "time"
+  },
+  "note": "График с несколькими компонентами; численные подписи к отдельным точкам отсутствуют.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "5a472fdab27d4f9011f4ffda208a4dd6e0833fdb3cbde4608c4fd9d7b151dce5",
+    "plot": [
+      62,
+      199,
+      1115,
+      695
+    ],
+    "x_ticks": [
+      {
+        "position": 0.01899335232668566,
+        "label": "02.03"
+      },
+      {
+        "position": 0.2418730367448316,
+        "label": "13.04"
+      },
+      {
+        "position": 0.46475272116297756,
+        "label": "25.05"
+      },
+      {
+        "position": 0.6876324055811236,
+        "label": "06.07"
+      },
+      {
+        "position": 0.9105120899992695,
+        "label": "17.08"
+      },
+      {
+        "position": 0.9848053181386515,
+        "label": "31.08"
+      }
+    ],
+    "series": [
+      {
+        "id": "food-fruit-vegetables-excluded",
+        "mode": "unreadable",
+        "note": "Сегмент местами тонкий и наложен на соседние/отрицательные части стекового столбца."
+      }
+    ]
+  },
+  "points": [],
+  "json_file": "series/inflation-02-weekly-decomposition-by-segment--food-fruit-vegetables-excluded.json",
+  "svg_file": null
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "alfa-consumption-nominal-wages-sectors--q1-26",
+  "chart_id": "alfa-consumption-nominal-wages-sectors",
+  "series_id": "q1-26",
+  "label": "1К26",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    "chart_title": "Рис. 4: Динамика номинальных зарплат по сегментам, % г/г",
+    "page": 1,
+    "crop": [
+      0.495,
+      0.7,
+      0.93,
+      0.94
+    ],
+    "image": "images/alfa-consumption-nominal-wages-sectors.jpg",
+    "image_sha256": "6dd8e6784880ee97464f1789afc29aa5e536562dbe8b3f2d97a92f3d5466a2dc"
+  },
+  "x_axis": {
+    "label": "Сегмент",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [
+    {
+      "label": "Экономика",
+      "value": 15
+    },
+    {
+      "label": "Информация и связь",
+      "value": 19
+    },
+    {
+      "label": "Обраб. пром-ть",
+      "value": 12
+    },
+    {
+      "label": "Торговля",
+      "value": 18
+    },
+    {
+      "label": "Образование",
+      "value": 13
+    },
+    {
+      "label": "Строит. сектор",
+      "value": 15
+    },
+    {
+      "label": "Гостиницы и общепит",
+      "value": 24
+    },
+    {
+      "label": "Недвиж-ть",
+      "value": 20
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "Экономика",
+      "value": 15,
+      "source_index": 0
+    },
+    {
+      "x": "Информация и связь",
+      "value": 19,
+      "source_index": 1
+    },
+    {
+      "x": "Обраб. пром-ть",
+      "value": 12,
+      "source_index": 2
+    },
+    {
+      "x": "Торговля",
+      "value": 18,
+      "source_index": 3
+    },
+    {
+      "x": "Образование",
+      "value": 13,
+      "source_index": 4
+    },
+    {
+      "x": "Строит. сектор",
+      "value": 15,
+      "source_index": 5
+    },
+    {
+      "x": "Гостиницы и общепит",
+      "value": 24,
+      "source_index": 6
+    },
+    {
+      "x": "Недвиж-ть",
+      "value": 20,
+      "source_index": 7
+    }
+  ],
+  "json_file": "series/alfa-consumption-nominal-wages-sectors--q1-26.json",
+  "svg_file": "series/alfa-consumption-nominal-wages-sectors--q1-26.svg"
+}

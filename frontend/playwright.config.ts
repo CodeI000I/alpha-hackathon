@@ -18,7 +18,7 @@ export default defineConfig({
   projects: [
     {
       name: "demo",
-      testMatch: /demo\.spec\.ts/,
+      testMatch: /(?:demo|report-charts)\.spec\.ts/,
       use: { baseURL: "http://127.0.0.1:4173" },
     },
     {

@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-retail-deposits--year-2024",
+  "chart_id": "alfa-policy-retail-deposits",
+  "series_id": "year-2024",
+  "label": "2024",
+  "unit": "Дек T-1 = 100%",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 6: Динамика рублевых розничных депозитов, дек T-1 = 100%",
+    "page": 3,
+    "crop": [
+      0.52,
+      0.12,
+      0.93,
+      0.38
+    ],
+    "image": "images/alfa-policy-retail-deposits.jpg",
+    "image_sha256": "39d49f645c94a3142bafc4d850bfd8a38353764643416ec8f2cbaffe49331b19"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      158,
+      191,
+      1128,
+      849
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "Дек T-1"
+      },
+      {
+        "position": 0.083505,
+        "label": "Янв"
+      },
+      {
+        "position": 0.16701,
+        "label": "Фев"
+      },
+      {
+        "position": 0.250515,
+        "label": "Мар"
+      },
+      {
+        "position": 0.334021,
+        "label": "Апр"
+      },
+      {
+        "position": 0.417526,
+        "label": "Май"
+      },
+      {
+        "position": 0.5,
+        "label": "Июн"
+      },
+      {
+        "position": 0.583505,
+        "label": "Июл"
+      },
+      {
+        "position": 0.66701,
+        "label": "Авг"
+      },
+      {
+        "position": 0.750515,
+        "label": "Сен"
+      },
+      {
+        "position": 0.834021,
+        "label": "Окт"
+      },
+      {
+        "position": 0.916495,
+        "label": "Ноя"
+      },
+      {
+        "position": 1.0,
+        "label": "Дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2024",
+        "mode": "line",
+        "y_axis": {
+          "min": 94,
+          "max": 133
+        },
+        "anchors": [
+          [
+            0.0,
+            0.840426
+          ],
+          [
+            0.083505,
+            0.860182
+          ],
+          [
+            0.16701,
+            0.793313
+          ],
+          [
+            0.250515,
+            0.737082
+          ],
+          [
+            0.334021,
+            0.673252
+          ],
+          [
+            0.417526,
+            0.592705
+          ],
+          [
+            0.5,
+            0.539514
+          ],
+          [
+            0.583505,
+            0.50152
+          ],
+          [
+            0.66701,
+            0.451368
+          ],
+          [
+            0.750515,
+            0.407295
+          ],
+          [
+            0.834021,
+            0.360182
+          ],
+          [
+            0.916495,
+            0.31155
+          ],
+          [
+            1.0,
+            0.069909
+          ]
+        ],
+        "estimated_error": 0.356,
+        "note": "Опорные точки повторно измерены по координатам JPEG; значения приблизительны, интерполяция не является исходным рядом."
+      }
+    ],
+    "image_sha256": "39d49f645c94a3142bafc4d850bfd8a38353764643416ec8f2cbaffe49331b19"
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value": 100.22
+    },
+    {
+      "x": 0.083505,
+      "value": 99.45
+    },
+    {
+      "x": 0.16701,
+      "value": 102.06
+    },
+    {
+      "x": 0.250515,
+      "value": 104.25
+    },
+    {
+      "x": 0.334021,
+      "value": 106.74
+    },
+    {
+      "x": 0.417526,
+      "value": 109.88
+    },
+    {
+      "x": 0.5,
+      "value": 111.96
+    },
+    {
+      "x": 0.583505,
+      "value": 113.44
+    },
+    {
+      "x": 0.66701,
+      "value": 115.4
+    },
+    {
+      "x": 0.750515,
+      "value": 117.12
+    },
+    {
+      "x": 0.834021,
+      "value": 118.95
+    },
+    {
+      "x": 0.916495,
+      "value": 120.85
+    },
+    {
+      "x": 1.0,
+      "value": 130.27
+    }
+  ],
+  "json_file": "series/alfa-policy-retail-deposits--year-2024.json",
+  "svg_file": "series/alfa-policy-retail-deposits--year-2024.svg"
+}

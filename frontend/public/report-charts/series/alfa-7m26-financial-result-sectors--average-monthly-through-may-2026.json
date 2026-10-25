@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "id": "alfa-7m26-financial-result-sectors--average-monthly-through-may-2026",
+  "chart_id": "alfa-7m26-financial-result-sectors",
+  "series_id": "average-monthly-through-may-2026",
+  "label": "в среднем в месяц за 5М26",
+  "unit": "трлн руб./мес.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-7m26",
+      "file": "ALFA-7M26.pdf",
+      "sha256": "3c64c1e43f3b46a795f9581967f2dbc8efb0994cb77ab82e95da180830e9ff8c",
+      "pages": 4,
+      "title": "Макростатистика 7М26"
+    },
+    "chart_title": "Рис. 4: Сальдированный финансовый результат компаний по секторам, млрд руб./мес.",
+    "page": 2,
+    "crop": [
+      0.52,
+      0.11,
+      0.93,
+      0.34
+    ],
+    "image": "images/alfa-7m26-financial-result-sectors.jpg",
+    "image_sha256": "c94089f52e4358445def62bf8a5f4d67d9c2dbd0525d1ef7f3e7d445a40a7390"
+  },
+  "x_axis": {
+    "label": "Сектор",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      115,
+      196,
+      1100,
+      718
+    ],
+    "x_ticks": [
+      {
+        "position": 0.083249,
+        "label": "Всего"
+      },
+      {
+        "position": 0.248731,
+        "label": "Добыча"
+      },
+      {
+        "position": 0.416244,
+        "label": "Обработка"
+      },
+      {
+        "position": 0.583756,
+        "label": "Нефте-продукты"
+      },
+      {
+        "position": 0.751269,
+        "label": "Торговля"
+      },
+      {
+        "position": 0.918782,
+        "label": "Финансы"
+      }
+    ],
+    "series": [
+      {
+        "id": "average-monthly-through-may-2026",
+        "mode": "bar",
+        "y_axis": {
+          "min": -0.5,
+          "max": 2.5
+        },
+        "anchors": [
+          [
+            0.069036,
+            0.084291
+          ],
+          [
+            0.235533,
+            0.66092
+          ],
+          [
+            0.403046,
+            0.618774
+          ],
+          [
+            0.571574,
+            0.762452
+          ],
+          [
+            0.736041,
+            0.716475
+          ],
+          [
+            0.904569,
+            0.814176
+          ]
+        ],
+        "estimated_error": 0.034,
+        "note": "Опорные точки повторно измерены по координатам JPEG; значения приблизительны, интерполяция не является исходным рядом."
+      }
+    ],
+    "image_sha256": "c94089f52e4358445def62bf8a5f4d67d9c2dbd0525d1ef7f3e7d445a40a7390"
+  },
+  "points": [
+    {
+      "x": 0.069036,
+      "value": 2.247
+    },
+    {
+      "x": 0.235533,
+      "value": 0.517
+    },
+    {
+      "x": 0.403046,
+      "value": 0.644
+    },
+    {
+      "x": 0.571574,
+      "value": 0.213
+    },
+    {
+      "x": 0.736041,
+      "value": 0.351
+    },
+    {
+      "x": 0.904569,
+      "value": 0.057
+    }
+  ],
+  "json_file": "series/alfa-7m26-financial-result-sectors--average-monthly-through-may-2026.json",
+  "svg_file": "series/alfa-7m26-financial-result-sectors--average-monthly-through-may-2026.svg"
+}

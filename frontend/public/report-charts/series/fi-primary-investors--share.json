@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "id": "fi-primary-investors--share",
+  "chart_id": "fi-primary-investors",
+  "series_id": "share",
+  "label": "Доля инвесторов",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Структура инвесторов на первичном рынке корп. облигаций в 1П26 г., %",
+    "page": 21,
+    "crop": [
+      0.64957,
+      0.49698,
+      0.97009,
+      0.83
+    ],
+    "image": "images/fi-primary-investors.jpg",
+    "image_sha256": "8bddb857da4c932855a0c8996e5ee706dede9259554f69669da193a364919f6b"
+  },
+  "x_axis": {
+    "label": "Категория инвестора",
+    "kind": "category"
+  },
+  "note": "Напечатанные округленные доли суммируются в 101%; нормализация не выполнялась. Общий объем в центре 4,8 трлн руб. НФО — подпись исходной легенды.",
+  "exact_points": [
+    {
+      "label": "НФО",
+      "value": 10
+    },
+    {
+      "label": "СЗКО",
+      "value": 36
+    },
+    {
+      "label": "Доверительное управление",
+      "value": 17
+    },
+    {
+      "label": "Физические лица",
+      "value": 8
+    },
+    {
+      "label": "Прочие банки",
+      "value": 7
+    },
+    {
+      "label": "Компании нефинансового сектора",
+      "value": 22
+    },
+    {
+      "label": "Нерезиденты",
+      "value": 1
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "НФО",
+      "value": 10,
+      "source_index": 0
+    },
+    {
+      "x": "СЗКО",
+      "value": 36,
+      "source_index": 1
+    },
+    {
+      "x": "Доверительное управление",
+      "value": 17,
+      "source_index": 2
+    },
+    {
+      "x": "Физические лица",
+      "value": 8,
+      "source_index": 3
+    },
+    {
+      "x": "Прочие банки",
+      "value": 7,
+      "source_index": 4
+    },
+    {
+      "x": "Компании нефинансового сектора",
+      "value": 22,
+      "source_index": 5
+    },
+    {
+      "x": "Нерезиденты",
+      "value": 1,
+      "source_index": 6
+    }
+  ],
+  "json_file": "series/fi-primary-investors--share.json",
+  "svg_file": "series/fi-primary-investors--share.svg"
+}

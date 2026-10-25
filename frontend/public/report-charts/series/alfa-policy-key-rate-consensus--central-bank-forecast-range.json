@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-key-rate-consensus--central-bank-forecast-range",
+  "chart_id": "alfa-policy-key-rate-consensus",
+  "series_id": "central-bank-forecast-range",
+  "label": "Прогнозный диапазон ЦБ РФ по средней КС",
+  "unit": "%",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 9: Изменение ожидаемой средней ключевой ставки на 2027 г., %",
+    "page": 3,
+    "crop": [
+      0.08,
+      0.66,
+      0.5,
+      0.92
+    ],
+    "image": "images/alfa-policy-key-rate-consensus.jpg",
+    "image_sha256": "26d6d70c8ecaa1a60b76e76d0c81ab64bffdbaba7072c1c9739aa1a43042bb94"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "Шесть подписанных маркеров консенсус-прогноза средней ставки на 2027 год, опубликованных в указанные месяцы 2026 года. Нет наблюдений за май и август. Серые 8,0–12,5% — границы диапазона ЦБ, не точки консенсуса; они не включены в этот ряд.",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      159,
+      286,
+      1035,
+      853
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "фев.26"
+      },
+      {
+        "position": 0.142694,
+        "label": "мар.26"
+      },
+      {
+        "position": 0.285388,
+        "label": "апр.26"
+      },
+      {
+        "position": 0.429224,
+        "label": "май.26"
+      },
+      {
+        "position": 0.573059,
+        "label": "июн.26"
+      },
+      {
+        "position": 0.71347,
+        "label": "июл.26"
+      },
+      {
+        "position": 0.857306,
+        "label": "авг.26"
+      },
+      {
+        "position": 1.0,
+        "label": "сен.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "central-bank-forecast-range",
+        "mode": "band",
+        "y_axis": {
+          "min": 7,
+          "max": 13
+        },
+        "anchors": [
+          [
+            0.0,
+            0.666667,
+            0.832451
+          ],
+          [
+            0.142694,
+            0.666667,
+            0.832451
+          ],
+          [
+            0.285388,
+            0.500882,
+            0.832451
+          ],
+          [
+            0.573059,
+            0.500882,
+            0.832451
+          ],
+          [
+            0.71347,
+            0.084656,
+            0.416226
+          ],
+          [
+            1.0,
+            0.084656,
+            0.416226
+          ]
+        ],
+        "estimated_error": 0.063,
+        "note": "Границы диапазона ЦБ измерены по серым ломаным; переходы между мартом/апрелем и июнем/июлем наклонные, не ступени.",
+        "forecast_from": 0.0
+      }
+    ],
+    "image_sha256": "26d6d70c8ecaa1a60b76e76d0c81ab64bffdbaba7072c1c9739aa1a43042bb94"
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value_low": 8.005,
+      "value_high": 9.0,
+      "forecast": true
+    },
+    {
+      "x": 0.142694,
+      "value_low": 8.005,
+      "value_high": 9.0,
+      "forecast": true
+    },
+    {
+      "x": 0.285388,
+      "value_low": 8.005,
+      "value_high": 9.995,
+      "forecast": true
+    },
+    {
+      "x": 0.573059,
+      "value_low": 8.005,
+      "value_high": 9.995,
+      "forecast": true
+    },
+    {
+      "x": 0.71347,
+      "value_low": 10.503,
+      "value_high": 12.492,
+      "forecast": true
+    },
+    {
+      "x": 1.0,
+      "value_low": 10.503,
+      "value_high": 12.492,
+      "forecast": true
+    }
+  ],
+  "json_file": "series/alfa-policy-key-rate-consensus--central-bank-forecast-range.json",
+  "svg_file": "series/alfa-policy-key-rate-consensus--central-bank-forecast-range.svg"
+}

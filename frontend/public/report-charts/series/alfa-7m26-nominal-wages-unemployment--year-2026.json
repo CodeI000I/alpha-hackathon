@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "id": "alfa-7m26-nominal-wages-unemployment--year-2026",
+  "chart_id": "alfa-7m26-nominal-wages-unemployment",
+  "series_id": "year-2026",
+  "label": "2026",
+  "unit": "",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-7m26",
+      "file": "ALFA-7M26.pdf",
+      "sha256": "3c64c1e43f3b46a795f9581967f2dbc8efb0994cb77ab82e95da180830e9ff8c",
+      "pages": 4,
+      "title": "Макростатистика 7М26"
+    },
+    "chart_title": "Рис. 5: Динамика зарплат в номинальном выражении, % г/г и уровень безработицы, %",
+    "page": 2,
+    "crop": [
+      0.08,
+      0.58,
+      0.5,
+      0.805
+    ],
+    "image": "images/alfa-7m26-nominal-wages-unemployment.jpg",
+    "image_sha256": "1660264e88d2e58d2e5ffd60ecdd36d24fd8683a65355f996d74baffc268aa05"
+  },
+  "x_axis": {
+    "label": "Номинальные зарплаты, % г/г",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      112,
+      193,
+      1120,
+      722
+    ],
+    "x_ticks": [
+      {
+        "position": 0,
+        "label": "5%"
+      },
+      {
+        "position": 0.25,
+        "label": "10%"
+      },
+      {
+        "position": 0.5,
+        "label": "15%"
+      },
+      {
+        "position": 0.75,
+        "label": "20%"
+      },
+      {
+        "position": 1,
+        "label": "25%"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2026",
+        "mode": "scatter",
+        "y_axis": {
+          "min": 2,
+          "max": 7
+        },
+        "anchors": [
+          [
+            0.201389,
+            0.943289
+          ],
+          [
+            0.230159,
+            0.964083
+          ],
+          [
+            0.256944,
+            0.984877
+          ],
+          [
+            0.300595,
+            0.962193
+          ],
+          [
+            0.470238,
+            0.964083
+          ],
+          [
+            0.499008,
+            0.982987
+          ],
+          [
+            0.50496,
+            0.962193
+          ]
+        ],
+        "estimated_error": 0.057,
+        "note": "Центры семи видимых красных маркеров; два положения около 15% роста зарплат частично перекрываются."
+      }
+    ],
+    "image_sha256": "1660264e88d2e58d2e5ffd60ecdd36d24fd8683a65355f996d74baffc268aa05"
+  },
+  "points": [
+    {
+      "x": 0.201389,
+      "value": 2.284
+    },
+    {
+      "x": 0.230159,
+      "value": 2.18
+    },
+    {
+      "x": 0.256944,
+      "value": 2.076
+    },
+    {
+      "x": 0.300595,
+      "value": 2.189
+    },
+    {
+      "x": 0.470238,
+      "value": 2.18
+    },
+    {
+      "x": 0.499008,
+      "value": 2.085
+    },
+    {
+      "x": 0.50496,
+      "value": 2.189
+    }
+  ],
+  "json_file": "series/alfa-7m26-nominal-wages-unemployment--year-2026.json",
+  "svg_file": "series/alfa-7m26-nominal-wages-unemployment--year-2026.svg"
+}

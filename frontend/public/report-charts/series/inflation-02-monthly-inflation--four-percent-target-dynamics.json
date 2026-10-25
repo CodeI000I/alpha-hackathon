@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "inflation-02-monthly-inflation--four-percent-target-dynamics",
+  "chart_id": "inflation-02-monthly-inflation",
+  "series_id": "four-percent-target-dynamics",
+  "label": "Динамика, соответствующая инфляции 4,0%",
+  "unit": "% м/м",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    "chart_title": "Динамика месячной инфляции, % м/м",
+    "page": 2,
+    "crop": [
+      0.5,
+      0.7,
+      0.98,
+      0.94
+    ],
+    "image": "images/inflation-02-monthly-inflation.jpg",
+    "image_sha256": "68b00af256befb0d98e4da0ea22b30ab4ba1de000d151aefb5a6fe296e96c28e"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "Частичное покрытие: подписанные значения за январь–август 2026 года. Августовское значение −0,07% — прогноз: на странице 1 ожидаемая дефляция за месяц указана как 0,07%. Значение соответствующей инфляции 4,0% обозначено линией без подписанных отдельных точек.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "68b00af256befb0d98e4da0ea22b30ab4ba1de000d151aefb5a6fe296e96c28e",
+    "plot": [
+      29,
+      80,
+      1080,
+      670
+    ],
+    "x_ticks": [
+      {
+        "position": 0.04091341579448145,
+        "label": "янв"
+      },
+      {
+        "position": 0.12438370383184848,
+        "label": "фев"
+      },
+      {
+        "position": 0.20785399186921547,
+        "label": "мар"
+      },
+      {
+        "position": 0.2913242799065825,
+        "label": "апр"
+      },
+      {
+        "position": 0.3747945679439495,
+        "label": "май"
+      },
+      {
+        "position": 0.45826485598131655,
+        "label": "июн"
+      },
+      {
+        "position": 0.5417351440186835,
+        "label": "июл"
+      },
+      {
+        "position": 0.6252054320560505,
+        "label": "авг"
+      },
+      {
+        "position": 0.7086757200934176,
+        "label": "сен"
+      },
+      {
+        "position": 0.7921460081307846,
+        "label": "окт"
+      },
+      {
+        "position": 0.8756162961681516,
+        "label": "ноя"
+      },
+      {
+        "position": 0.9590865842055185,
+        "label": "дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "four-percent-target-dynamics",
+        "mode": "line",
+        "y_axis": {
+          "min": -0.5,
+          "max": 1.75
+        },
+        "anchors": [
+          [
+            0.04091,
+            0.54915
+          ],
+          [
+            0.12438,
+            0.57797
+          ],
+          [
+            0.20785,
+            0.62712
+          ],
+          [
+            0.29132,
+            0.62712
+          ],
+          [
+            0.37479,
+            0.63559
+          ],
+          [
+            0.45826,
+            0.64068
+          ],
+          [
+            0.54174,
+            0.5678
+          ],
+          [
+            0.62521,
+            0.82881
+          ],
+          [
+            0.70868,
+            0.76949
+          ],
+          [
+            0.79215,
+            0.66102
+          ],
+          [
+            0.87562,
+            0.59153
+          ],
+          [
+            0.95909,
+            0.51356
+          ]
+        ],
+        "estimated_error": 0.03,
+        "note": "Центры видимых маркеров измерены по JPEG; соединение точек повторяет печатную линию. Значения приблизительные, исходный ряд недоступен."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.04091,
+      "value": 0.514
+    },
+    {
+      "x": 0.12438,
+      "value": 0.45
+    },
+    {
+      "x": 0.20785,
+      "value": 0.339
+    },
+    {
+      "x": 0.29132,
+      "value": 0.339
+    },
+    {
+      "x": 0.37479,
+      "value": 0.32
+    },
+    {
+      "x": 0.45826,
+      "value": 0.308
+    },
+    {
+      "x": 0.54174,
+      "value": 0.472
+    },
+    {
+      "x": 0.62521,
+      "value": -0.115
+    },
+    {
+      "x": 0.70868,
+      "value": 0.019
+    },
+    {
+      "x": 0.79215,
+      "value": 0.263
+    },
+    {
+      "x": 0.87562,
+      "value": 0.419
+    },
+    {
+      "x": 0.95909,
+      "value": 0.594
+    }
+  ],
+  "json_file": "series/inflation-02-monthly-inflation--four-percent-target-dynamics.json",
+  "svg_file": "series/inflation-02-monthly-inflation--four-percent-target-dynamics.svg"
+}

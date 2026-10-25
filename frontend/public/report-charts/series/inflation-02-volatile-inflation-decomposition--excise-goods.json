@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "id": "inflation-02-volatile-inflation-decomposition--excise-goods",
+  "chart_id": "inflation-02-volatile-inflation-decomposition",
+  "series_id": "excise-goods",
+  "label": "Акцизные товары",
+  "unit": "п.п.",
+  "data_status": "unavailable",
+  "source": {
+    "document": {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    "chart_title": "Волатильная инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+    "page": 2,
+    "crop": [
+      0.5,
+      0.38,
+      0.98,
+      0.68
+    ],
+    "image": "images/inflation-02-volatile-inflation-decomposition.jpg",
+    "image_sha256": "ae354650d0d11795048fafe1ddde28b44a10f77428e5b407a21db5ff2cb34eaa"
+  },
+  "x_axis": {
+    "label": "Дата",
+    "kind": "time"
+  },
+  "note": "Численные подписи к точкам и столбцам отсутствуют.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "ae354650d0d11795048fafe1ddde28b44a10f77428e5b407a21db5ff2cb34eaa",
+    "plot": [
+      48,
+      186,
+      1067,
+      782
+    ],
+    "x_ticks": [
+      {
+        "position": 0.018645731108930325,
+        "label": "02.03"
+      },
+      {
+        "position": 0.2408092398278856,
+        "label": "13.04"
+      },
+      {
+        "position": 0.46297274854684084,
+        "label": "25.05"
+      },
+      {
+        "position": 0.6851362572657961,
+        "label": "06.07"
+      },
+      {
+        "position": 0.9072997659847514,
+        "label": "17.08"
+      },
+      {
+        "position": 0.9813542688910697,
+        "label": "31.08"
+      }
+    ],
+    "series": [
+      {
+        "id": "excise-goods",
+        "mode": "unreadable",
+        "note": "Контур не отделяется от соседних элементов при заданном масштабе."
+      }
+    ]
+  },
+  "points": [],
+  "json_file": "series/inflation-02-volatile-inflation-decomposition--excise-goods.json",
+  "svg_file": null
+}

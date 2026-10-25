@@ -258,9 +258,11 @@ export function createApiClient(mode: DataMode = dataMode) {
         const signal = toAbortSignal(signalInput);
         return request(`/analytics/issues/${encodeURIComponent(issueId)}?role=${encodeURIComponent(role)}`, { signal });
       },
-      evidence(issueId: string, role: string, signalInput?: SignalInput): Promise<AnalyticsEvidencePack[]> {
+      evidence(issueId: string, role: string, signalInput?: SignalInput, version?: number): Promise<AnalyticsEvidencePack[]> {
         const signal = toAbortSignal(signalInput);
-        return request(`/analytics/issues/${encodeURIComponent(issueId)}/evidence?role=${encodeURIComponent(role)}`, { signal }, "collection");
+        const params = new URLSearchParams({ role });
+        if (version !== undefined) params.set("version", String(version));
+        return request(`/analytics/issues/${encodeURIComponent(issueId)}/evidence?${params.toString()}`, { signal }, "collection");
       },
       history(issueId: string, role: string, signalInput?: SignalInput): Promise<BusinessIssue[]> {
         const signal = toAbortSignal(signalInput);

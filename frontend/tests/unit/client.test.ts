@@ -73,6 +73,18 @@ describe("API mode", () => {
     );
   });
 
+  it("requests evidence for a pinned issue version and keeps the signal argument position", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(json([]));
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    const { createApiClient } = await loadClient();
+    const api = createApiClient("api");
+
+    await api.analytics.evidence("issue-1", "cfo", controller.signal, 7);
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/v1/analytics/issues/issue-1/evidence?role=cfo&version=7", expect.objectContaining({ signal: controller.signal }));
+  });
+
   it("does not replace a network failure with demo data", async () => {
     const failure = new TypeError("network offline");
     const fetchMock = vi.fn().mockRejectedValue(failure);

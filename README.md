@@ -9,6 +9,7 @@ React, Go API и Python analytics соединены в один стек.
 - [API backend](backend/API.md), [интерфейс Signal](frontend/FRONTEND_GUIDE_RU.md)
 - [Аналитика](orchestrator/analytics/README.md), [спецификация](docs/analytics-spec-v1.md)
 - [Парсер](parser_service/README.md), [деплой в k3s](docs/cd-k3s.md)
+- [Графики из PDF: каталог, числовые данные и предпросмотр виджетов](docs/report-charts.md)
 
 ## Запуск приложения
 

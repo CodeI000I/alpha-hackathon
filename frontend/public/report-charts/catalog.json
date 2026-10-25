@@ -1,0 +1,4030 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    {
+      "id": "alfa-7m26",
+      "file": "ALFA-7M26.pdf",
+      "sha256": "3c64c1e43f3b46a795f9581967f2dbc8efb0994cb77ab82e95da180830e9ff8c",
+      "pages": 4,
+      "title": "Макростатистика 7М26"
+    },
+    {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    {
+      "id": "alfa-macro-stat-1h26",
+      "file": "ALFA-macro_stat1H26.pdf",
+      "sha256": "84899553fadf3e49abac7074c7b7d2afc2fa5c70b7fde0bf4c3eabe3d7402266",
+      "pages": 5,
+      "title": "Макростатистика 1П26"
+    },
+    {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    {
+      "id": "bond-brief-14092026",
+      "file": "Бонд_Бриф_14092026.pdf",
+      "sha256": "87dc17520e2a744f95580ee2ec42461d0ee6ebf19e752622a49c49600cb1b055",
+      "pages": 5,
+      "title": "Бонд Бриф: Итоги недели"
+    },
+    {
+      "id": "alfa-russian-steels-1q21",
+      "file": "ALFA_Russian_Steels_1К21PreviewUpdate_15Apr2021.pdf",
+      "sha256": "36eaaa58ae68d858db3600dbf3cc93d0bdefb8ca03f1f5cc154c532cc32e0c86",
+      "pages": 4,
+      "title": "Российская сталь: Ралли цен продолжается; прогноз результатов за 1К21"
+    }
+  ],
+  "charts": [
+    {
+      "id": "fi-market-indices",
+      "document_id": "fi-strategy-3q26",
+      "page": 5,
+      "title": "Динамика индексов RGBI и IMOEX",
+      "kind": "line",
+      "crop": [
+        0.6094,
+        0.2237,
+        0.96752,
+        0.51391
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Две разные оси: RGBI слева, IMOEX справа. Числа на осях не являются значениями наблюдений.",
+      "image": "images/fi-market-indices.jpg",
+      "image_sha256": "483bdf9996fa9bd627aa2729aa77a54e139abd4e47f2b234c24b3d91b2849aa0",
+      "image_width": 1200,
+      "image_height": 687
+    },
+    {
+      "id": "fi-ofz-yields",
+      "document_id": "fi-strategy-3q26",
+      "page": 5,
+      "title": "Динамика доходности ОФЗ, %",
+      "kind": "line",
+      "crop": [
+        0.60855,
+        0.52116,
+        0.96581,
+        0.81983
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-ofz-yields.jpg",
+      "image_sha256": "160ca8c028ae3d0fb20f53f6d7e756d304bc1078066733ca741ca4b3b27305c3",
+      "image_width": 1200,
+      "image_height": 710
+    },
+    {
+      "id": "fi-total-returns",
+      "document_id": "fi-strategy-3q26",
+      "page": 6,
+      "title": "Динамика доходности активов в 2026 г. (индексы полной доходности)",
+      "kind": "line",
+      "crop": [
+        0.5359,
+        0.20919,
+        0.98974,
+        0.87304
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-total-returns.jpg",
+      "image_sha256": "f5ea52bb231daca6a3bb11a17afc0621357203291705dceecfa55703357e873b",
+      "image_width": 1200,
+      "image_height": 1240
+    },
+    {
+      "id": "fi-budget-monthly",
+      "document_id": "fi-strategy-3q26",
+      "page": 9,
+      "title": "Расходы федерального бюджета помесячно, млрд руб.",
+      "kind": "bar",
+      "crop": [
+        0.5735,
+        0.20798,
+        0.95556,
+        0.5127
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-budget-monthly.jpg",
+      "image_sha256": "fb85686c023e1087981e319aefbcf2e70749460673b649cdfc4733fb88970cb5",
+      "image_width": 1200,
+      "image_height": 676
+    },
+    {
+      "id": "fi-budget-inflation",
+      "document_id": "fi-strategy-3q26",
+      "page": 9,
+      "title": "Динамика бюджетных расходов помесячно г/г и динамика инфляции",
+      "kind": "line",
+      "crop": [
+        0.57949,
+        0.52116,
+        0.97521,
+        0.87424
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-budget-inflation.jpg",
+      "image_sha256": "75478f4fa5e043d596fe269bc1c2e4fd5d88b71d75c61fc987802d91097f0182",
+      "image_width": 1200,
+      "image_height": 757
+    },
+    {
+      "id": "fi-credit-growth",
+      "document_id": "fi-strategy-3q26",
+      "page": 10,
+      "title": "Динамика корпоративного кредитования и совокупных активов помесячно м/м, %",
+      "kind": "line",
+      "crop": [
+        0.60171,
+        0.20435,
+        0.96838,
+        0.54293
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-credit-growth.jpg",
+      "image_sha256": "882b3e3f5733a621990d9ac136b442ff8e345feb6a08a49bdbc667c302258717",
+      "image_width": 1200,
+      "image_height": 783
+    },
+    {
+      "id": "fi-credit-volume",
+      "document_id": "fi-strategy-3q26",
+      "page": 10,
+      "title": "Динамика объема кредитов юрлицам, трлн руб.",
+      "kind": "bar",
+      "crop": [
+        0.60598,
+        0.54534,
+        0.95983,
+        0.87787
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-credit-volume.jpg",
+      "image_sha256": "8082cd8eb9cdba474bbeb724c0b6461340b1f7a5801fbc02307402f2583c132f",
+      "image_width": 1200,
+      "image_height": 798
+    },
+    {
+      "id": "fi-consumer-credit-retail",
+      "document_id": "fi-strategy-3q26",
+      "page": 11,
+      "title": "Динамика потребкредитования и оборота розничной торговли",
+      "kind": "bar",
+      "crop": [
+        0.58462,
+        0.2104,
+        0.96752,
+        0.51753
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-consumer-credit-retail.jpg",
+      "image_sha256": "c8b7d93266bac7b026431c4a8d5694b78d4b466cf5e9d65b82ed0d6ecafbe93c",
+      "image_width": 1200,
+      "image_height": 681
+    },
+    {
+      "id": "fi-mortgages",
+      "document_id": "fi-strategy-3q26",
+      "page": 11,
+      "title": "Объем выданных ипотечных кредитов, млрд руб.",
+      "kind": "mixed",
+      "crop": [
+        0.02051,
+        0.54534,
+        0.29915,
+        0.85248
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-mortgages.jpg",
+      "image_sha256": "a4d986c783ba54160e6fdfa9721cd376f12e81043d2414404a95c13e252d178c",
+      "image_width": 1200,
+      "image_height": 935
+    },
+    {
+      "id": "fi-retail-wages-inflation",
+      "document_id": "fi-strategy-3q26",
+      "page": 11,
+      "title": "Динамика оборота розничной торговли, инфляции и номинальной з/п, %",
+      "kind": "line",
+      "crop": [
+        0.31368,
+        0.54534,
+        0.6265,
+        0.85369
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-retail-wages-inflation.jpg",
+      "image_sha256": "4c20dce245ddfc9450b97ea99ef233868a1afe6ae26c3ad39a629a9b558db1ef",
+      "image_width": 1200,
+      "image_height": 836
+    },
+    {
+      "id": "fi-consumer-sentiment",
+      "document_id": "fi-strategy-3q26",
+      "page": 11,
+      "title": "Индекс потребительских настроений и индикатор бизнес-климата",
+      "kind": "line",
+      "crop": [
+        0.6359,
+        0.54414,
+        0.9641,
+        0.85248
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-consumer-sentiment.jpg",
+      "image_sha256": "90ec62febfaeba5e476ac46537ab259a16399e83f1b21b906a6ca1a0276d8067",
+      "image_width": 1200,
+      "image_height": 797
+    },
+    {
+      "id": "fi-monetary-policy",
+      "document_id": "fi-strategy-3q26",
+      "page": 12,
+      "title": "Показатели жесткости ДКП",
+      "kind": "line",
+      "crop": [
+        0.64188,
+        0.21524,
+        0.9735,
+        0.66385
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Ключевая ставка, ожидаемая инфляция, сезонно скорректированная инфляция и цель. Числа на шкале не переносились как наблюдения.",
+      "image": "images/fi-monetary-policy.jpg",
+      "image_sha256": "75d3600dfd8bff863789c22786ebf0241c57f86d720f6bb44a3e70b130875212",
+      "image_width": 1200,
+      "image_height": 1148
+    },
+    {
+      "id": "fi-brent",
+      "document_id": "fi-strategy-3q26",
+      "page": 13,
+      "title": "Динамика цены Brent, USD/барр",
+      "kind": "line",
+      "crop": [
+        0.02991,
+        0.51391,
+        0.28803,
+        0.82346
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-brent.jpg",
+      "image_sha256": "adb94bfaac924ffc6ebc26d84005f9750fed7646f37ac1914d7d8a455879ecfc",
+      "image_width": 1200,
+      "image_height": 1017
+    },
+    {
+      "id": "fi-oil-monthly",
+      "document_id": "fi-strategy-3q26",
+      "page": 13,
+      "title": "Динамика среднемесячной цены нефти Юралс и Brent",
+      "kind": "line",
+      "crop": [
+        0.32393,
+        0.51391,
+        0.61624,
+        0.82104
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-oil-monthly.jpg",
+      "image_sha256": "a027f0e7b09cdbd746fabf05fa27b1a385f485a206727613d2045aefb9f6759c",
+      "image_width": 1200,
+      "image_height": 891
+    },
+    {
+      "id": "fi-urals-discount",
+      "document_id": "fi-strategy-3q26",
+      "page": 13,
+      "title": "Дисконт Urals к Brent, $",
+      "kind": "bar",
+      "crop": [
+        0.65812,
+        0.51391,
+        0.95726,
+        0.84885
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-urals-discount.jpg",
+      "image_sha256": "020bd890ba2157c91825bec3a1d4f93812b0e6d6f48f8920af6a340bd48d21be",
+      "image_width": 1200,
+      "image_height": 950
+    },
+    {
+      "id": "fi-bank-bond-holdings",
+      "document_id": "fi-strategy-3q26",
+      "page": 15,
+      "title": "Объем вложений банков в ОФЗ и корп. облигации, млрд руб.",
+      "kind": "line",
+      "crop": [
+        0.58376,
+        0.20677,
+        0.97863,
+        0.51874
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-bank-bond-holdings.jpg",
+      "image_sha256": "88aadc81721ac0db70c5fe502ed28d35a36b3ce662f53a5485b1a199f1627a92",
+      "image_width": 1200,
+      "image_height": 671
+    },
+    {
+      "id": "fi-ofz-volume",
+      "document_id": "fi-strategy-3q26",
+      "page": 15,
+      "title": "ОФЗ в обращении по номиналу, трлн руб.",
+      "kind": "line",
+      "crop": [
+        0.58718,
+        0.53688,
+        0.97436,
+        0.84401
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-ofz-volume.jpg",
+      "image_sha256": "d4e6b57e68f71c32de05e4965323d923c3e5d11a1df9e0d855badcac19272cd1",
+      "image_width": 1200,
+      "image_height": 673
+    },
+    {
+      "id": "fi-ofz-investors",
+      "document_id": "fi-strategy-3q26",
+      "page": 15,
+      "title": "Структура инвесторов в ОФЗ",
+      "kind": "bar",
+      "crop": [
+        0.02479,
+        0.55018,
+        0.55128,
+        0.89
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "banks",
+          "label": "Кредитные организации",
+          "unit": "%",
+          "points": [
+            {
+              "label": "31.12.2017",
+              "value": 46
+            },
+            {
+              "label": "31.12.2018",
+              "value": 43
+            },
+            {
+              "label": "31.12.2019",
+              "value": 38
+            },
+            {
+              "label": "31.12.2020",
+              "value": 53
+            },
+            {
+              "label": "31.12.2021",
+              "value": 58
+            },
+            {
+              "label": "31.12.2022",
+              "value": 63
+            },
+            {
+              "label": "31.12.2023",
+              "value": 62
+            },
+            {
+              "label": "31.12.2024",
+              "value": 70
+            },
+            {
+              "label": "31.12.2025",
+              "value": 63
+            }
+          ]
+        },
+        {
+          "id": "nonresidents",
+          "label": "Нерезиденты",
+          "unit": "%",
+          "points": [
+            {
+              "label": "31.12.2017",
+              "value": 33
+            },
+            {
+              "label": "31.12.2018",
+              "value": 24
+            },
+            {
+              "label": "31.12.2019",
+              "value": 33
+            },
+            {
+              "label": "31.12.2020",
+              "value": 23
+            },
+            {
+              "label": "31.12.2021",
+              "value": 20
+            },
+            {
+              "label": "31.12.2022",
+              "value": 11
+            },
+            {
+              "label": "31.12.2023",
+              "value": 7
+            },
+            {
+              "label": "31.12.2024",
+              "value": 4
+            },
+            {
+              "label": "31.12.2025",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "id": "pension",
+          "label": "НПФ",
+          "unit": "%",
+          "points": [
+            {
+              "label": "31.12.2017",
+              "value": 3
+            },
+            {
+              "label": "31.12.2018",
+              "value": 13
+            },
+            {
+              "label": "31.12.2019",
+              "value": 11
+            },
+            {
+              "label": "31.12.2020",
+              "value": 8
+            },
+            {
+              "label": "31.12.2021",
+              "value": 8
+            },
+            {
+              "label": "31.12.2022",
+              "value": 9
+            },
+            {
+              "label": "31.12.2023",
+              "value": 10
+            },
+            {
+              "label": "31.12.2024",
+              "value": 10
+            },
+            {
+              "label": "31.12.2025",
+              "value": 11
+            }
+          ]
+        },
+        {
+          "id": "insurers",
+          "label": "Страховщики",
+          "unit": "%",
+          "points": [
+            {
+              "label": "31.12.2017",
+              "value": 3
+            },
+            {
+              "label": "31.12.2018",
+              "value": 6
+            },
+            {
+              "label": "31.12.2019",
+              "value": 5
+            },
+            {
+              "label": "31.12.2020",
+              "value": 4
+            },
+            {
+              "label": "31.12.2021",
+              "value": 4
+            },
+            {
+              "label": "31.12.2022",
+              "value": 4
+            },
+            {
+              "label": "31.12.2023",
+              "value": 5
+            },
+            {
+              "label": "31.12.2024",
+              "value": 3
+            },
+            {
+              "label": "31.12.2025",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "id": "other-financial",
+          "label": "Другие финансовые организации",
+          "unit": "%",
+          "points": [
+            {
+              "label": "31.12.2017",
+              "value": 3
+            },
+            {
+              "label": "31.12.2018",
+              "value": 3
+            },
+            {
+              "label": "31.12.2019",
+              "value": 6
+            },
+            {
+              "label": "31.12.2020",
+              "value": 4
+            },
+            {
+              "label": "31.12.2021",
+              "value": 4
+            },
+            {
+              "label": "31.12.2022",
+              "value": 4
+            },
+            {
+              "label": "31.12.2023",
+              "value": 7
+            },
+            {
+              "label": "31.12.2024",
+              "value": 6
+            },
+            {
+              "label": "31.12.2025",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "id": "population",
+          "label": "Население",
+          "unit": "%",
+          "points": [
+            {
+              "label": "31.12.2017",
+              "value": 1
+            },
+            {
+              "label": "31.12.2018",
+              "value": 2
+            },
+            {
+              "label": "31.12.2019",
+              "value": 2
+            },
+            {
+              "label": "31.12.2020",
+              "value": 1
+            },
+            {
+              "label": "31.12.2021",
+              "value": 1
+            },
+            {
+              "label": "31.12.2022",
+              "value": 2
+            },
+            {
+              "label": "31.12.2023",
+              "value": 2
+            },
+            {
+              "label": "31.12.2024",
+              "value": 2
+            },
+            {
+              "label": "31.12.2025",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "note": "Перенесены только шесть рядов с явными числовыми подписями. Малые неподписанные сегменты не восстановлены; это не полная декомпозиция 100%.",
+      "image": "images/fi-ofz-investors.jpg",
+      "image_sha256": "6b33fcbde33e228bd651571c76972514face9bc50cbedb7939e409574ed2fef6",
+      "image_width": 1200,
+      "image_height": 548
+    },
+    {
+      "id": "fi-ofz-redemptions",
+      "document_id": "fi-strategy-3q26",
+      "page": 16,
+      "title": "График погашения ОФЗ на 13.07.2026 г., по номиналу, млрд руб.",
+      "kind": "bar",
+      "crop": [
+        0.6265,
+        0.20798,
+        0.97692,
+        0.52116
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-ofz-redemptions.jpg",
+      "image_sha256": "ee370108d671844c2fc51e3c52a893070f828b89cde2e971546f6b5d21ec0543",
+      "image_width": 1200,
+      "image_height": 759
+    },
+    {
+      "id": "fi-ofz-maturity-volume",
+      "document_id": "fi-strategy-3q26",
+      "page": 16,
+      "title": "Объем ОФЗ-ПД в разрезе сроков погашения, трлн руб.",
+      "kind": "bar",
+      "crop": [
+        0.04017,
+        0.54897,
+        0.33419,
+        0.89
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Срок погашения",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "volume",
+          "label": "Объем ОФЗ-ПД",
+          "unit": "трлн руб.",
+          "points": [
+            {
+              "label": "2026–2028",
+              "value": 2.5
+            },
+            {
+              "label": "2029–2030",
+              "value": 2.5
+            },
+            {
+              "label": "2031–2033",
+              "value": 4.5
+            },
+            {
+              "label": "2034–2037",
+              "value": 4.8
+            },
+            {
+              "label": "2038+",
+              "value": 6.0
+            }
+          ]
+        }
+      ],
+      "note": "Значения напечатаны над столбцами; группы сроков сохранены без превращения в ежегодный ряд.",
+      "image": "images/fi-ofz-maturity-volume.jpg",
+      "image_sha256": "a103596701dcd0ccfb8b5c9fd12df12b92b122bbb3a6eb9c49843424f3a349b2",
+      "image_width": 1200,
+      "image_height": 984
+    },
+    {
+      "id": "fi-ofz-maturity-share",
+      "document_id": "fi-strategy-3q26",
+      "page": 16,
+      "title": "Структура ОФЗ-ПД по сроку погашения на 13.07.2026 г., %",
+      "kind": "pie",
+      "crop": [
+        0.35299,
+        0.54897,
+        0.64701,
+        0.84764
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Срок погашения",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "share",
+          "label": "Доля объема",
+          "unit": "%",
+          "points": [
+            {
+              "label": "до 2,5 лет",
+              "value": 12
+            },
+            {
+              "label": "2,5–4,5 лет",
+              "value": 12
+            },
+            {
+              "label": "4,5–7,5 лет",
+              "value": 22
+            },
+            {
+              "label": "7,5–10,5 лет",
+              "value": 24
+            },
+            {
+              "label": "от 10,5 лет и больше",
+              "value": 30
+            }
+          ]
+        }
+      ],
+      "note": "Подписи сегментов перенесены без пересчета; общий объем в центре — 20,4 трлн руб.",
+      "image": "images/fi-ofz-maturity-share.jpg",
+      "image_sha256": "5fe46c424174681d88fae06495b0fd0cad7b1e92d84a2b94cc2bad9406bf6ca0",
+      "image_width": 1200,
+      "image_height": 862
+    },
+    {
+      "id": "fi-ofz-coupon-share",
+      "document_id": "fi-strategy-3q26",
+      "page": 16,
+      "title": "Структура ОФЗ по типу купона на 13.07.2026 г., %",
+      "kind": "pie",
+      "crop": [
+        0.67436,
+        0.54776,
+        0.95726,
+        0.84764
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Тип купона",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "share",
+          "label": "Доля объема",
+          "unit": "%",
+          "points": [
+            {
+              "label": "ОФЗ-ПД",
+              "value": 63
+            },
+            {
+              "label": "ОФЗ-ПК",
+              "value": 37
+            }
+          ]
+        }
+      ],
+      "note": "Подписи сегментов. Общий объем в центре — 32,2 трлн руб.",
+      "image": "images/fi-ofz-coupon-share.jpg",
+      "image_sha256": "d2621d997aa876fa5cdf7c26463a2fbb8495ab86f932b516c830db00bbc06152",
+      "image_width": 1200,
+      "image_height": 899
+    },
+    {
+      "id": "fi-retail-flows",
+      "document_id": "fi-strategy-3q26",
+      "page": 17,
+      "title": "Среднемесячные притоки новых вложений физических лиц в финансовые инструменты, млрд руб.",
+      "kind": "bar",
+      "crop": [
+        0.58376,
+        0.20919,
+        0.97692,
+        0.5127
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-retail-flows.jpg",
+      "image_sha256": "60bbafa24ecfe3f3c8252b581f6ae154e304963fa872c0591a9bf0ee1468f960",
+      "image_width": 1200,
+      "image_height": 655
+    },
+    {
+      "id": "fi-retail-bond-flows",
+      "document_id": "fi-strategy-3q26",
+      "page": 17,
+      "title": "Среднемесячные притоки новых вложений физических лиц в ОФЗ и корпоративные облигации, млрд руб.",
+      "kind": "bar",
+      "crop": [
+        0.58718,
+        0.55381,
+        0.96239,
+        0.86699
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-retail-bond-flows.jpg",
+      "image_sha256": "4073461cac6cd30aa360c085570c1dfcfa0b92daa41d3f0f547b999fcaa02dc0",
+      "image_width": 1200,
+      "image_height": 708
+    },
+    {
+      "id": "fi-fund-nav",
+      "document_id": "fi-strategy-3q26",
+      "page": 17,
+      "title": "Динамика стоимости чистых активов (СЧА) БПИФ денежного рынка и ПИФ облигаций (млрд руб.)",
+      "kind": "bar",
+      "crop": [
+        0.0265,
+        0.55381,
+        0.46239,
+        0.87787
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "money-market",
+          "label": "СЧА БПИФ денежного рынка",
+          "unit": "млрд руб.",
+          "points": [
+            {
+              "label": "31.12.2025",
+              "value": 1528
+            },
+            {
+              "label": "30.01.2026",
+              "value": 1591
+            },
+            {
+              "label": "27.02.2026",
+              "value": 1649
+            },
+            {
+              "label": "31.03.2026",
+              "value": 1680
+            },
+            {
+              "label": "30.04.2026",
+              "value": 1717
+            },
+            {
+              "label": "31.05.2026",
+              "value": 1752
+            }
+          ]
+        },
+        {
+          "id": "bond-funds",
+          "label": "СЧА ПИФ облигаций",
+          "unit": "млрд руб.",
+          "points": [
+            {
+              "label": "31.12.2025",
+              "value": 797
+            },
+            {
+              "label": "30.01.2026",
+              "value": 760
+            },
+            {
+              "label": "27.02.2026",
+              "value": 804
+            },
+            {
+              "label": "31.03.2026",
+              "value": 858
+            },
+            {
+              "label": "30.04.2026",
+              "value": 1050
+            },
+            {
+              "label": "31.05.2026",
+              "value": 1206
+            }
+          ]
+        }
+      ],
+      "note": "Перенесены все подписи столбцов; даты сохранены как в исходном графике.",
+      "image": "images/fi-fund-nav.jpg",
+      "image_sha256": "76baf3009a56f798a35a35479751cca8061399e63a26d588467c4644a172ea48",
+      "image_width": 1200,
+      "image_height": 631
+    },
+    {
+      "id": "fi-ofz-turnover",
+      "document_id": "fi-strategy-3q26",
+      "page": 18,
+      "title": "Объем торгов ОФЗ на вторичном биржевом рынке (трлн руб.)",
+      "kind": "bar",
+      "crop": [
+        0.55128,
+        0.20798,
+        0.97009,
+        0.49335
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-ofz-turnover.jpg",
+      "image_sha256": "fb2b9f71371eafd175f3d9694849a8f95c3524758c98d22e4bd9cdd93910ad4d",
+      "image_width": 1200,
+      "image_height": 579
+    },
+    {
+      "id": "fi-ofz-participant-flows",
+      "document_id": "fi-strategy-3q26",
+      "page": 18,
+      "title": "Покупки / продажи ОФЗ на вторичном рынке по категориям участников, млрд руб.",
+      "kind": "bar",
+      "crop": [
+        0.02308,
+        0.52842,
+        0.53333,
+        0.89238
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-ofz-participant-flows.jpg",
+      "image_sha256": "626d3abbc44c54ba3ff39efe81a22a9d1b8f82a332e2ae7c27c3bae664d5712c",
+      "image_width": 1200,
+      "image_height": 605
+    },
+    {
+      "id": "fi-ofz-prices",
+      "document_id": "fi-strategy-3q26",
+      "page": 19,
+      "title": "Динамика цены ОФЗ 26249 (6 лет) и 26254 (14 лет), %",
+      "kind": "line",
+      "crop": [
+        0.61709,
+        0.21765,
+        0.9641,
+        0.54293
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-ofz-prices.jpg",
+      "image_sha256": "4e7d04fccbde2f90344c6f7c3d7b5072848015bc3ec4588ea7229da42ae345f1",
+      "image_width": 1200,
+      "image_height": 795
+    },
+    {
+      "id": "fi-ofz-policy-yields",
+      "document_id": "fi-strategy-3q26",
+      "page": 19,
+      "title": "Динамика ключевой ставки и доходности ОФЗ, %",
+      "kind": "line",
+      "crop": [
+        0.61795,
+        0.55381,
+        0.97607,
+        0.8682
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-ofz-policy-yields.jpg",
+      "image_sha256": "9fe479f6611b054402bcdd6b2b0d5664809f3d3a980a90ce6ad187ba5cf94caa",
+      "image_width": 1200,
+      "image_height": 745
+    },
+    {
+      "id": "fi-corporate-placements",
+      "document_id": "fi-strategy-3q26",
+      "page": 21,
+      "title": "Объем размещений корпоративных облигаций, млрд руб.",
+      "kind": "bar",
+      "crop": [
+        0.02564,
+        0.49577,
+        0.32821,
+        0.81378
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "volume",
+          "label": "Размещения",
+          "unit": "млрд руб.",
+          "points": [
+            {
+              "label": "Январь",
+              "value": 208
+            },
+            {
+              "label": "Февраль",
+              "value": 412
+            },
+            {
+              "label": "Март",
+              "value": 586
+            },
+            {
+              "label": "Апрель",
+              "value": 639
+            },
+            {
+              "label": "Май",
+              "value": 624
+            },
+            {
+              "label": "Июнь",
+              "value": 705
+            }
+          ]
+        }
+      ],
+      "note": "Месяцы 1П26. Без секьюритизаций, ипотечных, конвертируемых, бессрочных, нерыночных выпусков, структурных продуктов, ЦФА и облигаций Роснефти. Сумма округленных подписей может отличаться от итога в тексте.",
+      "image": "images/fi-corporate-placements.jpg",
+      "image_sha256": "f59f8449d270ce0af75dffa8c41eb864c6ae55b1e064d90d38688cca8dd1ac5c",
+      "image_width": 1200,
+      "image_height": 891
+    },
+    {
+      "id": "fi-floater-placement-share",
+      "document_id": "fi-strategy-3q26",
+      "page": 21,
+      "title": "Доля флоутеров в структуре размещений, %",
+      "kind": "bar",
+      "crop": [
+        0.3359,
+        0.49456,
+        0.61026,
+        0.81137
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "share",
+          "label": "Доля флоутеров",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Январь",
+              "value": 90
+            },
+            {
+              "label": "Февраль",
+              "value": 64
+            },
+            {
+              "label": "Март",
+              "value": 56
+            },
+            {
+              "label": "Апрель",
+              "value": 55
+            },
+            {
+              "label": "Май",
+              "value": 64
+            },
+            {
+              "label": "Июнь",
+              "value": 59
+            }
+          ]
+        }
+      ],
+      "note": "Месяцы 1П26; перенесены подписи всех шести столбцов.",
+      "image": "images/fi-floater-placement-share.jpg",
+      "image_sha256": "ca3d1f7d02ab1e010b48d3e564d42f78208a7feed5f86e2b22ad16b5220d7aef",
+      "image_width": 1200,
+      "image_height": 979
+    },
+    {
+      "id": "fi-corporate-coupon-share",
+      "document_id": "fi-strategy-3q26",
+      "page": 21,
+      "title": "Структура корпоративных рублевых облигаций по типу купона на 20.07.2026 г., %",
+      "kind": "pie",
+      "crop": [
+        0.64957,
+        0.20919,
+        0.96667,
+        0.49819
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Тип купона",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "share",
+          "label": "Доля объема",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Фиксированный",
+              "value": 48
+            },
+            {
+              "label": "Плавающий",
+              "value": 52
+            }
+          ]
+        }
+      ],
+      "note": "Подписи сегментов. Объем 15,4 трлн руб.; ограничения состава рынка перечислены в примечании страницы.",
+      "image": "images/fi-corporate-coupon-share.jpg",
+      "image_sha256": "135185ebc9c4759d1c6dd2254c05a32b73401db631cc8c980e5b239ff6932f88",
+      "image_width": 1200,
+      "image_height": 774
+    },
+    {
+      "id": "fi-primary-investors",
+      "document_id": "fi-strategy-3q26",
+      "page": 21,
+      "title": "Структура инвесторов на первичном рынке корп. облигаций в 1П26 г., %",
+      "kind": "pie",
+      "crop": [
+        0.64957,
+        0.49698,
+        0.97009,
+        0.83
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Категория инвестора",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "share",
+          "label": "Доля инвесторов",
+          "unit": "%",
+          "points": [
+            {
+              "label": "НФО",
+              "value": 10
+            },
+            {
+              "label": "СЗКО",
+              "value": 36
+            },
+            {
+              "label": "Доверительное управление",
+              "value": 17
+            },
+            {
+              "label": "Физические лица",
+              "value": 8
+            },
+            {
+              "label": "Прочие банки",
+              "value": 7
+            },
+            {
+              "label": "Компании нефинансового сектора",
+              "value": 22
+            },
+            {
+              "label": "Нерезиденты",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "note": "Напечатанные округленные доли суммируются в 101%; нормализация не выполнялась. Общий объем в центре 4,8 трлн руб. НФО — подпись исходной легенды.",
+      "image": "images/fi-primary-investors.jpg",
+      "image_sha256": "8bddb857da4c932855a0c8996e5ee706dede9259554f69669da193a364919f6b",
+      "image_width": 1200,
+      "image_height": 882
+    },
+    {
+      "id": "fi-credit-bonds-volume",
+      "document_id": "fi-strategy-3q26",
+      "page": 22,
+      "title": "Динамика объема корпоративных кредитов и корпоративных облигаций, трлн руб.",
+      "kind": "bar",
+      "crop": [
+        0.55641,
+        0.20314,
+        0.95043,
+        0.51149
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "credit",
+          "label": "Кредиты юрлицам",
+          "unit": "трлн руб.",
+          "points": [
+            {
+              "label": "31.12.2019 г.",
+              "value": 39.0
+            },
+            {
+              "label": "31.12.2020 г.",
+              "value": 44.8
+            },
+            {
+              "label": "31.12.2021 г.",
+              "value": 52.7
+            },
+            {
+              "label": "31.12.2022 г.",
+              "value": 59.1
+            },
+            {
+              "label": "31.12.2023 г.",
+              "value": 73.8
+            },
+            {
+              "label": "31.12.2024 г.",
+              "value": 95.3
+            },
+            {
+              "label": "01.01.2026",
+              "value": 96.6
+            },
+            {
+              "label": "30.06.2026",
+              "value": 100.2
+            }
+          ]
+        },
+        {
+          "id": "bonds",
+          "label": "Облигации",
+          "unit": "трлн руб.",
+          "points": [
+            {
+              "label": "31.12.2019 г.",
+              "value": 11.6
+            },
+            {
+              "label": "31.12.2020 г.",
+              "value": 14.3
+            },
+            {
+              "label": "31.12.2021 г.",
+              "value": 15.6
+            },
+            {
+              "label": "31.12.2022 г.",
+              "value": 17.5
+            },
+            {
+              "label": "31.12.2023 г.",
+              "value": 22.4
+            },
+            {
+              "label": "31.12.2024 г.",
+              "value": 31.0
+            },
+            {
+              "label": "01.01.2026",
+              "value": 33.1
+            },
+            {
+              "label": "30.06.2026",
+              "value": 36.3
+            }
+          ]
+        }
+      ],
+      "note": "Все подписи столбцов. Последние даты именно 01.01.2026 и 30.06.2026; промежуточные даты не добавлены.",
+      "image": "images/fi-credit-bonds-volume.jpg",
+      "image_sha256": "22fa5c3d9f13ce03e583c383127fc64957197814c3506e4409ced03db208e6a4",
+      "image_width": 1200,
+      "image_height": 664
+    },
+    {
+      "id": "fi-rating-yields",
+      "document_id": "fi-strategy-3q26",
+      "page": 22,
+      "title": "Динамика доходности корпоративных облигаций по уровню кредитного рейтинга, %",
+      "kind": "line",
+      "crop": [
+        0.02735,
+        0.52116,
+        0.52051,
+        0.87062
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-rating-yields.jpg",
+      "image_sha256": "2e22f3ab7c11546c67ce252d5120ca7e2ed8db6b277a53fde20fc175e6af082c",
+      "image_width": 1200,
+      "image_height": 601
+    },
+    {
+      "id": "fi-rating-shares",
+      "document_id": "fi-strategy-3q26",
+      "page": 22,
+      "title": "Структура корпоративных облигаций по уровню кредитного рейтинга",
+      "kind": "bar",
+      "crop": [
+        0.56154,
+        0.52116,
+        0.97863,
+        0.86215
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "aaa",
+          "label": "AAA",
+          "unit": "%",
+          "points": [
+            {
+              "label": "12.2017",
+              "value": 72
+            },
+            {
+              "label": "12.2018",
+              "value": 74
+            },
+            {
+              "label": "12.2019",
+              "value": 69
+            },
+            {
+              "label": "12.2020",
+              "value": 66
+            },
+            {
+              "label": "12.2021",
+              "value": 57
+            },
+            {
+              "label": "12.2022",
+              "value": 54
+            },
+            {
+              "label": "12.2023",
+              "value": 56
+            },
+            {
+              "label": "12.2024",
+              "value": 65
+            },
+            {
+              "label": "12.2025",
+              "value": 69
+            }
+          ]
+        },
+        {
+          "id": "a-aa",
+          "label": "От A- до AA+",
+          "unit": "%",
+          "points": [
+            {
+              "label": "12.2017",
+              "value": 16
+            },
+            {
+              "label": "12.2018",
+              "value": 15
+            },
+            {
+              "label": "12.2019",
+              "value": 22
+            },
+            {
+              "label": "12.2020",
+              "value": 21
+            },
+            {
+              "label": "12.2021",
+              "value": 27
+            },
+            {
+              "label": "12.2022",
+              "value": 29
+            },
+            {
+              "label": "12.2023",
+              "value": 32
+            },
+            {
+              "label": "12.2024",
+              "value": 29
+            },
+            {
+              "label": "12.2025",
+              "value": 26
+            }
+          ]
+        },
+        {
+          "id": "unrated",
+          "label": "Отозван/нет рейтинга",
+          "unit": "%",
+          "points": [
+            {
+              "label": "12.2017",
+              "value": 9
+            },
+            {
+              "label": "12.2018",
+              "value": 9
+            },
+            {
+              "label": "12.2019",
+              "value": 6
+            },
+            {
+              "label": "12.2020",
+              "value": 10
+            },
+            {
+              "label": "12.2021",
+              "value": 12
+            },
+            {
+              "label": "12.2022",
+              "value": 13
+            },
+            {
+              "label": "12.2023",
+              "value": 10
+            },
+            {
+              "label": "12.2024",
+              "value": 4
+            },
+            {
+              "label": "12.2025",
+              "value": 4
+            }
+          ]
+        }
+      ],
+      "note": "Только три сегмента с напечатанными значениями. Малые сегменты BBB и ниже не имеют подписей и не восстановлены; сумма рядов не должна интерпретироваться как 100%.",
+      "image": "images/fi-rating-shares.jpg",
+      "image_sha256": "8d5a12916652a73aedab617347c8db6cc8319b688c2e1423e99e71e6590633f3",
+      "image_width": 1200,
+      "image_height": 694
+    },
+    {
+      "id": "fi-coupon-concentration",
+      "document_id": "fi-strategy-3q26",
+      "page": 23,
+      "title": "Объем рынка корпоративных облигаций по типу купона на 20.07.2026 г., трлн руб.",
+      "kind": "bar",
+      "crop": [
+        0.66667,
+        0.20798,
+        0.96581,
+        0.50786
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Тип купона",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "top10",
+          "label": "Топ-10",
+          "unit": "трлн руб.",
+          "points": [
+            {
+              "label": "Фиксированный",
+              "value": 3.6
+            },
+            {
+              "label": "Плавающий",
+              "value": 5.3
+            }
+          ]
+        },
+        {
+          "id": "others",
+          "label": "Прочие",
+          "unit": "трлн руб.",
+          "points": [
+            {
+              "label": "Фиксированный",
+              "value": 3.7
+            },
+            {
+              "label": "Плавающий",
+              "value": 3.1
+            }
+          ]
+        }
+      ],
+      "note": "Все четыре подписи столбцов.",
+      "image": "images/fi-coupon-concentration.jpg",
+      "image_sha256": "87c914b4835e714d1f4ee7686f54551014318255762c87135633ab8caadbb8fe",
+      "image_width": 1200,
+      "image_height": 850
+    },
+    {
+      "id": "fi-bank-corporate-bonds",
+      "document_id": "fi-strategy-3q26",
+      "page": 23,
+      "title": "Объем вложений банков в корпоративные облигации, млрд руб.",
+      "kind": "line",
+      "crop": [
+        0.68205,
+        0.51874,
+        0.9812,
+        0.82467
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-bank-corporate-bonds.jpg",
+      "image_sha256": "7fdcaff44383e5f826d42ee37db85befe97597d14c161996311daf49af22b4b7",
+      "image_width": 1200,
+      "image_height": 867
+    },
+    {
+      "id": "fi-floater-index",
+      "document_id": "fi-strategy-3q26",
+      "page": 24,
+      "title": "Динамика индекса чистых цен облигаций с переменным купоном RUFLBICP",
+      "kind": "line",
+      "crop": [
+        0.64701,
+        0.21403,
+        0.98376,
+        0.57316
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Период",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "На графике нет подписей значений наблюдений; числовой ряд не восстанавливался по пикселям.",
+      "image": "images/fi-floater-index.jpg",
+      "image_sha256": "ce5c9660fd41e3bbc0cc686dd07284323e3cf33e42d432ae8d906590b51cf4bf",
+      "image_width": 1200,
+      "image_height": 905
+    },
+    {
+      "id": "alfa-7m26-car-sales-monthly",
+      "document_id": "alfa-7m26",
+      "page": 1,
+      "title": "Рис. 1: Продажи новых легковых автомобилей, тыс. шт.",
+      "kind": "bar",
+      "crop": [
+        0.08,
+        0.49,
+        0.5,
+        0.735
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-7m26-car-sales-monthly.jpg",
+      "image_sha256": "651529ee319e1f1e48b2e19a661cc68629f97f004d5c5e23e70e3fe2e6e0617c",
+      "image_width": 1200,
+      "image_height": 991
+    },
+    {
+      "id": "alfa-7m26-retail-industry-dynamics",
+      "document_id": "alfa-7m26",
+      "page": 1,
+      "title": "Рис. 2: Динамика оборота розничной торговли и промпроизводства, % г/г",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.49,
+        0.93,
+        0.735
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-7m26-retail-industry-dynamics.jpg",
+      "image_sha256": "c1f75ebfb9b6c7b78cf515267200f741262d57310028876e004973304e7ceed1",
+      "image_width": 1200,
+      "image_height": 1015
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 3: Сальдированный финансовый результат компаний, накопленным итогом, млрд руб.",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.11,
+        0.5,
+        0.34
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-7m26-financial-result-cumulative.jpg",
+      "image_sha256": "c58081dadc9a21ef9f864d3916e73e30dce37459f70893e15e46072fa091e9bf",
+      "image_width": 1200,
+      "image_height": 930
+    },
+    {
+      "id": "alfa-7m26-financial-result-sectors",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 4: Сальдированный финансовый результат компаний по секторам, млрд руб./мес.",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.11,
+        0.93,
+        0.34
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Сектор",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-7m26-financial-result-sectors.jpg",
+      "image_sha256": "c94089f52e4358445def62bf8a5f4d67d9c2dbd0525d1ef7f3e7d445a40a7390",
+      "image_width": 1200,
+      "image_height": 953
+    },
+    {
+      "id": "alfa-7m26-nominal-wages-unemployment",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 5: Динамика зарплат в номинальном выражении, % г/г и уровень безработицы, %",
+      "kind": "scatter",
+      "crop": [
+        0.08,
+        0.58,
+        0.5,
+        0.805
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номинальные зарплаты, % г/г",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-7m26-nominal-wages-unemployment.jpg",
+      "image_sha256": "1660264e88d2e58d2e5ffd60ecdd36d24fd8683a65355f996d74baffc268aa05",
+      "image_width": 1200,
+      "image_height": 910
+    },
+    {
+      "id": "alfa-7m26-vacancies",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 6: Число вакансий, Дек T-1=100",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.58,
+        0.93,
+        0.805
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-7m26-vacancies.jpg",
+      "image_sha256": "19b5f66f42c03827cbcbcc3d3b50014f64a04c6e121d42bcc88bfdd08833e975",
+      "image_width": 1200,
+      "image_height": 932
+    },
+    {
+      "id": "alfa-policy-weekly-inflation",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 1: Динамика усредненной недельной инфляции и ее исторический диапазон*, % н/н",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.35,
+        0.5,
+        0.65
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номер недели",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-weekly-inflation.jpg",
+      "image_sha256": "bcb12034fd755d045e0ac69d9f2d967870abd7fda61fff13c56ea06fb7e8a9d7",
+      "image_width": 1200,
+      "image_height": 1213
+    },
+    {
+      "id": "alfa-policy-inflation-expectations",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 2: Инфляционные ожидания населения, % и инфляционные ожидания предприятий, п.",
+      "kind": "scatter",
+      "crop": [
+        0.52,
+        0.35,
+        0.93,
+        0.65
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Инфляционные ожидания населения, %",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-inflation-expectations.jpg",
+      "image_sha256": "04816461c895739f61ef76b3edc161a66000b610532d89e596b950275778ce11",
+      "image_width": 1200,
+      "image_height": 1242
+    },
+    {
+      "id": "alfa-policy-money-aggregates",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 3: Динамика денежных агрегатов, % г/г",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.65,
+        0.5,
+        0.91
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-money-aggregates.jpg",
+      "image_sha256": "ef691d4e32fe88167dbed6914479887e4861823b2029513743656ef87c745b65",
+      "image_width": 1200,
+      "image_height": 1052
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 4: Изменение наличных денег в обращении, накопленным итогом с начала года, млрд руб.",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.65,
+        0.93,
+        0.91
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-cash-money-cumulative.jpg",
+      "image_sha256": "c3ab2fa7ae7584db4bf348af3a27b5e013a2eaecc6a1860ed84166c0f067ed21",
+      "image_width": 1200,
+      "image_height": 1077
+    },
+    {
+      "id": "alfa-policy-credit-portfolio-growth",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 5: Прирост кредитного портфеля по сегментам, % м/м",
+      "kind": "scatter",
+      "crop": [
+        0.08,
+        0.12,
+        0.5,
+        0.38
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Корп. сегмент, % м/м",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-credit-portfolio-growth.jpg",
+      "image_sha256": "341502ad8c20ca1644a141dfcc3043050dd8ea03f72d12d96e9cce446fc51e93",
+      "image_width": 1200,
+      "image_height": 1052
+    },
+    {
+      "id": "alfa-policy-retail-deposits",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 6: Динамика рублевых розничных депозитов, дек T-1 = 100%",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.12,
+        0.93,
+        0.38
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-retail-deposits.jpg",
+      "image_sha256": "39d49f645c94a3142bafc4d850bfd8a38353764643416ec8f2cbaffe49331b19",
+      "image_width": 1200,
+      "image_height": 1077
+    },
+    {
+      "id": "alfa-policy-federal-budget-balance",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 7: Динамика накопленного с начала года баланса федерального бюджета, трлн руб.",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.42,
+        0.5,
+        0.66
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-federal-budget-balance.jpg",
+      "image_sha256": "7aadd4b26bd3b193d17d3321c2996d85b40eb884e294a4acacb4ca759c8769d3",
+      "image_width": 1200,
+      "image_height": 971
+    },
+    {
+      "id": "alfa-policy-wages-unemployment",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 8: Уровень безработицы, % и динамика номинальных зарплат, % г/г",
+      "kind": "scatter",
+      "crop": [
+        0.52,
+        0.42,
+        0.93,
+        0.66
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номинальные зарплаты, % г/г",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-policy-wages-unemployment.jpg",
+      "image_sha256": "70f8bbba641bbb3d3e5eaac5611cfc88ed62f7748de0031a5f7fb1888491bdd1",
+      "image_width": 1200,
+      "image_height": 994
+    },
+    {
+      "id": "alfa-policy-key-rate-consensus",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 9: Изменение ожидаемой средней ключевой ставки на 2027 г., %",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.66,
+        0.5,
+        0.92
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "consensus",
+          "label": "Ожидаемая консенсусом средняя КС",
+          "unit": "%",
+          "points": [
+            {
+              "label": "фев.26",
+              "value": 10.4,
+              "forecast": true
+            },
+            {
+              "label": "мар.26",
+              "value": 10.3,
+              "forecast": true
+            },
+            {
+              "label": "апр.26",
+              "value": 10.7,
+              "forecast": true
+            },
+            {
+              "label": "июн.26",
+              "value": 10.6,
+              "forecast": true
+            },
+            {
+              "label": "июл.26",
+              "value": 12.2,
+              "forecast": true
+            },
+            {
+              "label": "сен.26",
+              "value": 12.4,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Шесть подписанных маркеров консенсус-прогноза средней ставки на 2027 год, опубликованных в указанные месяцы 2026 года. Нет наблюдений за май и август. Серые 8,0–12,5% — границы диапазона ЦБ, не точки консенсуса; они не включены в этот ряд.",
+      "image": "images/alfa-policy-key-rate-consensus.jpg",
+      "image_sha256": "26d6d70c8ecaa1a60b76e76d0c81ab64bffdbaba7072c1c9739aa1a43042bb94",
+      "image_width": 1200,
+      "image_height": 1051
+    },
+    {
+      "id": "alfa-policy-alfa-key-rate-forecast",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 10: Прогноз Альфа-Банка по движению ключевой ставки в 2026–2027 гг., %",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.66,
+        0.93,
+        0.92
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "key-rate",
+          "label": "Ключевая ставка",
+          "unit": "%",
+          "points": [
+            {
+              "label": "янв.26",
+              "value": 16.0
+            },
+            {
+              "label": "фев.26",
+              "value": 15.5
+            },
+            {
+              "label": "мар.26",
+              "value": 15.0
+            },
+            {
+              "label": "апр.26",
+              "value": 14.5
+            },
+            {
+              "label": "июн.26",
+              "value": 14.25
+            },
+            {
+              "label": "июл.26",
+              "value": 14.0
+            },
+            {
+              "label": "сен.26",
+              "value": 14.0
+            },
+            {
+              "label": "окт.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "дек.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "дек.27",
+              "value": 12.0,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Подписи напечатаны только для показанных месяцев (май, авг. и ноябрь не указаны). Прогнозный период начинается после вертикальной метки между сен.26 и окт.26.",
+      "image": "images/alfa-policy-alfa-key-rate-forecast.jpg",
+      "image_sha256": "b444a9fbed4ab0965a5f1ec19df843e8479696f8d4d47d39da443e3af6a9221d",
+      "image_width": 1200,
+      "image_height": 1077
+    },
+    {
+      "id": "alfa-consumption-retail-turnover",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 1: Динамика оборота розничной торговли по сегментам, % г/г",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.34,
+        0.5,
+        0.56
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Квартал",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-consumption-retail-turnover.jpg",
+      "image_sha256": "79b9f88434182f8c1115c89dc80bb33ea9ca3539d7a69a8cb3e1912edb5bf849",
+      "image_width": 1200,
+      "image_height": 890
+    },
+    {
+      "id": "alfa-consumption-car-sales-cumulative",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 2: Продажи новых легковых автомобилей, накопленным итогом с начала года, тыс. шт.",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.34,
+        0.93,
+        0.56
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-consumption-car-sales-cumulative.jpg",
+      "image_sha256": "4bc016e7f693f04a93be6285739239c449be9dac74fa61badfd52073fd8a293a",
+      "image_width": 1200,
+      "image_height": 911
+    },
+    {
+      "id": "alfa-consumption-nominal-real-wages",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 3: Динамика номинальных и реальных зарплат, % г/г",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.7,
+        0.5,
+        0.94
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-consumption-nominal-real-wages.jpg",
+      "image_sha256": "cc377951f8171a0a6321abc3095cc99962fefadd37f590627247e77a0865fab2",
+      "image_width": 1200,
+      "image_height": 971
+    },
+    {
+      "id": "alfa-consumption-nominal-wages-sectors",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 4: Динамика номинальных зарплат по сегментам, % г/г",
+      "kind": "bar",
+      "crop": [
+        0.495,
+        0.7,
+        0.93,
+        0.94
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Сегмент",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "may-26",
+          "label": "май.26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 10
+            },
+            {
+              "label": "Информация и связь",
+              "value": 6
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 11
+            },
+            {
+              "label": "Торговля",
+              "value": 11
+            },
+            {
+              "label": "Образование",
+              "value": 11
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 12
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 13
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 19
+            }
+          ]
+        },
+        {
+          "id": "q1-26",
+          "label": "1К26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 15
+            },
+            {
+              "label": "Информация и связь",
+              "value": 19
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 12
+            },
+            {
+              "label": "Торговля",
+              "value": 18
+            },
+            {
+              "label": "Образование",
+              "value": 13
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 15
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 24
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 20
+            }
+          ]
+        }
+      ],
+      "note": "",
+      "image": "images/alfa-consumption-nominal-wages-sectors.jpg",
+      "image_sha256": "6dd8e6784880ee97464f1789afc29aa5e536562dbe8b3f2d97a92f3d5466a2dc",
+      "image_width": 1200,
+      "image_height": 937
+    },
+    {
+      "id": "alfa-consumption-hh-index-unemployment",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 5: Индекс HH и уровень безработицы, %",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.24,
+        0.5,
+        0.5
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Числовые подписи наблюдений отсутствуют. Красные значения 2,0–4,5% справа относятся к шкале безработицы, а не к отдельным точкам.",
+      "image": "images/alfa-consumption-hh-index-unemployment.jpg",
+      "image_sha256": "7e3554b282fe602fedda32d08f04588f2ed4e32cbbdc784b6234124fa9b4cc98",
+      "image_width": 1200,
+      "image_height": 1051
+    },
+    {
+      "id": "alfa-consumption-vacancies-resumes",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 5: Динамика числа вакансий и резюме, янв.2022=100",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.24,
+        0.93,
+        0.5
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-consumption-vacancies-resumes.jpg",
+      "image_sha256": "7f79a1fcea108c961c06c14545badbf8b9e07615d165b5ed12a970e8ed470ffb",
+      "image_width": 1200,
+      "image_height": 1077
+    },
+    {
+      "id": "alfa-consumption-weekly-inflation",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 7: Динамика базовой недельной инфляции и ее структура, % н/н",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.63,
+        0.5,
+        0.89
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Неделя",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-consumption-weekly-inflation.jpg",
+      "image_sha256": "f92bd89f658be330f028df176e5f3af3ecd7ad18c015faa33761fc2a0d50d239",
+      "image_width": 1200,
+      "image_height": 1051
+    },
+    {
+      "id": "alfa-consumption-key-rate-forecast",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 8: Прогноз Альфа-Банка по динамике ключевой ставки на конец периода, %",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.63,
+        0.93,
+        0.89
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "key-rate",
+          "label": "Ключевая ставка",
+          "unit": "%",
+          "points": [
+            {
+              "label": "янв.26",
+              "value": 16.0
+            },
+            {
+              "label": "фев.26",
+              "value": 15.5
+            },
+            {
+              "label": "мар.26",
+              "value": 15.0
+            },
+            {
+              "label": "апр.26",
+              "value": 14.5
+            },
+            {
+              "label": "июн.26",
+              "value": 14.25
+            },
+            {
+              "label": "июл.26",
+              "value": 14.0
+            },
+            {
+              "label": "сен.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "окт.26",
+              "value": 13.75,
+              "forecast": true
+            },
+            {
+              "label": "дек.26",
+              "value": 13.5,
+              "forecast": true
+            },
+            {
+              "label": "дек.27",
+              "value": 12.0,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Подписи напечатаны только для указанных месяцев (май, авг. и ноябрь не указаны). Прогноз начинается в сен.26 после вертикального разделителя.",
+      "image": "images/alfa-consumption-key-rate-forecast.jpg",
+      "image_sha256": "b31877e96903a5466f4ac67c268579ee594493ffef729cbcec93c9eb04704e81",
+      "image_width": 1200,
+      "image_height": 1077
+    },
+    {
+      "id": "alfa-consumption-retail-credit-growth",
+      "document_id": "alfa-consumption",
+      "page": 3,
+      "title": "Рис. 9: Прирост розничного кредитного портфеля по сегментам, % м/м",
+      "kind": "scatter",
+      "crop": [
+        0.08,
+        0.15,
+        0.5,
+        0.42
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Непродовольственный сегмент",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-consumption-retail-credit-growth.jpg",
+      "image_sha256": "15d2dd4c705e0ed966f21f980233b7b3570ff4b7d50c5a595a09e3785a46f708",
+      "image_width": 1200,
+      "image_height": 1092
+    },
+    {
+      "id": "alfa-consumption-cash-money",
+      "document_id": "alfa-consumption",
+      "page": 3,
+      "title": "Рис. 10: Прирост наличных денег в обращении, млрд руб., сумма за 12-мес.",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.15,
+        0.93,
+        0.4
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-consumption-cash-money.jpg",
+      "image_sha256": "022a43a3ee8d7cd467d2b932c31a8681fb215cf0b6abcda390e07a66e2ed6b38",
+      "image_width": 1200,
+      "image_height": 1036
+    },
+    {
+      "id": "alfa-macro-stat-industry-output",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 1: Динамика выпуска в отраслях промышленности, % г/г",
+      "kind": "scatter",
+      "crop": [
+        0.03,
+        0.61,
+        0.49,
+        0.81
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-macro-stat-industry-output.jpg",
+      "image_sha256": "31f7c4dfb24f78f984a9bfc14e192ef40ba7f01f8bcf355e61642a48e49c80bb",
+      "image_width": 1200,
+      "image_height": 738
+    },
+    {
+      "id": "alfa-macro-stat-retail-and-gdp",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 2: Динамика оборота розничной торговли и ВП РФ, % г/г",
+      "kind": "line",
+      "crop": [
+        0.51,
+        0.61,
+        0.95,
+        0.81
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-macro-stat-retail-and-gdp.jpg",
+      "image_sha256": "3edd5fce0a11f2dff8674f60451bbe4454ad3f642beed2b6d3d5fa66dd61f56e",
+      "image_width": 1200,
+      "image_height": 771
+    },
+    {
+      "id": "alfa-macro-stat-car-sales-cumulative",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 3: Продажи новых легковых машин, накопленным итогом, тыс. шт.",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.81,
+        0.49,
+        0.995
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-macro-stat-car-sales-cumulative.jpg",
+      "image_sha256": "4555ff91fd61f749d83e010ea6fb765abcfe110fbc111b721e98e48248abe22b",
+      "image_width": 1200,
+      "image_height": 683
+    },
+    {
+      "id": "alfa-macro-stat-nominal-wages-sectors",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 4: Динамика номинальных зарплат по отраслям экономики, % г/г",
+      "kind": "bar",
+      "crop": [
+        0.51,
+        0.81,
+        0.95,
+        0.995
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Отрасль",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "may-26",
+          "label": "май.26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 10
+            },
+            {
+              "label": "Информация и связь",
+              "value": 6
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 11
+            },
+            {
+              "label": "Торговля",
+              "value": 11
+            },
+            {
+              "label": "Образование",
+              "value": 11
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 12
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 13
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 19
+            }
+          ]
+        },
+        {
+          "id": "q1-26",
+          "label": "1К26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 15
+            },
+            {
+              "label": "Информация и связь",
+              "value": 19
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 12
+            },
+            {
+              "label": "Торговля",
+              "value": 18
+            },
+            {
+              "label": "Образование",
+              "value": 13
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 15
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 24
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 20
+            }
+          ]
+        }
+      ],
+      "note": "",
+      "image": "images/alfa-macro-stat-nominal-wages-sectors.jpg",
+      "image_sha256": "e461cd343ded3813abadac823191df66ac6e0127441322206536ad73b293b4d3",
+      "image_width": 1200,
+      "image_height": 714
+    },
+    {
+      "id": "alfa-macro-stat-industry-retail-index",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 5: Динамика промпроизводства и оборота розничной торговли, 2021=100",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.545,
+        0.49,
+        0.75
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Год",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "",
+      "image": "images/alfa-macro-stat-industry-retail-index.jpg",
+      "image_sha256": "5fcfec663b63970c6415e6a1f126cea9f490c0f6c474be7dd30c7d7a003ec20a",
+      "image_width": 1200,
+      "image_height": 757
+    },
+    {
+      "id": "alfa-macro-stat-import-ruble",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 6: Импорт товаров, $млрд и % г/г и курс рубля на конец года, руб./$",
+      "kind": "mixed",
+      "crop": [
+        0.51,
+        0.545,
+        0.99,
+        0.75
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Год",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "import-yoy",
+          "label": "Изменение импорта товаров",
+          "unit": "% г/г",
+          "points": [
+            {
+              "label": "2016",
+              "value": -1
+            },
+            {
+              "label": "2017",
+              "value": 24
+            },
+            {
+              "label": "2018",
+              "value": 4
+            },
+            {
+              "label": "2019",
+              "value": 2
+            },
+            {
+              "label": "2020",
+              "value": -5
+            },
+            {
+              "label": "2021",
+              "value": 25
+            },
+            {
+              "label": "2022",
+              "value": -8
+            },
+            {
+              "label": "2023",
+              "value": 10
+            },
+            {
+              "label": "2024",
+              "value": -1
+            },
+            {
+              "label": "2025",
+              "value": 2
+            },
+            {
+              "label": "2026П",
+              "value": 11,
+              "forecast": true
+            },
+            {
+              "label": "2027П",
+              "value": 3,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: подписаны только темпы роста импорта; значения столбцов импорта и точки курса рубля не подписаны. Прогнозные годы в подписи отмечены «П».",
+      "image": "images/alfa-macro-stat-import-ruble.jpg",
+      "image_sha256": "b97a76950a11b78b2e64b7d9fa5c6b32590fc29c7e196804afc646dafb93a6da",
+      "image_width": 1200,
+      "image_height": 725
+    },
+    {
+      "id": "alfa-macro-stat-inflation-year-end",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 7: Динамика инфляции на конец года, % г/г",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.745,
+        0.49,
+        0.995
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Год",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "inflation",
+          "label": "Инфляция",
+          "unit": "%",
+          "points": [
+            {
+              "label": "2010",
+              "value": 8.8
+            },
+            {
+              "label": "2011",
+              "value": 6.1
+            },
+            {
+              "label": "2012",
+              "value": 6.6
+            },
+            {
+              "label": "2013",
+              "value": 6.5
+            },
+            {
+              "label": "2014",
+              "value": 11.4
+            },
+            {
+              "label": "2015",
+              "value": 12.9
+            },
+            {
+              "label": "2016",
+              "value": 5.4
+            },
+            {
+              "label": "2017",
+              "value": 2.5
+            },
+            {
+              "label": "2018",
+              "value": 4.3
+            },
+            {
+              "label": "2019",
+              "value": 3.0
+            },
+            {
+              "label": "2020",
+              "value": 4.9
+            },
+            {
+              "label": "2021",
+              "value": 8.4
+            },
+            {
+              "label": "2022",
+              "value": 11.9
+            },
+            {
+              "label": "2023",
+              "value": 7.4
+            },
+            {
+              "label": "2024",
+              "value": 9.5
+            },
+            {
+              "label": "2025",
+              "value": 5.6
+            },
+            {
+              "label": "2026П",
+              "value": 7.5,
+              "forecast": true
+            },
+            {
+              "label": "2027П",
+              "value": 5.5,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "",
+      "image": "images/alfa-macro-stat-inflation-year-end.jpg",
+      "image_sha256": "8799a0006774fce843b2d5d65282ca8565affdb02d5548f48ceddec1f73a1e28",
+      "image_width": 1200,
+      "image_height": 923
+    },
+    {
+      "id": "alfa-macro-stat-key-rate",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 8: Динамика ключевой ставки в 2026–2027 гг., %",
+      "kind": "bar",
+      "crop": [
+        0.51,
+        0.745,
+        0.95,
+        0.995
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "key-rate",
+          "label": "Ключевая ставка",
+          "unit": "%",
+          "points": [
+            {
+              "label": "янв.26",
+              "value": 16.0
+            },
+            {
+              "label": "фев.26",
+              "value": 15.5
+            },
+            {
+              "label": "мар.26",
+              "value": 15.0
+            },
+            {
+              "label": "апр.26",
+              "value": 14.5
+            },
+            {
+              "label": "июн.26",
+              "value": 14.25
+            },
+            {
+              "label": "июл.26",
+              "value": 14.0
+            },
+            {
+              "label": "сен.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "окт.26",
+              "value": 13.75,
+              "forecast": true
+            },
+            {
+              "label": "дек.26",
+              "value": 13.5,
+              "forecast": true
+            },
+            {
+              "label": "дек.27",
+              "value": 12.0,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Подписи напечатаны только для показанных месяцев. Прогнозный период начинается в сен.26, после вертикального разделителя.",
+      "image": "images/alfa-macro-stat-key-rate.jpg",
+      "image_sha256": "53c6359fc45e76943646831210ebfd229722419f8602fbbad12940a55f98c972",
+      "image_width": 1200,
+      "image_height": 964
+    },
+    {
+      "id": "gold-aug26-gold-vs-dollar-returns",
+      "document_id": "gold-digest-august-2026",
+      "page": 3,
+      "title": "Доходность золота VS доллара США по результатам августа",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.41,
+        0.96,
+        0.63
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Актив",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "return",
+          "label": "Доходность",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Золото",
+              "value": 9.7
+            },
+            {
+              "label": "Доллар США по индексу DXY",
+              "value": -0.5
+            }
+          ]
+        }
+      ],
+      "note": "Подписи значений на столбцах: +9,7% и −0,5%.",
+      "image": "images/gold-aug26-gold-vs-dollar-returns.jpg",
+      "image_sha256": "93e745024b5c46ead11b5587a16c761f5dfa36bdd9f4613fab7a1c9863c92524",
+      "image_width": 1200,
+      "image_height": 402
+    },
+    {
+      "id": "gold-aug26-price-ytd",
+      "document_id": "gold-digest-august-2026",
+      "page": 3,
+      "title": "Динамика цены золота с начала 2026 года, $ за унцию",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.63,
+        0.96,
+        0.97
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "gold-price",
+          "label": "Цена золота",
+          "unit": "$ за унцию",
+          "points": [
+            {
+              "label": "Максимум в ходе ралли (дата не указана)",
+              "value": 4700
+            },
+            {
+              "label": "Конец августа",
+              "value": 4400
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: внесены только подписанные ориентиры $4 700 и $4 400; остальные значения линии не подписаны.",
+      "image": "images/gold-aug26-price-ytd.jpg",
+      "image_sha256": "d44302d2045efb7399868a7ce6a60011a0fc38914411cc60af8a1434ceb2ed7c",
+      "image_width": 1200,
+      "image_height": 621
+    },
+    {
+      "id": "gold-aug26-us-jobs-revisions",
+      "document_id": "gold-digest-august-2026",
+      "page": 4,
+      "title": "Слабый рынок труда*: важны и новый результат, и пересмотры",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.1,
+        0.96,
+        0.42
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "before-release",
+          "label": "До релиза 7 августа",
+          "unit": "тыс. рабочих мест",
+          "points": [
+            {
+              "label": "Май",
+              "value": 129
+            },
+            {
+              "label": "Июнь",
+              "value": 57
+            },
+            {
+              "label": "Июль",
+              "value": 80
+            }
+          ]
+        },
+        {
+          "id": "release-aug-7",
+          "label": "В релизе 7 августа",
+          "unit": "тыс. рабочих мест",
+          "points": [
+            {
+              "label": "Май",
+              "value": 63
+            },
+            {
+              "label": "Июнь",
+              "value": 20
+            },
+            {
+              "label": "Июль",
+              "value": -23
+            }
+          ]
+        }
+      ],
+      "note": "Звёздочка в источнике: число рабочих мест в экономике США без учёта сельскохозяйственного сектора.",
+      "image": "images/gold-aug26-us-jobs-revisions.jpg",
+      "image_sha256": "dd4abe78e675fefb028baf070bf7bb1bcca791276860e98dedfabe7dcc6f7d87",
+      "image_width": 1200,
+      "image_height": 584
+    },
+    {
+      "id": "gold-aug26-us-inflation",
+      "document_id": "gold-digest-august-2026",
+      "page": 5,
+      "title": "Годовая инфляция в июле: показатели выше цели ФРС",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.49,
+        0.97,
+        0.76
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Показатель",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "annual-inflation",
+          "label": "Годовая инфляция в июле",
+          "unit": "% г/г",
+          "points": [
+            {
+              "label": "CPI",
+              "value": 3.4
+            },
+            {
+              "label": "Базовый CPI",
+              "value": 2.5
+            },
+            {
+              "label": "PCE",
+              "value": 3.7
+            },
+            {
+              "label": "Базовый PCE",
+              "value": 3.3
+            }
+          ]
+        }
+      ],
+      "note": "Зелёная пунктирная линия показывает цель ФРС по PCE: 2%.",
+      "image": "images/gold-aug26-us-inflation.jpg",
+      "image_sha256": "e49df504383600169e6f5bd2884a5bb053e3695affec5b3f6b6d3360aeee3a11",
+      "image_width": 1200,
+      "image_height": 488
+    },
+    {
+      "id": "gold-aug26-us-debt",
+      "document_id": "gold-digest-august-2026",
+      "page": 6,
+      "title": "За август американский госдолг вырос практически на полтриллиона долларов",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.18,
+        0.96,
+        0.51
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "us-debt",
+          "label": "Госдолг США",
+          "unit": "$ трлн",
+          "points": [
+            {
+              "label": "31.07",
+              "value": 39.772
+            },
+            {
+              "label": "31.08",
+              "value": 40.125
+            }
+          ]
+        },
+        {
+          "id": "threshold",
+          "label": "Порог $40 трлн",
+          "unit": "$ трлн",
+          "points": [
+            {
+              "label": "Порог",
+              "value": 40.0
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: указаны подписанные начальное и конечное значения и подписанный порог; прочие значения линии не подписаны. Последнее доступное значение — на 7 сентября.",
+      "image": "images/gold-aug26-us-debt.jpg",
+      "image_sha256": "a86688d72d051db7c37fdefe047cc251e21e5c4fb8cf55fb6b176e6500931e49",
+      "image_width": 1200,
+      "image_height": 602
+    },
+    {
+      "id": "gold-aug26-central-bank-operations",
+      "document_id": "gold-digest-august-2026",
+      "page": 7,
+      "title": "Крупнейшие заявленные операции мировых ЦБ в июле",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.18,
+        0.96,
+        0.48
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Страна",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "net-operations",
+          "label": "Чистые покупки / продажи",
+          "unit": "тонны",
+          "points": [
+            {
+              "label": "Китай",
+              "value": 20
+            },
+            {
+              "label": "Польша",
+              "value": 8
+            },
+            {
+              "label": "Чехия",
+              "value": 2
+            },
+            {
+              "label": "Казахстан",
+              "value": 1
+            },
+            {
+              "label": "Малайзия",
+              "value": 1
+            },
+            {
+              "label": "Боливия",
+              "value": 1
+            },
+            {
+              "label": "Россия",
+              "value": -6
+            }
+          ]
+        }
+      ],
+      "note": "За июль 2026 года; значения подписаны у столбцов.",
+      "image": "images/gold-aug26-central-bank-operations.jpg",
+      "image_sha256": "43b168fa8431ca01f428f33e7c5109871b03643051add5fa727149fb52404c9e",
+      "image_width": 1200,
+      "image_height": 547
+    },
+    {
+      "id": "gold-aug26-central-bank-monthly-purchases",
+      "document_id": "gold-digest-august-2026",
+      "page": 7,
+      "title": "Ежемесячные покупки золота мировыми ЦБ, т",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.62,
+        0.99,
+        0.92
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "central-bank-purchases",
+          "label": "Покупки мировых ЦБ",
+          "unit": "т",
+          "points": [
+            {
+              "label": "июл.25",
+              "value": 10
+            },
+            {
+              "label": "авг.25",
+              "value": 19
+            },
+            {
+              "label": "сен.25",
+              "value": 39
+            },
+            {
+              "label": "окт.25",
+              "value": 53
+            },
+            {
+              "label": "ноя.25",
+              "value": 45
+            },
+            {
+              "label": "дек.25",
+              "value": 30
+            },
+            {
+              "label": "янв.26",
+              "value": 5
+            },
+            {
+              "label": "фев.26",
+              "value": 27
+            },
+            {
+              "label": "мар.26",
+              "value": -30
+            },
+            {
+              "label": "апр.26",
+              "value": 17
+            },
+            {
+              "label": "май.26",
+              "value": 41
+            },
+            {
+              "label": "июн.26",
+              "value": 51
+            },
+            {
+              "label": "июл.26",
+              "value": 23
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: внесены все подписанные столбцы покупок. Среднее значение за год на пунктирной линии и цена золота на линии не подписаны точками.",
+      "image": "images/gold-aug26-central-bank-monthly-purchases.jpg",
+      "image_sha256": "c9be214fa21f7686d76bd86e089b3658a437ce5ee21b685ee3c90d3a52734277",
+      "image_width": 1200,
+      "image_height": 531
+    },
+    {
+      "id": "inflation-02-weekly-inflation",
+      "document_id": "inflation-tracker-02",
+      "page": 1,
+      "title": "Недельная инфляция, % н/н",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.62,
+        0.48,
+        0.91
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "weekly-inflation",
+          "label": "Недельная инфляция",
+          "unit": "% н/н",
+          "points": [
+            {
+              "label": "13.07",
+              "value": 0.17
+            },
+            {
+              "label": "27.07",
+              "value": 0.04
+            },
+            {
+              "label": "10.08",
+              "value": -0.06
+            },
+            {
+              "label": "24.08",
+              "value": 0.01
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: добавлены только даты, явно подписанные на оси X, и однозначные подписи соответствующих точек; остальные наблюдения опущены.",
+      "image": "images/inflation-02-weekly-inflation.jpg",
+      "image_sha256": "8cfacdbe2f11038099303ac1940878a3f8736d3945f234c641e3cfe9dfc6f280",
+      "image_width": 1200,
+      "image_height": 1094
+    },
+    {
+      "id": "inflation-02-weekly-segment-inflation",
+      "document_id": "inflation-tracker-02",
+      "page": 1,
+      "title": "Недельная инфляция по сегментам, % н/н",
+      "kind": "bar",
+      "crop": [
+        0.495,
+        0.645,
+        0.97,
+        0.9
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Сегмент",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "aug-25-31",
+          "label": "Недельное значение за 25–31 августа",
+          "unit": "% н/н",
+          "points": [
+            {
+              "label": "ИПЦ",
+              "value": -0.01
+            },
+            {
+              "label": "Прод. сегмент",
+              "value": -0.08
+            },
+            {
+              "label": "Плодоовощи",
+              "value": -1.72
+            },
+            {
+              "label": "Непрод. сегмент",
+              "value": 0.23
+            },
+            {
+              "label": "Бензин",
+              "value": 0.91
+            },
+            {
+              "label": "Услуги",
+              "value": -0.1
+            }
+          ]
+        },
+        {
+          "id": "aug-18-24",
+          "label": "Недельное значение за 18–24 августа",
+          "unit": "% н/н",
+          "points": [
+            {
+              "label": "ИПЦ",
+              "value": 0.01
+            },
+            {
+              "label": "Прод. сегмент",
+              "value": -0.06
+            },
+            {
+              "label": "Плодоовощи",
+              "value": -1.89
+            },
+            {
+              "label": "Непрод. сегмент",
+              "value": 0.26
+            },
+            {
+              "label": "Бензин",
+              "value": 0.89
+            },
+            {
+              "label": "Услуги",
+              "value": -0.13
+            }
+          ]
+        }
+      ],
+      "note": "Значения перенесены с подписей у столбцов; отрицательные величины показаны в исходном виде.",
+      "image": "images/inflation-02-weekly-segment-inflation.jpg",
+      "image_sha256": "34f10f297e7b581476405e5e56b1cfd063d991e72c750455b1a7b35b39ffe783",
+      "image_width": 1200,
+      "image_height": 911
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Недельная инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.1,
+        0.49,
+        0.37
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "График с несколькими компонентами; численные подписи к отдельным точкам отсутствуют.",
+      "image": "images/inflation-02-weekly-decomposition-by-segment.jpg",
+      "image_sha256": "5a472fdab27d4f9011f4ffda208a4dd6e0833fdb3cbde4608c4fd9d7b151dce5",
+      "image_width": 1200,
+      "image_height": 996
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-volatility",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Недельная инфляция, % н/н и ее декомпозиция на базовые и волатильные компоненты, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.5,
+        0.1,
+        0.98,
+        0.37
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Численные подписи к точкам и столбцам отсутствуют.",
+      "image": "images/inflation-02-weekly-decomposition-volatility.jpg",
+      "image_sha256": "264d9415ce461764c24cfcc88c9c39bad526be3d1106efa526ec5892859e55d0",
+      "image_width": 1200,
+      "image_height": 954
+    },
+    {
+      "id": "inflation-02-core-inflation-decomposition",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Базовая инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.38,
+        0.49,
+        0.68
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Численные подписи к точкам и столбцам отсутствуют.",
+      "image": "images/inflation-02-core-inflation-decomposition.jpg",
+      "image_sha256": "ae906da84640797c31a19ea7aebcb32630e5d43e6c11f1adfd85acb26dc29c27",
+      "image_width": 1200,
+      "image_height": 1107
+    },
+    {
+      "id": "inflation-02-volatile-inflation-decomposition",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Волатильная инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.5,
+        0.38,
+        0.98,
+        0.68
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Численные подписи к точкам и столбцам отсутствуют.",
+      "image": "images/inflation-02-volatile-inflation-decomposition.jpg",
+      "image_sha256": "ae354650d0d11795048fafe1ddde28b44a10f77428e5b407a21db5ff2cb34eaa",
+      "image_width": 1200,
+      "image_height": 1060
+    },
+    {
+      "id": "inflation-02-average-weekly-inflation-range",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Динамика усредненной недельной инфляции и ее исторический диапазон*, % н/н",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.7,
+        0.49,
+        0.94
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номер недели",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "Численные подписи к значениям линии отсутствуют; звёздочка относится к историческому диапазону 2017–2025 годов за исключением 2022 года.",
+      "image": "images/inflation-02-average-weekly-inflation-range.jpg",
+      "image_sha256": "06342df0559ef575632426e3f9e7d0ddcf327f7fd817d2c64576c5abf808d16c",
+      "image_width": 1200,
+      "image_height": 886
+    },
+    {
+      "id": "inflation-02-monthly-inflation",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Динамика месячной инфляции, % м/м",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.7,
+        0.98,
+        0.94
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "2026",
+          "label": "2026",
+          "unit": "% м/м",
+          "points": [
+            {
+              "label": "янв",
+              "value": 1.62
+            },
+            {
+              "label": "фев",
+              "value": 0.73
+            },
+            {
+              "label": "мар",
+              "value": 0.6
+            },
+            {
+              "label": "апр",
+              "value": 0.14
+            },
+            {
+              "label": "май",
+              "value": 0.17
+            },
+            {
+              "label": "июн",
+              "value": 0.87
+            },
+            {
+              "label": "июл",
+              "value": 0.54
+            },
+            {
+              "label": "авг",
+              "value": -0.07,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: подписанные значения за январь–август 2026 года. Августовское значение −0,07% — прогноз: на странице 1 ожидаемая дефляция за месяц указана как 0,07%. Значение соответствующей инфляции 4,0% обозначено линией без подписанных отдельных точек.",
+      "image": "images/inflation-02-monthly-inflation.jpg",
+      "image_sha256": "68b00af256befb0d98e4da0ea22b30ab4ba1de000d151aefb5a6fe296e96c28e",
+      "image_width": 1200,
+      "image_height": 848
+    },
+    {
+      "id": "bond-brief-weekly-ofz-yield-key-rate",
+      "document_id": "bond-brief-14092026",
+      "page": 1,
+      "title": "Динамика доходности ОФЗ и Ключевая ставка, %",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.34,
+        0.5,
+        0.6
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют.",
+      "image": "images/bond-brief-weekly-ofz-yield-key-rate.jpg",
+      "image_sha256": "7df6a8c57d27bced18738a3c3080022f6cb4d4fb4e488aab2720950062ad4b96",
+      "image_width": 1200,
+      "image_height": 940
+    },
+    {
+      "id": "bond-brief-weekly-indexes",
+      "document_id": "bond-brief-14092026",
+      "page": 1,
+      "title": "Динамика индексов RGBI и IMOEX",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.34,
+        0.97,
+        0.6
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют.",
+      "image": "images/bond-brief-weekly-indexes.jpg",
+      "image_sha256": "69e80562e1034a356044f64c5349397a632cc219de1ec65cf62db1eea404b7bf",
+      "image_width": 1200,
+      "image_height": 940
+    },
+    {
+      "id": "bond-brief-oil-prices",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика цен на нефть, помесячно",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.16,
+        0.48,
+        0.39
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют.",
+      "image": "images/bond-brief-oil-prices.jpg",
+      "image_sha256": "19c21a87c91c055e735304f3aa5a98eeadb3d928cb2ad7c8548d63ed76112d95",
+      "image_width": 1200,
+      "image_height": 868
+    },
+    {
+      "id": "bond-brief-ruble-usd",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика курса рубля к доллару США",
+      "kind": "line",
+      "crop": [
+        0.51,
+        0.16,
+        0.97,
+        0.39
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривой отсутствуют.",
+      "image": "images/bond-brief-ruble-usd.jpg",
+      "image_sha256": "80870860fd4b88ccbfce53d3b5e781f591c1feab88b06d3353d1211d706fb00e",
+      "image_width": 1200,
+      "image_height": 849
+    },
+    {
+      "id": "bond-brief-ofz-yields",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика доходности ОФЗ, %",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.39,
+        0.49,
+        0.64
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют.",
+      "image": "images/bond-brief-ofz-yields.jpg",
+      "image_sha256": "b681d1dbe9a16f4b3713e1e520fd8411c6fff79c1ae570a2df9935228385a0f8",
+      "image_width": 1200,
+      "image_height": 923
+    },
+    {
+      "id": "bond-brief-corporate-yields-by-rating",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Доходность корпоративных облигаций по уровню кредитного рейтинга, %",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.39,
+        0.98,
+        0.64
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "aaa",
+          "label": "AAA",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 15.3
+            }
+          ]
+        },
+        {
+          "id": "aa",
+          "label": "AA",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 17.0
+            }
+          ]
+        },
+        {
+          "id": "a",
+          "label": "A",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 19.8
+            }
+          ]
+        },
+        {
+          "id": "ofz-1-3y",
+          "label": "ОФЗ (1–3 года)",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 13.7
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: подписаны только последние значения рядов; дата подписей на графике не указана.",
+      "image": "images/bond-brief-corporate-yields-by-rating.jpg",
+      "image_sha256": "a02fff629b4dc46730da4dee2c1e404eaa23d70c05bf62a530a616acbaac4b0c",
+      "image_width": 1200,
+      "image_height": 885
+    },
+    {
+      "id": "bond-brief-10y-sovereign-yields",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика доходности 10-летних гособлигаций РФ, Бразилии и Мексики, %",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.64,
+        0.49,
+        0.88
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют.",
+      "image": "images/bond-brief-10y-sovereign-yields.jpg",
+      "image_sha256": "64f492f6a6e7da24a84f63c69bafc8f5195911ee33a58e985669033ee7879d55",
+      "image_width": 1200,
+      "image_height": 886
+    },
+    {
+      "id": "bond-brief-key-rate-ruonia",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Ключевая ставка и ставка RUONIA, %",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.64,
+        0.98,
+        0.88
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют.",
+      "image": "images/bond-brief-key-rate-ruonia.jpg",
+      "image_sha256": "3f2b2083e8939d712d61b13f9833e24fc59f5aaa501b38b67ec64854ca1ed0a5",
+      "image_width": 1200,
+      "image_height": 849
+    },
+    {
+      "id": "russian-steels-share-price",
+      "document_id": "alfa-russian-steels-1q21",
+      "page": 1,
+      "title": "Динамика акций за 1 год",
+      "kind": "line",
+      "crop": [
+        0.67,
+        0.42,
+        0.96,
+        0.62
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Три нормированных ценовых линии (SVST, NLMK, MMK); численные значения отдельных точек не подписаны.",
+      "image": "images/russian-steels-share-price.jpg",
+      "image_sha256": "bdb4c713ce6f75aacfceebf9b0ada2d9bbbca431308f5d7f31474381b98f6b2c",
+      "image_width": 1200,
+      "image_height": 1171
+    }
+  ]
+}

@@ -1,0 +1,905 @@
+{
+  "documents": [
+    {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    {
+      "id": "bond-brief-14092026",
+      "file": "Бонд_Бриф_14092026.pdf",
+      "sha256": "87dc17520e2a744f95580ee2ec42461d0ee6ebf19e752622a49c49600cb1b055",
+      "pages": 5,
+      "title": "Бонд Бриф: Итоги недели"
+    },
+    {
+      "id": "alfa-russian-steels-1q21",
+      "file": "ALFA_Russian_Steels_1К21PreviewUpdate_15Apr2021.pdf",
+      "sha256": "36eaaa58ae68d858db3600dbf3cc93d0bdefb8ca03f1f5cc154c532cc32e0c86",
+      "pages": 4,
+      "title": "Российская сталь: Ралли цен продолжается; прогноз результатов за 1К21"
+    }
+  ],
+  "charts": [
+    {
+      "id": "gold-aug26-gold-vs-dollar-returns",
+      "document_id": "gold-digest-august-2026",
+      "page": 3,
+      "title": "Доходность золота VS доллара США по результатам августа",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.41,
+        0.96,
+        0.63
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Актив",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "return",
+          "label": "Доходность",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Золото",
+              "value": 9.7
+            },
+            {
+              "label": "Доллар США по индексу DXY",
+              "value": -0.5
+            }
+          ]
+        }
+      ],
+      "note": "Подписи значений на столбцах: +9,7% и −0,5%."
+    },
+    {
+      "id": "gold-aug26-price-ytd",
+      "document_id": "gold-digest-august-2026",
+      "page": 3,
+      "title": "Динамика цены золота с начала 2026 года, $ за унцию",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.63,
+        0.96,
+        0.97
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "gold-price",
+          "label": "Цена золота",
+          "unit": "$ за унцию",
+          "points": [
+            {
+              "label": "Максимум в ходе ралли (дата не указана)",
+              "value": 4700
+            },
+            {
+              "label": "Конец августа",
+              "value": 4400
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: внесены только подписанные ориентиры $4 700 и $4 400; остальные значения линии не подписаны."
+    },
+    {
+      "id": "gold-aug26-us-jobs-revisions",
+      "document_id": "gold-digest-august-2026",
+      "page": 4,
+      "title": "Слабый рынок труда*: важны и новый результат, и пересмотры",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.1,
+        0.96,
+        0.42
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "before-release",
+          "label": "До релиза 7 августа",
+          "unit": "тыс. рабочих мест",
+          "points": [
+            {
+              "label": "Май",
+              "value": 129
+            },
+            {
+              "label": "Июнь",
+              "value": 57
+            },
+            {
+              "label": "Июль",
+              "value": 80
+            }
+          ]
+        },
+        {
+          "id": "release-aug-7",
+          "label": "В релизе 7 августа",
+          "unit": "тыс. рабочих мест",
+          "points": [
+            {
+              "label": "Май",
+              "value": 63
+            },
+            {
+              "label": "Июнь",
+              "value": 20
+            },
+            {
+              "label": "Июль",
+              "value": -23
+            }
+          ]
+        }
+      ],
+      "note": "Звёздочка в источнике: число рабочих мест в экономике США без учёта сельскохозяйственного сектора."
+    },
+    {
+      "id": "gold-aug26-us-inflation",
+      "document_id": "gold-digest-august-2026",
+      "page": 5,
+      "title": "Годовая инфляция в июле: показатели выше цели ФРС",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.49,
+        0.97,
+        0.76
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Показатель",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "annual-inflation",
+          "label": "Годовая инфляция в июле",
+          "unit": "% г/г",
+          "points": [
+            {
+              "label": "CPI",
+              "value": 3.4
+            },
+            {
+              "label": "Базовый CPI",
+              "value": 2.5
+            },
+            {
+              "label": "PCE",
+              "value": 3.7
+            },
+            {
+              "label": "Базовый PCE",
+              "value": 3.3
+            }
+          ]
+        }
+      ],
+      "note": "Зелёная пунктирная линия показывает цель ФРС по PCE: 2%."
+    },
+    {
+      "id": "gold-aug26-us-debt",
+      "document_id": "gold-digest-august-2026",
+      "page": 6,
+      "title": "За август американский госдолг вырос практически на полтриллиона долларов",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.18,
+        0.96,
+        0.51
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "us-debt",
+          "label": "Госдолг США",
+          "unit": "$ трлн",
+          "points": [
+            {
+              "label": "31.07",
+              "value": 39.772
+            },
+            {
+              "label": "31.08",
+              "value": 40.125
+            }
+          ]
+        },
+        {
+          "id": "threshold",
+          "label": "Порог $40 трлн",
+          "unit": "$ трлн",
+          "points": [
+            {
+              "label": "Порог",
+              "value": 40.0
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: указаны подписанные начальное и конечное значения и подписанный порог; прочие значения линии не подписаны. Последнее доступное значение — на 7 сентября."
+    },
+    {
+      "id": "gold-aug26-central-bank-operations",
+      "document_id": "gold-digest-august-2026",
+      "page": 7,
+      "title": "Крупнейшие заявленные операции мировых ЦБ в июле",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.18,
+        0.96,
+        0.48
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Страна",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "net-operations",
+          "label": "Чистые покупки / продажи",
+          "unit": "тонны",
+          "points": [
+            {
+              "label": "Китай",
+              "value": 20
+            },
+            {
+              "label": "Польша",
+              "value": 8
+            },
+            {
+              "label": "Чехия",
+              "value": 2
+            },
+            {
+              "label": "Казахстан",
+              "value": 1
+            },
+            {
+              "label": "Малайзия",
+              "value": 1
+            },
+            {
+              "label": "Боливия",
+              "value": 1
+            },
+            {
+              "label": "Россия",
+              "value": -6
+            }
+          ]
+        }
+      ],
+      "note": "За июль 2026 года; значения подписаны у столбцов."
+    },
+    {
+      "id": "gold-aug26-central-bank-monthly-purchases",
+      "document_id": "gold-digest-august-2026",
+      "page": 7,
+      "title": "Ежемесячные покупки золота мировыми ЦБ, т",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.62,
+        0.99,
+        0.92
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "central-bank-purchases",
+          "label": "Покупки мировых ЦБ",
+          "unit": "т",
+          "points": [
+            {
+              "label": "июл.25",
+              "value": 10
+            },
+            {
+              "label": "авг.25",
+              "value": 19
+            },
+            {
+              "label": "сен.25",
+              "value": 39
+            },
+            {
+              "label": "окт.25",
+              "value": 53
+            },
+            {
+              "label": "ноя.25",
+              "value": 45
+            },
+            {
+              "label": "дек.25",
+              "value": 30
+            },
+            {
+              "label": "янв.26",
+              "value": 5
+            },
+            {
+              "label": "фев.26",
+              "value": 27
+            },
+            {
+              "label": "мар.26",
+              "value": -30
+            },
+            {
+              "label": "апр.26",
+              "value": 17
+            },
+            {
+              "label": "май.26",
+              "value": 41
+            },
+            {
+              "label": "июн.26",
+              "value": 51
+            },
+            {
+              "label": "июл.26",
+              "value": 23
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: внесены все подписанные столбцы покупок. Среднее значение за год на пунктирной линии и цена золота на линии не подписаны точками."
+    },
+    {
+      "id": "inflation-02-weekly-inflation",
+      "document_id": "inflation-tracker-02",
+      "page": 1,
+      "title": "Недельная инфляция, % н/н",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.62,
+        0.48,
+        0.91
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "weekly-inflation",
+          "label": "Недельная инфляция",
+          "unit": "% н/н",
+          "points": [
+            {
+              "label": "13.07",
+              "value": 0.17
+            },
+            {
+              "label": "27.07",
+              "value": 0.04
+            },
+            {
+              "label": "10.08",
+              "value": -0.06
+            },
+            {
+              "label": "24.08",
+              "value": 0.01
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: добавлены только даты, явно подписанные на оси X, и однозначные подписи соответствующих точек; остальные наблюдения опущены."
+    },
+    {
+      "id": "inflation-02-weekly-segment-inflation",
+      "document_id": "inflation-tracker-02",
+      "page": 1,
+      "title": "Недельная инфляция по сегментам, % н/н",
+      "kind": "bar",
+      "crop": [
+        0.495,
+        0.645,
+        0.97,
+        0.9
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Сегмент",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "aug-25-31",
+          "label": "Недельное значение за 25–31 августа",
+          "unit": "% н/н",
+          "points": [
+            {
+              "label": "ИПЦ",
+              "value": -0.01
+            },
+            {
+              "label": "Прод. сегмент",
+              "value": -0.08
+            },
+            {
+              "label": "Плодоовощи",
+              "value": -1.72
+            },
+            {
+              "label": "Непрод. сегмент",
+              "value": 0.23
+            },
+            {
+              "label": "Бензин",
+              "value": 0.91
+            },
+            {
+              "label": "Услуги",
+              "value": -0.1
+            }
+          ]
+        },
+        {
+          "id": "aug-18-24",
+          "label": "Недельное значение за 18–24 августа",
+          "unit": "% н/н",
+          "points": [
+            {
+              "label": "ИПЦ",
+              "value": 0.01
+            },
+            {
+              "label": "Прод. сегмент",
+              "value": -0.06
+            },
+            {
+              "label": "Плодоовощи",
+              "value": -1.89
+            },
+            {
+              "label": "Непрод. сегмент",
+              "value": 0.26
+            },
+            {
+              "label": "Бензин",
+              "value": 0.89
+            },
+            {
+              "label": "Услуги",
+              "value": -0.13
+            }
+          ]
+        }
+      ],
+      "note": "Значения перенесены с подписей у столбцов; отрицательные величины показаны в исходном виде."
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Недельная инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.1,
+        0.49,
+        0.37
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "График с несколькими компонентами; численные подписи к отдельным точкам отсутствуют."
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-volatility",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Недельная инфляция, % н/н и ее декомпозиция на базовые и волатильные компоненты, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.5,
+        0.1,
+        0.98,
+        0.37
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Численные подписи к точкам и столбцам отсутствуют."
+    },
+    {
+      "id": "inflation-02-core-inflation-decomposition",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Базовая инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.38,
+        0.49,
+        0.68
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Численные подписи к точкам и столбцам отсутствуют."
+    },
+    {
+      "id": "inflation-02-volatile-inflation-decomposition",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Волатильная инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+      "kind": "mixed",
+      "crop": [
+        0.5,
+        0.38,
+        0.98,
+        0.68
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Численные подписи к точкам и столбцам отсутствуют."
+    },
+    {
+      "id": "inflation-02-average-weekly-inflation-range",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Динамика усредненной недельной инфляции и ее исторический диапазон*, % н/н",
+      "kind": "mixed",
+      "crop": [
+        0.03,
+        0.7,
+        0.49,
+        0.94
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номер недели",
+        "kind": "category"
+      },
+      "series": [],
+      "note": "Численные подписи к значениям линии отсутствуют; звёздочка относится к историческому диапазону 2017–2025 годов за исключением 2022 года."
+    },
+    {
+      "id": "inflation-02-monthly-inflation",
+      "document_id": "inflation-tracker-02",
+      "page": 2,
+      "title": "Динамика месячной инфляции, % м/м",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.7,
+        0.98,
+        0.94
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "2026",
+          "label": "2026",
+          "unit": "% м/м",
+          "points": [
+            {
+              "label": "янв",
+              "value": 1.62
+            },
+            {
+              "label": "фев",
+              "value": 0.73
+            },
+            {
+              "label": "мар",
+              "value": 0.6
+            },
+            {
+              "label": "апр",
+              "value": 0.14
+            },
+            {
+              "label": "май",
+              "value": 0.17
+            },
+            {
+              "label": "июн",
+              "value": 0.87
+            },
+            {
+              "label": "июл",
+              "value": 0.54
+            },
+            {
+              "label": "авг",
+              "value": -0.07,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: подписанные значения за январь–август 2026 года. Августовское значение −0,07% — прогноз: на странице 1 ожидаемая дефляция за месяц указана как 0,07%. Значение соответствующей инфляции 4,0% обозначено линией без подписанных отдельных точек."
+    },
+    {
+      "id": "bond-brief-weekly-ofz-yield-key-rate",
+      "document_id": "bond-brief-14092026",
+      "page": 1,
+      "title": "Динамика доходности ОФЗ и Ключевая ставка, %",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.34,
+        0.5,
+        0.6
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют."
+    },
+    {
+      "id": "bond-brief-weekly-indexes",
+      "document_id": "bond-brief-14092026",
+      "page": 1,
+      "title": "Динамика индексов RGBI и IMOEX",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.34,
+        0.97,
+        0.6
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют."
+    },
+    {
+      "id": "bond-brief-oil-prices",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика цен на нефть, помесячно",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.16,
+        0.48,
+        0.39
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют."
+    },
+    {
+      "id": "bond-brief-ruble-usd",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика курса рубля к доллару США",
+      "kind": "line",
+      "crop": [
+        0.51,
+        0.16,
+        0.97,
+        0.39
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривой отсутствуют."
+    },
+    {
+      "id": "bond-brief-ofz-yields",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика доходности ОФЗ, %",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.39,
+        0.49,
+        0.64
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют."
+    },
+    {
+      "id": "bond-brief-corporate-yields-by-rating",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Доходность корпоративных облигаций по уровню кредитного рейтинга, %",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.39,
+        0.98,
+        0.64
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "aaa",
+          "label": "AAA",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 15.3
+            }
+          ]
+        },
+        {
+          "id": "aa",
+          "label": "AA",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 17.0
+            }
+          ]
+        },
+        {
+          "id": "a",
+          "label": "A",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 19.8
+            }
+          ]
+        },
+        {
+          "id": "ofz-1-3y",
+          "label": "ОФЗ (1–3 года)",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Подпись у конечной точки (дата не указана)",
+              "value": 13.7
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: подписаны только последние значения рядов; дата подписей на графике не указана."
+    },
+    {
+      "id": "bond-brief-10y-sovereign-yields",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Динамика доходности 10-летних гособлигаций РФ, Бразилии и Мексики, %",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.64,
+        0.49,
+        0.88
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют."
+    },
+    {
+      "id": "bond-brief-key-rate-ruonia",
+      "document_id": "bond-brief-14092026",
+      "page": 4,
+      "title": "Ключевая ставка и ставка RUONIA, %",
+      "kind": "line",
+      "crop": [
+        0.5,
+        0.64,
+        0.98,
+        0.88
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Подписанные численные значения на кривых отсутствуют."
+    },
+    {
+      "id": "russian-steels-share-price",
+      "document_id": "alfa-russian-steels-1q21",
+      "page": 1,
+      "title": "Динамика акций за 1 год",
+      "kind": "line",
+      "crop": [
+        0.67,
+        0.42,
+        0.96,
+        0.62
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Дата",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Три нормированных ценовых линии (SVST, NLMK, MMK); численные значения отдельных точек не подписаны."
+    }
+  ]
+}

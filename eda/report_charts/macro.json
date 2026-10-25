@@ -1,0 +1,1205 @@
+{
+  "documents": [
+    {
+      "id": "alfa-7m26",
+      "file": "ALFA-7M26.pdf",
+      "sha256": "3c64c1e43f3b46a795f9581967f2dbc8efb0994cb77ab82e95da180830e9ff8c",
+      "pages": 4,
+      "title": "Макростатистика 7М26"
+    },
+    {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    {
+      "id": "alfa-macro-stat-1h26",
+      "file": "ALFA-macro_stat1H26.pdf",
+      "sha256": "84899553fadf3e49abac7074c7b7d2afc2fa5c70b7fde0bf4c3eabe3d7402266",
+      "pages": 5,
+      "title": "Макростатистика 1П26"
+    }
+  ],
+  "charts": [
+    {
+      "id": "alfa-7m26-car-sales-monthly",
+      "document_id": "alfa-7m26",
+      "page": 1,
+      "title": "Рис. 1: Продажи новых легковых автомобилей, тыс. шт.",
+      "kind": "bar",
+      "crop": [
+        0.08,
+        0.49,
+        0.5,
+        0.735
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-7m26-retail-industry-dynamics",
+      "document_id": "alfa-7m26",
+      "page": 1,
+      "title": "Рис. 2: Динамика оборота розничной торговли и промпроизводства, % г/г",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.49,
+        0.93,
+        0.735
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 3: Сальдированный финансовый результат компаний, накопленным итогом, млрд руб.",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.11,
+        0.5,
+        0.34
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-7m26-financial-result-sectors",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 4: Сальдированный финансовый результат компаний по секторам, млрд руб./мес.",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.11,
+        0.93,
+        0.34
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Сектор",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-7m26-nominal-wages-unemployment",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 5: Динамика зарплат в номинальном выражении, % г/г и уровень безработицы, %",
+      "kind": "scatter",
+      "crop": [
+        0.08,
+        0.58,
+        0.5,
+        0.805
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номинальные зарплаты, % г/г",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-7m26-vacancies",
+      "document_id": "alfa-7m26",
+      "page": 2,
+      "title": "Рис. 6: Число вакансий, Дек T-1=100",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.58,
+        0.93,
+        0.805
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-weekly-inflation",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 1: Динамика усредненной недельной инфляции и ее исторический диапазон*, % н/н",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.35,
+        0.5,
+        0.65
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номер недели",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-inflation-expectations",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 2: Инфляционные ожидания населения, % и инфляционные ожидания предприятий, п.",
+      "kind": "scatter",
+      "crop": [
+        0.52,
+        0.35,
+        0.93,
+        0.65
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Инфляционные ожидания населения, %",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-money-aggregates",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 3: Динамика денежных агрегатов, % г/г",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.65,
+        0.5,
+        0.91
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 2,
+      "title": "Рис. 4: Изменение наличных денег в обращении, накопленным итогом с начала года, млрд руб.",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.65,
+        0.93,
+        0.91
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-credit-portfolio-growth",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 5: Прирост кредитного портфеля по сегментам, % м/м",
+      "kind": "scatter",
+      "crop": [
+        0.08,
+        0.12,
+        0.5,
+        0.38
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Корп. сегмент, % м/м",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-retail-deposits",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 6: Динамика рублевых розничных депозитов, дек T-1 = 100%",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.12,
+        0.93,
+        0.38
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-federal-budget-balance",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 7: Динамика накопленного с начала года баланса федерального бюджета, трлн руб.",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.42,
+        0.5,
+        0.66
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-wages-unemployment",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 8: Уровень безработицы, % и динамика номинальных зарплат, % г/г",
+      "kind": "scatter",
+      "crop": [
+        0.52,
+        0.42,
+        0.93,
+        0.66
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Номинальные зарплаты, % г/г",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-policy-key-rate-consensus",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 9: Изменение ожидаемой средней ключевой ставки на 2027 г., %",
+      "kind": "line",
+      "crop": [
+        0.08,
+        0.66,
+        0.5,
+        0.92
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "consensus",
+          "label": "Ожидаемая консенсусом средняя КС",
+          "unit": "%",
+          "points": [
+            {
+              "label": "фев.26",
+              "value": 10.4,
+              "forecast": true
+            },
+            {
+              "label": "мар.26",
+              "value": 10.3,
+              "forecast": true
+            },
+            {
+              "label": "апр.26",
+              "value": 10.7,
+              "forecast": true
+            },
+            {
+              "label": "июн.26",
+              "value": 10.6,
+              "forecast": true
+            },
+            {
+              "label": "июл.26",
+              "value": 12.2,
+              "forecast": true
+            },
+            {
+              "label": "сен.26",
+              "value": 12.4,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Шесть подписанных маркеров консенсус-прогноза средней ставки на 2027 год, опубликованных в указанные месяцы 2026 года. Нет наблюдений за май и август. Серые 8,0–12,5% — границы диапазона ЦБ, не точки консенсуса; они не включены в этот ряд."
+    },
+    {
+      "id": "alfa-policy-alfa-key-rate-forecast",
+      "document_id": "alfa-policy-rate-11sep",
+      "page": 3,
+      "title": "Рис. 10: Прогноз Альфа-Банка по движению ключевой ставки в 2026–2027 гг., %",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.66,
+        0.93,
+        0.92
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "key-rate",
+          "label": "Ключевая ставка",
+          "unit": "%",
+          "points": [
+            {
+              "label": "янв.26",
+              "value": 16.0
+            },
+            {
+              "label": "фев.26",
+              "value": 15.5
+            },
+            {
+              "label": "мар.26",
+              "value": 15.0
+            },
+            {
+              "label": "апр.26",
+              "value": 14.5
+            },
+            {
+              "label": "июн.26",
+              "value": 14.25
+            },
+            {
+              "label": "июл.26",
+              "value": 14.0
+            },
+            {
+              "label": "сен.26",
+              "value": 14.0
+            },
+            {
+              "label": "окт.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "дек.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "дек.27",
+              "value": 12.0,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Подписи напечатаны только для показанных месяцев (май, авг. и ноябрь не указаны). Прогнозный период начинается после вертикальной метки между сен.26 и окт.26."
+    },
+    {
+      "id": "alfa-consumption-retail-turnover",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 1: Динамика оборота розничной торговли по сегментам, % г/г",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.34,
+        0.5,
+        0.56
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Квартал",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-consumption-car-sales-cumulative",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 2: Продажи новых легковых автомобилей, накопленным итогом с начала года, тыс. шт.",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.34,
+        0.93,
+        0.56
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-consumption-nominal-real-wages",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 3: Динамика номинальных и реальных зарплат, % г/г",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.7,
+        0.5,
+        0.94
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-consumption-nominal-wages-sectors",
+      "document_id": "alfa-consumption",
+      "page": 1,
+      "title": "Рис. 4: Динамика номинальных зарплат по сегментам, % г/г",
+      "kind": "bar",
+      "crop": [
+        0.495,
+        0.7,
+        0.93,
+        0.94
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Сегмент",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "may-26",
+          "label": "май.26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 10
+            },
+            {
+              "label": "Информация и связь",
+              "value": 6
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 11
+            },
+            {
+              "label": "Торговля",
+              "value": 11
+            },
+            {
+              "label": "Образование",
+              "value": 11
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 12
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 13
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 19
+            }
+          ]
+        },
+        {
+          "id": "q1-26",
+          "label": "1К26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 15
+            },
+            {
+              "label": "Информация и связь",
+              "value": 19
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 12
+            },
+            {
+              "label": "Торговля",
+              "value": 18
+            },
+            {
+              "label": "Образование",
+              "value": 13
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 15
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 24
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 20
+            }
+          ]
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": "alfa-consumption-hh-index-unemployment",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 5: Индекс HH и уровень безработицы, %",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.24,
+        0.5,
+        0.5
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": "Числовые подписи наблюдений отсутствуют. Красные значения 2,0–4,5% справа относятся к шкале безработицы, а не к отдельным точкам."
+    },
+    {
+      "id": "alfa-consumption-vacancies-resumes",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 5: Динамика числа вакансий и резюме, янв.2022=100",
+      "kind": "line",
+      "crop": [
+        0.52,
+        0.24,
+        0.93,
+        0.5
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-consumption-weekly-inflation",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 7: Динамика базовой недельной инфляции и ее структура, % н/н",
+      "kind": "mixed",
+      "crop": [
+        0.08,
+        0.63,
+        0.5,
+        0.89
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Неделя",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-consumption-key-rate-forecast",
+      "document_id": "alfa-consumption",
+      "page": 2,
+      "title": "Рис. 8: Прогноз Альфа-Банка по динамике ключевой ставки на конец периода, %",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.63,
+        0.93,
+        0.89
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "key-rate",
+          "label": "Ключевая ставка",
+          "unit": "%",
+          "points": [
+            {
+              "label": "янв.26",
+              "value": 16.0
+            },
+            {
+              "label": "фев.26",
+              "value": 15.5
+            },
+            {
+              "label": "мар.26",
+              "value": 15.0
+            },
+            {
+              "label": "апр.26",
+              "value": 14.5
+            },
+            {
+              "label": "июн.26",
+              "value": 14.25
+            },
+            {
+              "label": "июл.26",
+              "value": 14.0
+            },
+            {
+              "label": "сен.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "окт.26",
+              "value": 13.75,
+              "forecast": true
+            },
+            {
+              "label": "дек.26",
+              "value": 13.5,
+              "forecast": true
+            },
+            {
+              "label": "дек.27",
+              "value": 12.0,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Подписи напечатаны только для указанных месяцев (май, авг. и ноябрь не указаны). Прогноз начинается в сен.26 после вертикального разделителя."
+    },
+    {
+      "id": "alfa-consumption-retail-credit-growth",
+      "document_id": "alfa-consumption",
+      "page": 3,
+      "title": "Рис. 9: Прирост розничного кредитного портфеля по сегментам, % м/м",
+      "kind": "scatter",
+      "crop": [
+        0.08,
+        0.15,
+        0.5,
+        0.42
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Непродовольственный сегмент",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-consumption-cash-money",
+      "document_id": "alfa-consumption",
+      "page": 3,
+      "title": "Рис. 10: Прирост наличных денег в обращении, млрд руб., сумма за 12-мес.",
+      "kind": "bar",
+      "crop": [
+        0.52,
+        0.15,
+        0.93,
+        0.4
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-macro-stat-industry-output",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 1: Динамика выпуска в отраслях промышленности, % г/г",
+      "kind": "scatter",
+      "crop": [
+        0.03,
+        0.61,
+        0.49,
+        0.81
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "",
+        "kind": "category"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-macro-stat-retail-and-gdp",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 2: Динамика оборота розничной торговли и ВП РФ, % г/г",
+      "kind": "line",
+      "crop": [
+        0.51,
+        0.61,
+        0.95,
+        0.81
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-macro-stat-car-sales-cumulative",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 3: Продажи новых легковых машин, накопленным итогом, тыс. шт.",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.81,
+        0.49,
+        0.995
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-macro-stat-nominal-wages-sectors",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 2,
+      "title": "Рис. 4: Динамика номинальных зарплат по отраслям экономики, % г/г",
+      "kind": "bar",
+      "crop": [
+        0.51,
+        0.81,
+        0.95,
+        0.995
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Отрасль",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "may-26",
+          "label": "май.26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 10
+            },
+            {
+              "label": "Информация и связь",
+              "value": 6
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 11
+            },
+            {
+              "label": "Торговля",
+              "value": 11
+            },
+            {
+              "label": "Образование",
+              "value": 11
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 12
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 13
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 19
+            }
+          ]
+        },
+        {
+          "id": "q1-26",
+          "label": "1К26",
+          "unit": "%",
+          "points": [
+            {
+              "label": "Экономика",
+              "value": 15
+            },
+            {
+              "label": "Информация и связь",
+              "value": 19
+            },
+            {
+              "label": "Обраб. пром-ть",
+              "value": 12
+            },
+            {
+              "label": "Торговля",
+              "value": 18
+            },
+            {
+              "label": "Образование",
+              "value": 13
+            },
+            {
+              "label": "Строит. сектор",
+              "value": 15
+            },
+            {
+              "label": "Гостиницы и общепит",
+              "value": 24
+            },
+            {
+              "label": "Недвиж-ть",
+              "value": 20
+            }
+          ]
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": "alfa-macro-stat-industry-retail-index",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 5: Динамика промпроизводства и оборота розничной торговли, 2021=100",
+      "kind": "line",
+      "crop": [
+        0.03,
+        0.545,
+        0.49,
+        0.75
+      ],
+      "data_status": "image_only",
+      "x_axis": {
+        "label": "Год",
+        "kind": "time"
+      },
+      "series": [],
+      "note": ""
+    },
+    {
+      "id": "alfa-macro-stat-import-ruble",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 6: Импорт товаров, $млрд и % г/г и курс рубля на конец года, руб./$",
+      "kind": "mixed",
+      "crop": [
+        0.51,
+        0.545,
+        0.99,
+        0.75
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Год",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "import-yoy",
+          "label": "Изменение импорта товаров",
+          "unit": "% г/г",
+          "points": [
+            {
+              "label": "2016",
+              "value": -1
+            },
+            {
+              "label": "2017",
+              "value": 24
+            },
+            {
+              "label": "2018",
+              "value": 4
+            },
+            {
+              "label": "2019",
+              "value": 2
+            },
+            {
+              "label": "2020",
+              "value": -5
+            },
+            {
+              "label": "2021",
+              "value": 25
+            },
+            {
+              "label": "2022",
+              "value": -8
+            },
+            {
+              "label": "2023",
+              "value": 10
+            },
+            {
+              "label": "2024",
+              "value": -1
+            },
+            {
+              "label": "2025",
+              "value": 2
+            },
+            {
+              "label": "2026П",
+              "value": 11,
+              "forecast": true
+            },
+            {
+              "label": "2027П",
+              "value": 3,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Частичное покрытие: подписаны только темпы роста импорта; значения столбцов импорта и точки курса рубля не подписаны. Прогнозные годы в подписи отмечены «П»."
+    },
+    {
+      "id": "alfa-macro-stat-inflation-year-end",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 7: Динамика инфляции на конец года, % г/г",
+      "kind": "bar",
+      "crop": [
+        0.03,
+        0.745,
+        0.49,
+        0.995
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Год",
+        "kind": "category"
+      },
+      "series": [
+        {
+          "id": "inflation",
+          "label": "Инфляция",
+          "unit": "%",
+          "points": [
+            {
+              "label": "2010",
+              "value": 8.8
+            },
+            {
+              "label": "2011",
+              "value": 6.1
+            },
+            {
+              "label": "2012",
+              "value": 6.6
+            },
+            {
+              "label": "2013",
+              "value": 6.5
+            },
+            {
+              "label": "2014",
+              "value": 11.4
+            },
+            {
+              "label": "2015",
+              "value": 12.9
+            },
+            {
+              "label": "2016",
+              "value": 5.4
+            },
+            {
+              "label": "2017",
+              "value": 2.5
+            },
+            {
+              "label": "2018",
+              "value": 4.3
+            },
+            {
+              "label": "2019",
+              "value": 3.0
+            },
+            {
+              "label": "2020",
+              "value": 4.9
+            },
+            {
+              "label": "2021",
+              "value": 8.4
+            },
+            {
+              "label": "2022",
+              "value": 11.9
+            },
+            {
+              "label": "2023",
+              "value": 7.4
+            },
+            {
+              "label": "2024",
+              "value": 9.5
+            },
+            {
+              "label": "2025",
+              "value": 5.6
+            },
+            {
+              "label": "2026П",
+              "value": 7.5,
+              "forecast": true
+            },
+            {
+              "label": "2027П",
+              "value": 5.5,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": "alfa-macro-stat-key-rate",
+      "document_id": "alfa-macro-stat-1h26",
+      "page": 3,
+      "title": "Рис. 8: Динамика ключевой ставки в 2026–2027 гг., %",
+      "kind": "bar",
+      "crop": [
+        0.51,
+        0.745,
+        0.95,
+        0.995
+      ],
+      "data_status": "labelled_values",
+      "x_axis": {
+        "label": "Месяц",
+        "kind": "time"
+      },
+      "series": [
+        {
+          "id": "key-rate",
+          "label": "Ключевая ставка",
+          "unit": "%",
+          "points": [
+            {
+              "label": "янв.26",
+              "value": 16.0
+            },
+            {
+              "label": "фев.26",
+              "value": 15.5
+            },
+            {
+              "label": "мар.26",
+              "value": 15.0
+            },
+            {
+              "label": "апр.26",
+              "value": 14.5
+            },
+            {
+              "label": "июн.26",
+              "value": 14.25
+            },
+            {
+              "label": "июл.26",
+              "value": 14.0
+            },
+            {
+              "label": "сен.26",
+              "value": 14.0,
+              "forecast": true
+            },
+            {
+              "label": "окт.26",
+              "value": 13.75,
+              "forecast": true
+            },
+            {
+              "label": "дек.26",
+              "value": 13.5,
+              "forecast": true
+            },
+            {
+              "label": "дек.27",
+              "value": 12.0,
+              "forecast": true
+            }
+          ]
+        }
+      ],
+      "note": "Подписи напечатаны только для показанных месяцев. Прогнозный период начинается в сен.26, после вертикального разделителя."
+    }
+  ]
+}

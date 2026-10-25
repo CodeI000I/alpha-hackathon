@@ -156,6 +156,11 @@ jobs:
                   db.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(name)))
           PY
 
+      - name: Validate offline report charts
+        run: |
+          python -m unittest scripts.test_report_charts -v
+          python scripts/prepare_report_charts.py --check
+
       - name: Install the Cyrillic PDF test font
         run: |
           sudo apt-get update

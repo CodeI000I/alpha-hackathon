@@ -709,7 +709,7 @@ class HybridRetriever:
     @property
     def version(self) -> str:
         return digest({
-            'algorithm': 'hybrid-v2-token-windows', 'top_k': self.top_k,
+            'algorithm': 'hybrid-v3-complete-chunk-coverage', 'top_k': self.top_k,
             'max_depth': self.max_depth, 'use_graph': self.use_graph,
             'embedding_model_id': getattr(self.embeddings, 'model_id', '') if self.embeddings else '',
             'embedding_model_version': getattr(self.embeddings, 'version', '') if self.embeddings else '',
@@ -912,7 +912,7 @@ class HybridRetriever:
         all_chunk_candidates = set(chunk_rrf)
         truncated = (len(all_candidates) > len(selected_facts)
                      or len(paths) > len(relevant_paths)
-                     or len(all_chunk_candidates) > len(standalone_chunks))
+                     or bool(all_chunk_candidates - {chunk.chunk_id for chunk in selected_chunks}))
         return EvidencePack(
             tenant_id=scope.tenant_id, company_id=scope.company_id, event=event, as_of=as_of,
             company_knowledge_revision=revision, news=news, company_facts=selected_facts,

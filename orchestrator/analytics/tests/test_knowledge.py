@@ -665,6 +665,23 @@ class KnowledgeTests(unittest.TestCase):
         self.assertIn('graph', pack.retrieval['channels'])
         self.assertTrue(pack.candidate_paths)
         self.assertIn(source_chunk.chunk_id, pack.candidate_paths[0].evidence_refs)
+        # A candidate already included through a fact/path was not truncated.
+        self.assertFalse(pack.retrieval['context_truncated'])
+
+    def test_retrieval_reports_matching_chunks_dropped_by_top_k(self):
+        for number in range(3):
+            document = parse_document(f'bounded-{number}', 1, 'source.txt',
+                                      f'Supplier contract {number}'.encode(), 'text/plain')
+            document = document.model_copy(update={'status': 'ready', 'received_at': AS_OF})
+            self.store.put('document', document.document_id,
+                           {'document': document.model_dump(mode='json')}, **self.scope.db())
+            for chunk in document.chunks:
+                self.store.put('chunk', chunk.chunk_id, chunk.model_dump(mode='json'), **self.scope.db())
+        event = Event(event_id='bounded', event_type='test', action='supplier contract',
+                      subject='supplier', summary='supplier contract', evidence_quote='supplier contract')
+        pack = HybridRetriever(self.store, top_k=1).retrieve(self.scope, event, [], AS_OF)
+        self.assertEqual(len(pack.chunks), 1)
+        self.assertTrue(pack.retrieval['context_truncated'])
 
     def test_graph_traversal_normalizes_each_hop_and_keeps_original_path_ids(self):
         chunk = parse_document('graph-source', 1, 'source.txt', b'Graph evidence.', 'text/plain').chunks[0]

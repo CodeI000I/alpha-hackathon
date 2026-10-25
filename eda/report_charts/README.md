@@ -1,26 +1,76 @@
 # Offline report chart annotations
 
-Contract for the extractor and widget demo. Each `*.json` annotation file contains
-`documents` and `charts` arrays. Document fields: `id`, `file`, `sha256`, `pages`,
-`title`. Chart fields:
+Each JSON file contains `documents` and `charts`. Document fields: `id`, `file`,
+`sha256`, `pages`, `title`. The source PDFs are raster pages. Annotations are
+reviewed against their images; this is a reproducible curated dataset, not a
+universal PDF recognizer.
 
-- `id`: unique lower-case ASCII slug; `document_id`; `page` (1-based).
-- `title`; `kind`: `line`, `bar`, `pie`, `scatter` or `mixed`.
-- `crop`: `[left, top, right, bottom]`, fractions of the PDF page (0–1), including
-  chart title, axes, legend and source where feasible, excluding adjacent prose.
-- `data_status`: `labelled_values` or `image_only`. Use labelled_values only for
-  numbers visibly printed on the chart. Never infer unlabelled curve heights.
+Chart fields:
+
+- `id`, `document_id`, `page` (1-based), `title`, `kind`.
+- `crop`: `[left, top, right, bottom]`, fractions of the PDF page (0–1).
+- `data_status`: `labelled_values` or `image_only`, describing printed numbers
+  only. This legacy chart-level status does not describe digitization coverage.
 - `x_axis`: `{label, kind: "time" | "category"}`.
-- `series`: `[{id, label, unit, points: [{label, value, forecast?}]}]`.
-  Each series keeps its own labels: missing observations are omitted, never zero
-  filled. Forecast is per point. Years/dates and source units are kept verbatim.
-- `note`: extraction limitations, partial coverage, ambiguous dates or labels.
+- `series`: `[{id, label, unit, points: [{label, value, forecast?}]}]` contains
+  only numbers printed on the plot. Axis ticks are not observations. Partial
+  series retain gaps; rounded percentages are not renormalized.
+- `unavailable_series`: `[{id, label, unit}]` inventories series without printed
+  values, including series subsequently digitized. IDs cannot duplicate `series`.
+- `note`: limitations or ambiguous dates/labels.
 
-Every chart is visually checked against the original. For image_only, series is
-empty. A chart with only some explicitly labelled points must explain that the
-series is partial. Tables and decorative illustrations are outside this chart
-catalog. Document records include PDFs without charts so coverage is explicit.
+## Approximate digitization
 
-`python scripts/prepare_report_charts.py --input /path/to/reports` validates the
-source SHA-256 and generates the checked-in catalog and chart crops in
-`frontend/public/report-charts`. Original reports and OCR are not committed.
+`digitization` is optional and contains:
+
+- `image_sha256`: hash of the exact exported JPEG used for measurement. A changed
+  crop or renderer requires reviewing the calibration, not just updating its hash.
+- `plot`: `[left, top, right, bottom]` in pixels of that JPEG, calibrated to ticks.
+- `x_ticks`: `[{position, label}]`, normalized positions (0–1) and source labels.
+  These are reference ticks, not dates assigned to every point.
+- `series`: one profile per digitized or unreadable series:
+
+```json
+{
+  "id": "series-id",
+  "mode": "line",
+  "y_axis": {"min": 90, "max": 120},
+  "anchors": [[0.05, 0.3], [0.5, 0.7]],
+  "estimated_error": 0.5,
+  "note": "Approximate anchors from the raster image."
+}
+```
+
+Modes: `line`, `scatter`, `bar`, `stacked`, `band`, or `unreadable` with a reason.
+Each series has its own Y scale, including right-hand axes. Coordinates are
+normalized to `plot`: x increases rightward, y downward. Ordinary anchors are
+`[x,y]`, converted by `value = max - y * (max - min)`.
+
+`stacked` and `band` use `[x,top,bottom]`. Bands preserve lower/upper bounds.
+Stacked values are segment thicknesses, negative below the zero line; a segment
+cannot cross zero. Their individual SVGs draw these values from zero, while
+source overlays retain the original stacked positions. Sorting scatter anchors
+by x does not imply connecting those points.
+
+Optional `forecast_from` in a profile marks x positions from this threshold as
+forecasts. Existing exact per-point flags remain unchanged. Errors are visual
+estimates in the series' Y units, not measured confidence intervals or guarantees.
+X calibration and interpolation uncertainty are not quantified. Missing or
+occluded sections must be disclosed; never invent zero values. Unreadable rows
+still get an individual JSON with an explanation and no SVG.
+
+## Generated artifacts
+
+`python scripts/prepare_report_charts.py --input /path/to/reports` verifies every
+PDF and produces crops, the legacy exact-value CSV, `catalog.json`,
+`series-index.json`, and `series/<chart-id>--<series-id>.json` plus an SVG when
+numeric data exists. Approximate Y values use
+`round(value, max(0, 1 - floor(log10(estimated_error))))`; the rounding step is
+smaller than the stated visual error. SVGs plot these same exported values.
+Decimal places do not establish measurement accuracy. Exact points remain verbatim in
+`exact_points`, even when a partial series also has approximate points.
+
+`python scripts/prepare_report_charts.py --check` verifies image hashes and
+byte-for-byte agreement of all JSON/SVG/CSV exports with the annotations.
+`series/` is owned by the generator: stale generated JSON/SVG files are removed
+on successful regeneration. Keep original reports and OCR outside the repository.

@@ -69,6 +69,28 @@ class ReportChartTests(unittest.TestCase):
             self.assertEqual(exported['charts'][0]['series'], self.catalog['charts'][0]['series'])
             self.assertTrue((output / 'images/chart.jpg').read_bytes().startswith(b'\xff\xd8'))
             self.assertIn('дек.27', (output / 'points.csv').read_text())
+            series_path = output / 'series/chart--rate.json'
+            record = json.loads(series_path.read_text())
+            self.assertEqual(record['exact_points'], self.catalog['charts'][0]['series'][0]['points'])
+            self.assertEqual(record['source']['document']['sha256'], self.catalog['documents'][0]['sha256'])
+            original = series_path.read_bytes()
+            series_path.write_text('{}')
+            with self.assertRaisesRegex(ValueError, 'series/chart--rate.json'):
+                verify_export(output, self.catalog)
+            series_path.write_bytes(original)
+            svg_path = output / 'series/chart--rate.svg'
+            svg = svg_path.read_bytes()
+            svg_path.unlink()
+            with self.assertRaisesRegex(ValueError, 'series/chart--rate.svg'):
+                verify_export(output, self.catalog)
+            svg_path.write_bytes(svg)
+            stale = output / 'series/chart--obsolete.json'
+            stale.write_text('{}')
+            with self.assertRaisesRegex(ValueError, 'unexpected series'):
+                verify_export(output, self.catalog)
+            prepare(source, output, self.catalog)
+            self.assertFalse(stale.exists())
+            verify_export(output, self.catalog)
             snapshot = (output / 'catalog.json').read_bytes()
             (source / 'report.pdf').write_bytes(b'changed source')
             with self.assertRaisesRegex(ValueError, 'SHA-256'):

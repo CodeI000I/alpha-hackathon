@@ -158,7 +158,7 @@ jobs:
 
       - name: Validate offline report charts
         run: |
-          python -m unittest scripts.test_report_charts -v
+          python -m unittest scripts.test_report_charts scripts.test_report_chart_series -v
           python scripts/prepare_report_charts.py --check
 
       - name: Install the Cyrillic PDF test font

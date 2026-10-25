@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "alfa-consumption-car-sales-cumulative--year-2023",
+  "chart_id": "alfa-consumption-car-sales-cumulative",
+  "series_id": "year-2023",
+  "label": "2023",
+  "unit": "тыс. шт.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    "chart_title": "Рис. 2: Продажи новых легковых автомобилей, накопленным итогом с начала года, тыс. шт.",
+    "page": 1,
+    "crop": [
+      0.52,
+      0.34,
+      0.93,
+      0.56
+    ],
+    "image": "images/alfa-consumption-car-sales-cumulative.jpg",
+    "image_sha256": "4bc016e7f693f04a93be6285739239c449be9dac74fa61badfd52073fd8a293a"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      114,
+      209,
+      1144,
+      773
+    ],
+    "x_ticks": [
+      {
+        "position": 0.041748,
+        "label": "янв"
+      },
+      {
+        "position": 0.125243,
+        "label": "фев"
+      },
+      {
+        "position": 0.208738,
+        "label": "мар"
+      },
+      {
+        "position": 0.291262,
+        "label": "апр"
+      },
+      {
+        "position": 0.374757,
+        "label": "май"
+      },
+      {
+        "position": 0.458252,
+        "label": "июн"
+      },
+      {
+        "position": 0.540777,
+        "label": "июл"
+      },
+      {
+        "position": 0.624272,
+        "label": "авг"
+      },
+      {
+        "position": 0.707767,
+        "label": "сен"
+      },
+      {
+        "position": 0.790291,
+        "label": "окт"
+      },
+      {
+        "position": 0.873786,
+        "label": "ноя"
+      },
+      {
+        "position": 0.957282,
+        "label": "дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2023",
+        "mode": "line",
+        "y_axis": {
+          "min": 0,
+          "max": 1800
+        },
+        "anchors": [
+          [
+            0.041748,
+            0.980496
+          ],
+          [
+            0.125243,
+            0.953901
+          ],
+          [
+            0.208738,
+            0.907801
+          ],
+          [
+            0.291262,
+            0.868794
+          ],
+          [
+            0.374757,
+            0.835106
+          ],
+          [
+            0.458252,
+            0.785461
+          ],
+          [
+            0.540777,
+            0.730496
+          ],
+          [
+            0.624272,
+            0.666667
+          ],
+          [
+            0.707767,
+            0.601064
+          ],
+          [
+            0.790291,
+            0.533688
+          ],
+          [
+            0.873786,
+            0.469858
+          ],
+          [
+            0.957282,
+            0.391844
+          ]
+        ],
+        "estimated_error": 15,
+        "note": "Повторная ручная калибровка непосредственно по маркерам/границам JPEG; приблизительные опорные точки, не исходный ряд."
+      }
+    ],
+    "image_sha256": "4bc016e7f693f04a93be6285739239c449be9dac74fa61badfd52073fd8a293a"
+  },
+  "points": [
+    {
+      "x": 0.041748,
+      "value": 35.0
+    },
+    {
+      "x": 0.125243,
+      "value": 83.0
+    },
+    {
+      "x": 0.208738,
+      "value": 166.0
+    },
+    {
+      "x": 0.291262,
+      "value": 236.0
+    },
+    {
+      "x": 0.374757,
+      "value": 297.0
+    },
+    {
+      "x": 0.458252,
+      "value": 386.0
+    },
+    {
+      "x": 0.540777,
+      "value": 485.0
+    },
+    {
+      "x": 0.624272,
+      "value": 600.0
+    },
+    {
+      "x": 0.707767,
+      "value": 718.0
+    },
+    {
+      "x": 0.790291,
+      "value": 839.0
+    },
+    {
+      "x": 0.873786,
+      "value": 954.0
+    },
+    {
+      "x": 0.957282,
+      "value": 1095.0
+    }
+  ],
+  "json_file": "series/alfa-consumption-car-sales-cumulative--year-2023.json",
+  "svg_file": "series/alfa-consumption-car-sales-cumulative--year-2023.svg"
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "id": "fi-corporate-coupon-share--share",
+  "chart_id": "fi-corporate-coupon-share",
+  "series_id": "share",
+  "label": "Доля объема",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Структура корпоративных рублевых облигаций по типу купона на 20.07.2026 г., %",
+    "page": 21,
+    "crop": [
+      0.64957,
+      0.20919,
+      0.96667,
+      0.49819
+    ],
+    "image": "images/fi-corporate-coupon-share.jpg",
+    "image_sha256": "135185ebc9c4759d1c6dd2254c05a32b73401db631cc8c980e5b239ff6932f88"
+  },
+  "x_axis": {
+    "label": "Тип купона",
+    "kind": "category"
+  },
+  "note": "Подписи сегментов. Объем 15,4 трлн руб.; ограничения состава рынка перечислены в примечании страницы.",
+  "exact_points": [
+    {
+      "label": "Фиксированный",
+      "value": 48
+    },
+    {
+      "label": "Плавающий",
+      "value": 52
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "Фиксированный",
+      "value": 48,
+      "source_index": 0
+    },
+    {
+      "x": "Плавающий",
+      "value": 52,
+      "source_index": 1
+    }
+  ],
+  "json_file": "series/fi-corporate-coupon-share--share.json",
+  "svg_file": "series/fi-corporate-coupon-share--share.svg"
+}

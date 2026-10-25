@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "id": "alfa-macro-stat-import-ruble--ruble-exchange-rate",
+  "chart_id": "alfa-macro-stat-import-ruble",
+  "series_id": "ruble-exchange-rate",
+  "label": "Курс рубля на конец года, руб./$ (пр. шк)",
+  "unit": "руб./$",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-macro-stat-1h26",
+      "file": "ALFA-macro_stat1H26.pdf",
+      "sha256": "84899553fadf3e49abac7074c7b7d2afc2fa5c70b7fde0bf4c3eabe3d7402266",
+      "pages": 5,
+      "title": "Макростатистика 1П26"
+    },
+    "chart_title": "Рис. 6: Импорт товаров, $млрд и % г/г и курс рубля на конец года, руб./$",
+    "page": 3,
+    "crop": [
+      0.51,
+      0.545,
+      0.99,
+      0.75
+    ],
+    "image": "images/alfa-macro-stat-import-ruble.jpg",
+    "image_sha256": "b97a76950a11b78b2e64b7d9fa5c6b32590fc29c7e196804afc646dafb93a6da"
+  },
+  "x_axis": {
+    "label": "Год",
+    "kind": "category"
+  },
+  "note": "Частичное покрытие: подписаны только темпы роста импорта; значения столбцов импорта и точки курса рубля не подписаны. Прогнозные годы в подписи отмечены «П».",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      80,
+      133,
+      1062,
+      613
+    ],
+    "x_ticks": [
+      {
+        "position": 0.041752,
+        "label": "2016"
+      },
+      {
+        "position": 0.125255,
+        "label": "2017"
+      },
+      {
+        "position": 0.208758,
+        "label": "2018"
+      },
+      {
+        "position": 0.291242,
+        "label": "2019"
+      },
+      {
+        "position": 0.374745,
+        "label": "2020"
+      },
+      {
+        "position": 0.458248,
+        "label": "2021"
+      },
+      {
+        "position": 0.540733,
+        "label": "2022"
+      },
+      {
+        "position": 0.624236,
+        "label": "2023"
+      },
+      {
+        "position": 0.707739,
+        "label": "2024"
+      },
+      {
+        "position": 0.790224,
+        "label": "2025"
+      },
+      {
+        "position": 0.872709,
+        "label": "2026П"
+      },
+      {
+        "position": 0.956212,
+        "label": "2027П"
+      }
+    ],
+    "series": [
+      {
+        "id": "ruble-exchange-rate",
+        "mode": "line",
+        "y_axis": {
+          "min": 40,
+          "max": 120
+        },
+        "anchors": [
+          [
+            0.041752,
+            0.739583
+          ],
+          [
+            0.125255,
+            0.777083
+          ],
+          [
+            0.208758,
+            0.633333
+          ],
+          [
+            0.291242,
+            0.725
+          ],
+          [
+            0.374745,
+            0.575
+          ],
+          [
+            0.458248,
+            0.570833
+          ],
+          [
+            0.540733,
+            0.61875
+          ],
+          [
+            0.624236,
+            0.379167
+          ],
+          [
+            0.707739,
+            0.23125
+          ],
+          [
+            0.790224,
+            0.522917
+          ],
+          [
+            0.872709,
+            0.410417
+          ],
+          [
+            0.956212,
+            0.310417
+          ]
+        ],
+        "estimated_error": 0.8,
+        "note": "Повторная ручная калибровка непосредственно по маркерам/границам JPEG; приблизительные опорные точки, не исходный ряд. Правая шкала40–120руб./$.",
+        "forecast_from": 0.831466
+      }
+    ],
+    "image_sha256": "b97a76950a11b78b2e64b7d9fa5c6b32590fc29c7e196804afc646dafb93a6da"
+  },
+  "points": [
+    {
+      "x": 0.041752,
+      "value": 60.83,
+      "forecast": false
+    },
+    {
+      "x": 0.125255,
+      "value": 57.83,
+      "forecast": false
+    },
+    {
+      "x": 0.208758,
+      "value": 69.33,
+      "forecast": false
+    },
+    {
+      "x": 0.291242,
+      "value": 62.0,
+      "forecast": false
+    },
+    {
+      "x": 0.374745,
+      "value": 74.0,
+      "forecast": false
+    },
+    {
+      "x": 0.458248,
+      "value": 74.33,
+      "forecast": false
+    },
+    {
+      "x": 0.540733,
+      "value": 70.5,
+      "forecast": false
+    },
+    {
+      "x": 0.624236,
+      "value": 89.67,
+      "forecast": false
+    },
+    {
+      "x": 0.707739,
+      "value": 101.5,
+      "forecast": false
+    },
+    {
+      "x": 0.790224,
+      "value": 78.17,
+      "forecast": false
+    },
+    {
+      "x": 0.872709,
+      "value": 87.17,
+      "forecast": true
+    },
+    {
+      "x": 0.956212,
+      "value": 95.17,
+      "forecast": true
+    }
+  ],
+  "json_file": "series/alfa-macro-stat-import-ruble--ruble-exchange-rate.json",
+  "svg_file": "series/alfa-macro-stat-import-ruble--ruble-exchange-rate.svg"
+}

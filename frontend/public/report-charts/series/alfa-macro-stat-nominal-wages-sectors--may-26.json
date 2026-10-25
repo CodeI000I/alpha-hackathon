@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "alfa-macro-stat-nominal-wages-sectors--may-26",
+  "chart_id": "alfa-macro-stat-nominal-wages-sectors",
+  "series_id": "may-26",
+  "label": "май.26",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "alfa-macro-stat-1h26",
+      "file": "ALFA-macro_stat1H26.pdf",
+      "sha256": "84899553fadf3e49abac7074c7b7d2afc2fa5c70b7fde0bf4c3eabe3d7402266",
+      "pages": 5,
+      "title": "Макростатистика 1П26"
+    },
+    "chart_title": "Рис. 4: Динамика номинальных зарплат по отраслям экономики, % г/г",
+    "page": 2,
+    "crop": [
+      0.51,
+      0.81,
+      0.95,
+      0.995
+    ],
+    "image": "images/alfa-macro-stat-nominal-wages-sectors.jpg",
+    "image_sha256": "e461cd343ded3813abadac823191df66ac6e0127441322206536ad73b293b4d3"
+  },
+  "x_axis": {
+    "label": "Отрасль",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [
+    {
+      "label": "Экономика",
+      "value": 10
+    },
+    {
+      "label": "Информация и связь",
+      "value": 6
+    },
+    {
+      "label": "Обраб. пром-ть",
+      "value": 11
+    },
+    {
+      "label": "Торговля",
+      "value": 11
+    },
+    {
+      "label": "Образование",
+      "value": 11
+    },
+    {
+      "label": "Строит. сектор",
+      "value": 12
+    },
+    {
+      "label": "Гостиницы и общепит",
+      "value": 13
+    },
+    {
+      "label": "Недвиж-ть",
+      "value": 19
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "Экономика",
+      "value": 10,
+      "source_index": 0
+    },
+    {
+      "x": "Информация и связь",
+      "value": 6,
+      "source_index": 1
+    },
+    {
+      "x": "Обраб. пром-ть",
+      "value": 11,
+      "source_index": 2
+    },
+    {
+      "x": "Торговля",
+      "value": 11,
+      "source_index": 3
+    },
+    {
+      "x": "Образование",
+      "value": 11,
+      "source_index": 4
+    },
+    {
+      "x": "Строит. сектор",
+      "value": 12,
+      "source_index": 5
+    },
+    {
+      "x": "Гостиницы и общепит",
+      "value": 13,
+      "source_index": 6
+    },
+    {
+      "x": "Недвиж-ть",
+      "value": 19,
+      "source_index": 7
+    }
+  ],
+  "json_file": "series/alfa-macro-stat-nominal-wages-sectors--may-26.json",
+  "svg_file": "series/alfa-macro-stat-nominal-wages-sectors--may-26.svg"
+}

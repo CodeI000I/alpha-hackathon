@@ -1,0 +1,2535 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "fi-market-indices--rgbi",
+      "chart_id": "fi-market-indices",
+      "series_id": "rgbi",
+      "label": "RGBI",
+      "unit": "индекс",
+      "data_status": "digitized",
+      "json_file": "series/fi-market-indices--rgbi.json",
+      "svg_file": "series/fi-market-indices--rgbi.svg"
+    },
+    {
+      "id": "fi-market-indices--imoex",
+      "chart_id": "fi-market-indices",
+      "series_id": "imoex",
+      "label": "IMOEX (правая шкала)",
+      "unit": "индекс",
+      "data_status": "digitized",
+      "json_file": "series/fi-market-indices--imoex.json",
+      "svg_file": "series/fi-market-indices--imoex.svg"
+    },
+    {
+      "id": "fi-ofz-yields--ofz-26244",
+      "chart_id": "fi-ofz-yields",
+      "series_id": "ofz-26244",
+      "label": "26244 (8 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-yields--ofz-26244.json",
+      "svg_file": "series/fi-ofz-yields--ofz-26244.svg"
+    },
+    {
+      "id": "fi-ofz-yields--ofz-26242",
+      "chart_id": "fi-ofz-yields",
+      "series_id": "ofz-26242",
+      "label": "26242 (3 года)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-yields--ofz-26242.json",
+      "svg_file": "series/fi-ofz-yields--ofz-26242.svg"
+    },
+    {
+      "id": "fi-ofz-yields--ofz-26232",
+      "chart_id": "fi-ofz-yields",
+      "series_id": "ofz-26232",
+      "label": "26232 (1,5 года)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-yields--ofz-26232.json",
+      "svg_file": "series/fi-ofz-yields--ofz-26232.svg"
+    },
+    {
+      "id": "fi-ofz-yields--ofz-26247",
+      "chart_id": "fi-ofz-yields",
+      "series_id": "ofz-26247",
+      "label": "26247 (13 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-yields--ofz-26247.json",
+      "svg_file": "series/fi-ofz-yields--ofz-26247.svg"
+    },
+    {
+      "id": "fi-total-returns--rucbtr5yns",
+      "chart_id": "fi-total-returns",
+      "series_id": "rucbtr5yns",
+      "label": "RUCBTR5YNS",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-total-returns--rucbtr5yns.json",
+      "svg_file": "series/fi-total-returns--rucbtr5yns.svg"
+    },
+    {
+      "id": "fi-total-returns--ruflbitr",
+      "chart_id": "fi-total-returns",
+      "series_id": "ruflbitr",
+      "label": "RUFLBITR",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-total-returns--ruflbitr.json",
+      "svg_file": "series/fi-total-returns--ruflbitr.svg"
+    },
+    {
+      "id": "fi-total-returns--rugbtr3y",
+      "chart_id": "fi-total-returns",
+      "series_id": "rugbtr3y",
+      "label": "RUGBITR3Y",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-total-returns--rugbtr3y.json",
+      "svg_file": "series/fi-total-returns--rugbtr3y.svg"
+    },
+    {
+      "id": "fi-total-returns--rugbtr7y",
+      "chart_id": "fi-total-returns",
+      "series_id": "rugbtr7y",
+      "label": "RUGBITR7Y+",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-total-returns--rugbtr7y.json",
+      "svg_file": "series/fi-total-returns--rugbtr7y.svg"
+    },
+    {
+      "id": "fi-total-returns--mcftr",
+      "chart_id": "fi-total-returns",
+      "series_id": "mcftr",
+      "label": "MCFTR",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-total-returns--mcftr.json",
+      "svg_file": "series/fi-total-returns--mcftr.svg"
+    },
+    {
+      "id": "fi-budget-monthly--year-2023",
+      "chart_id": "fi-budget-monthly",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-budget-monthly--year-2023.json",
+      "svg_file": "series/fi-budget-monthly--year-2023.svg"
+    },
+    {
+      "id": "fi-budget-monthly--year-2024",
+      "chart_id": "fi-budget-monthly",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-budget-monthly--year-2024.json",
+      "svg_file": "series/fi-budget-monthly--year-2024.svg"
+    },
+    {
+      "id": "fi-budget-monthly--year-2025",
+      "chart_id": "fi-budget-monthly",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-budget-monthly--year-2025.json",
+      "svg_file": "series/fi-budget-monthly--year-2025.svg"
+    },
+    {
+      "id": "fi-budget-monthly--year-2026",
+      "chart_id": "fi-budget-monthly",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-budget-monthly--year-2026.json",
+      "svg_file": "series/fi-budget-monthly--year-2026.svg"
+    },
+    {
+      "id": "fi-budget-inflation--budget-growth",
+      "chart_id": "fi-budget-inflation",
+      "series_id": "budget-growth",
+      "label": "Динамика бюджетных расходов, г/г",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-budget-inflation--budget-growth.json",
+      "svg_file": "series/fi-budget-inflation--budget-growth.svg"
+    },
+    {
+      "id": "fi-budget-inflation--inflation",
+      "chart_id": "fi-budget-inflation",
+      "series_id": "inflation",
+      "label": "Инфляция (правая шкала)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-budget-inflation--inflation.json",
+      "svg_file": "series/fi-budget-inflation--inflation.svg"
+    },
+    {
+      "id": "fi-credit-growth--corporate-credit",
+      "chart_id": "fi-credit-growth",
+      "series_id": "corporate-credit",
+      "label": "Кредиты юридическим лицам",
+      "unit": "% м/м",
+      "data_status": "digitized",
+      "json_file": "series/fi-credit-growth--corporate-credit.json",
+      "svg_file": "series/fi-credit-growth--corporate-credit.svg"
+    },
+    {
+      "id": "fi-credit-growth--bank-assets",
+      "chart_id": "fi-credit-growth",
+      "series_id": "bank-assets",
+      "label": "Банковские активы всего",
+      "unit": "% м/м",
+      "data_status": "digitized",
+      "json_file": "series/fi-credit-growth--bank-assets.json",
+      "svg_file": "series/fi-credit-growth--bank-assets.svg"
+    },
+    {
+      "id": "fi-credit-volume--total-credit",
+      "chart_id": "fi-credit-volume",
+      "series_id": "total-credit",
+      "label": "Кредиты юрлицам, всего",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-credit-volume--total-credit.json",
+      "svg_file": "series/fi-credit-volume--total-credit.svg"
+    },
+    {
+      "id": "fi-credit-volume--fixed-rate-credit",
+      "chart_id": "fi-credit-volume",
+      "series_id": "fixed-rate-credit",
+      "label": "Кредиты юрлицам по фиксированной ставке",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-credit-volume--fixed-rate-credit.json",
+      "svg_file": "series/fi-credit-volume--fixed-rate-credit.svg"
+    },
+    {
+      "id": "fi-consumer-credit-retail--consumer-credit",
+      "chart_id": "fi-consumer-credit-retail",
+      "series_id": "consumer-credit",
+      "label": "Потребительский кредит м/м",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-consumer-credit-retail--consumer-credit.json",
+      "svg_file": "series/fi-consumer-credit-retail--consumer-credit.svg"
+    },
+    {
+      "id": "fi-consumer-credit-retail--retail-turnover",
+      "chart_id": "fi-consumer-credit-retail",
+      "series_id": "retail-turnover",
+      "label": "Оборот розничной торговли, % г/г",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-consumer-credit-retail--retail-turnover.json",
+      "svg_file": "series/fi-consumer-credit-retail--retail-turnover.svg"
+    },
+    {
+      "id": "fi-mortgages--primary",
+      "chart_id": "fi-mortgages",
+      "series_id": "primary",
+      "label": "Первичка",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-mortgages--primary.json",
+      "svg_file": "series/fi-mortgages--primary.svg"
+    },
+    {
+      "id": "fi-mortgages--secondary",
+      "chart_id": "fi-mortgages",
+      "series_id": "secondary",
+      "label": "Вторичка",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-mortgages--secondary.json",
+      "svg_file": "series/fi-mortgages--secondary.svg"
+    },
+    {
+      "id": "fi-mortgages--secondary-share",
+      "chart_id": "fi-mortgages",
+      "series_id": "secondary-share",
+      "label": "Доля вторички в выдачах (правая шкала)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-mortgages--secondary-share.json",
+      "svg_file": "series/fi-mortgages--secondary-share.svg"
+    },
+    {
+      "id": "fi-retail-wages-inflation--retail",
+      "chart_id": "fi-retail-wages-inflation",
+      "series_id": "retail",
+      "label": "Оборот розничной торговли, % г/г",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-retail-wages-inflation--retail.json",
+      "svg_file": "series/fi-retail-wages-inflation--retail.svg"
+    },
+    {
+      "id": "fi-retail-wages-inflation--wages",
+      "chart_id": "fi-retail-wages-inflation",
+      "series_id": "wages",
+      "label": "Номинальная з/п, % г/г",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-retail-wages-inflation--wages.json",
+      "svg_file": "series/fi-retail-wages-inflation--wages.svg"
+    },
+    {
+      "id": "fi-retail-wages-inflation--inflation",
+      "chart_id": "fi-retail-wages-inflation",
+      "series_id": "inflation",
+      "label": "Инфляция (правая шкала)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-retail-wages-inflation--inflation.json",
+      "svg_file": "series/fi-retail-wages-inflation--inflation.svg"
+    },
+    {
+      "id": "fi-consumer-sentiment--consumer-sentiment",
+      "chart_id": "fi-consumer-sentiment",
+      "series_id": "consumer-sentiment",
+      "label": "Индекс потребительских настроений",
+      "unit": "индекс",
+      "data_status": "digitized",
+      "json_file": "series/fi-consumer-sentiment--consumer-sentiment.json",
+      "svg_file": "series/fi-consumer-sentiment--consumer-sentiment.svg"
+    },
+    {
+      "id": "fi-consumer-sentiment--business-climate",
+      "chart_id": "fi-consumer-sentiment",
+      "series_id": "business-climate",
+      "label": "Индикатор бизнес-климата (правая шкала)",
+      "unit": "индекс",
+      "data_status": "digitized",
+      "json_file": "series/fi-consumer-sentiment--business-climate.json",
+      "svg_file": "series/fi-consumer-sentiment--business-climate.svg"
+    },
+    {
+      "id": "fi-monetary-policy--expected-inflation",
+      "chart_id": "fi-monetary-policy",
+      "series_id": "expected-inflation",
+      "label": "Ожидаемая инфляция",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-monetary-policy--expected-inflation.json",
+      "svg_file": "series/fi-monetary-policy--expected-inflation.svg"
+    },
+    {
+      "id": "fi-monetary-policy--key-rate",
+      "chart_id": "fi-monetary-policy",
+      "series_id": "key-rate",
+      "label": "Ключевая ставка",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-monetary-policy--key-rate.json",
+      "svg_file": "series/fi-monetary-policy--key-rate.svg"
+    },
+    {
+      "id": "fi-monetary-policy--annualized-inflation",
+      "chart_id": "fi-monetary-policy",
+      "series_id": "annualized-inflation",
+      "label": "Инфляция в годовом выражении, сезонно скорректированная",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-monetary-policy--annualized-inflation.json",
+      "svg_file": "series/fi-monetary-policy--annualized-inflation.svg"
+    },
+    {
+      "id": "fi-monetary-policy--inflation-target",
+      "chart_id": "fi-monetary-policy",
+      "series_id": "inflation-target",
+      "label": "Цель по инфляции",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-monetary-policy--inflation-target.json",
+      "svg_file": "series/fi-monetary-policy--inflation-target.svg"
+    },
+    {
+      "id": "fi-brent--brent",
+      "chart_id": "fi-brent",
+      "series_id": "brent",
+      "label": "Brent",
+      "unit": "USD/барр",
+      "data_status": "digitized",
+      "json_file": "series/fi-brent--brent.json",
+      "svg_file": "series/fi-brent--brent.svg"
+    },
+    {
+      "id": "fi-oil-monthly--urals",
+      "chart_id": "fi-oil-monthly",
+      "series_id": "urals",
+      "label": "Юралс",
+      "unit": "USD/барр",
+      "data_status": "digitized",
+      "json_file": "series/fi-oil-monthly--urals.json",
+      "svg_file": "series/fi-oil-monthly--urals.svg"
+    },
+    {
+      "id": "fi-oil-monthly--brent",
+      "chart_id": "fi-oil-monthly",
+      "series_id": "brent",
+      "label": "Brent",
+      "unit": "USD/барр",
+      "data_status": "digitized",
+      "json_file": "series/fi-oil-monthly--brent.json",
+      "svg_file": "series/fi-oil-monthly--brent.svg"
+    },
+    {
+      "id": "fi-urals-discount--discount",
+      "chart_id": "fi-urals-discount",
+      "series_id": "discount",
+      "label": "Дисконт Urals к Brent",
+      "unit": "$",
+      "data_status": "digitized",
+      "json_file": "series/fi-urals-discount--discount.json",
+      "svg_file": "series/fi-urals-discount--discount.svg"
+    },
+    {
+      "id": "fi-bank-bond-holdings--ofz",
+      "chart_id": "fi-bank-bond-holdings",
+      "series_id": "ofz",
+      "label": "ОФЗ",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-bank-bond-holdings--ofz.json",
+      "svg_file": "series/fi-bank-bond-holdings--ofz.svg"
+    },
+    {
+      "id": "fi-bank-bond-holdings--corporate-bonds",
+      "chart_id": "fi-bank-bond-holdings",
+      "series_id": "corporate-bonds",
+      "label": "Корпоративные облигации",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-bank-bond-holdings--corporate-bonds.json",
+      "svg_file": "series/fi-bank-bond-holdings--corporate-bonds.svg"
+    },
+    {
+      "id": "fi-ofz-volume--volume",
+      "chart_id": "fi-ofz-volume",
+      "series_id": "volume",
+      "label": "Объём ОФЗ в обращении",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-volume--volume.json",
+      "svg_file": "series/fi-ofz-volume--volume.svg"
+    },
+    {
+      "id": "fi-ofz-investors--banks",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "banks",
+      "label": "Кредитные организации",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-investors--banks.json",
+      "svg_file": "series/fi-ofz-investors--banks.svg"
+    },
+    {
+      "id": "fi-ofz-investors--nonresidents",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "nonresidents",
+      "label": "Нерезиденты",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-investors--nonresidents.json",
+      "svg_file": "series/fi-ofz-investors--nonresidents.svg"
+    },
+    {
+      "id": "fi-ofz-investors--pension",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "pension",
+      "label": "НПФ",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-investors--pension.json",
+      "svg_file": "series/fi-ofz-investors--pension.svg"
+    },
+    {
+      "id": "fi-ofz-investors--insurers",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "insurers",
+      "label": "Страховщики",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-investors--insurers.json",
+      "svg_file": "series/fi-ofz-investors--insurers.svg"
+    },
+    {
+      "id": "fi-ofz-investors--other-financial",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "other-financial",
+      "label": "Другие финансовые организации",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-investors--other-financial.json",
+      "svg_file": "series/fi-ofz-investors--other-financial.svg"
+    },
+    {
+      "id": "fi-ofz-investors--population",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "population",
+      "label": "Население",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-investors--population.json",
+      "svg_file": "series/fi-ofz-investors--population.svg"
+    },
+    {
+      "id": "fi-ofz-investors--investment-funds",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "investment-funds",
+      "label": "Инвестиционные фонды",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-investors--investment-funds.json",
+      "svg_file": "series/fi-ofz-investors--investment-funds.svg"
+    },
+    {
+      "id": "fi-ofz-investors--public-sector",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "public-sector",
+      "label": "Государственный сектор",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-investors--public-sector.json",
+      "svg_file": "series/fi-ofz-investors--public-sector.svg"
+    },
+    {
+      "id": "fi-ofz-investors--other",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "other",
+      "label": "Прочие",
+      "unit": "%",
+      "data_status": "unavailable",
+      "json_file": "series/fi-ofz-investors--other.json",
+      "svg_file": null
+    },
+    {
+      "id": "fi-ofz-investors--non-financial",
+      "chart_id": "fi-ofz-investors",
+      "series_id": "non-financial",
+      "label": "Нефинансовые организации",
+      "unit": "%",
+      "data_status": "unavailable",
+      "json_file": "series/fi-ofz-investors--non-financial.json",
+      "svg_file": null
+    },
+    {
+      "id": "fi-ofz-redemptions--ofz-pd",
+      "chart_id": "fi-ofz-redemptions",
+      "series_id": "ofz-pd",
+      "label": "ОФЗ-ПД",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-redemptions--ofz-pd.json",
+      "svg_file": "series/fi-ofz-redemptions--ofz-pd.svg"
+    },
+    {
+      "id": "fi-ofz-redemptions--ofz-pk",
+      "chart_id": "fi-ofz-redemptions",
+      "series_id": "ofz-pk",
+      "label": "ОФЗ-ПК",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-redemptions--ofz-pk.json",
+      "svg_file": "series/fi-ofz-redemptions--ofz-pk.svg"
+    },
+    {
+      "id": "fi-ofz-maturity-volume--volume",
+      "chart_id": "fi-ofz-maturity-volume",
+      "series_id": "volume",
+      "label": "Объем ОФЗ-ПД",
+      "unit": "трлн руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-maturity-volume--volume.json",
+      "svg_file": "series/fi-ofz-maturity-volume--volume.svg"
+    },
+    {
+      "id": "fi-ofz-maturity-share--share",
+      "chart_id": "fi-ofz-maturity-share",
+      "series_id": "share",
+      "label": "Доля объема",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-maturity-share--share.json",
+      "svg_file": "series/fi-ofz-maturity-share--share.svg"
+    },
+    {
+      "id": "fi-ofz-coupon-share--share",
+      "chart_id": "fi-ofz-coupon-share",
+      "series_id": "share",
+      "label": "Доля объема",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-ofz-coupon-share--share.json",
+      "svg_file": "series/fi-ofz-coupon-share--share.svg"
+    },
+    {
+      "id": "fi-retail-flows--bonds",
+      "chart_id": "fi-retail-flows",
+      "series_id": "bonds",
+      "label": "Облигации",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-retail-flows--bonds.json",
+      "svg_file": "series/fi-retail-flows--bonds.svg"
+    },
+    {
+      "id": "fi-retail-flows--equities",
+      "chart_id": "fi-retail-flows",
+      "series_id": "equities",
+      "label": "Акции",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-retail-flows--equities.json",
+      "svg_file": "series/fi-retail-flows--equities.svg"
+    },
+    {
+      "id": "fi-retail-bond-flows--ofz",
+      "chart_id": "fi-retail-bond-flows",
+      "series_id": "ofz",
+      "label": "ОФЗ",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-retail-bond-flows--ofz.json",
+      "svg_file": "series/fi-retail-bond-flows--ofz.svg"
+    },
+    {
+      "id": "fi-retail-bond-flows--corporate-bonds",
+      "chart_id": "fi-retail-bond-flows",
+      "series_id": "corporate-bonds",
+      "label": "Рублёвые корпоративные облигации",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-retail-bond-flows--corporate-bonds.json",
+      "svg_file": "series/fi-retail-bond-flows--corporate-bonds.svg"
+    },
+    {
+      "id": "fi-fund-nav--money-market",
+      "chart_id": "fi-fund-nav",
+      "series_id": "money-market",
+      "label": "СЧА БПИФ денежного рынка",
+      "unit": "млрд руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-fund-nav--money-market.json",
+      "svg_file": "series/fi-fund-nav--money-market.svg"
+    },
+    {
+      "id": "fi-fund-nav--bond-funds",
+      "chart_id": "fi-fund-nav",
+      "series_id": "bond-funds",
+      "label": "СЧА ПИФ облигаций",
+      "unit": "млрд руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-fund-nav--bond-funds.json",
+      "svg_file": "series/fi-fund-nav--bond-funds.svg"
+    },
+    {
+      "id": "fi-ofz-turnover--turnover",
+      "chart_id": "fi-ofz-turnover",
+      "series_id": "turnover",
+      "label": "Объём торгов ОФЗ",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-turnover--turnover.json",
+      "svg_file": "series/fi-ofz-turnover--turnover.svg"
+    },
+    {
+      "id": "fi-ofz-participant-flows--nonresidents",
+      "chart_id": "fi-ofz-participant-flows",
+      "series_id": "nonresidents",
+      "label": "Нерезиденты",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-participant-flows--nonresidents.json",
+      "svg_file": "series/fi-ofz-participant-flows--nonresidents.svg"
+    },
+    {
+      "id": "fi-ofz-participant-flows--nfo",
+      "chart_id": "fi-ofz-participant-flows",
+      "series_id": "nfo",
+      "label": "НФО",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-participant-flows--nfo.json",
+      "svg_file": "series/fi-ofz-participant-flows--nfo.svg"
+    },
+    {
+      "id": "fi-ofz-participant-flows--other-banks",
+      "chart_id": "fi-ofz-participant-flows",
+      "series_id": "other-banks",
+      "label": "Прочие банки",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-participant-flows--other-banks.json",
+      "svg_file": "series/fi-ofz-participant-flows--other-banks.svg"
+    },
+    {
+      "id": "fi-ofz-participant-flows--systemic-banks",
+      "chart_id": "fi-ofz-participant-flows",
+      "series_id": "systemic-banks",
+      "label": "СЗКО",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-participant-flows--systemic-banks.json",
+      "svg_file": "series/fi-ofz-participant-flows--systemic-banks.svg"
+    },
+    {
+      "id": "fi-ofz-participant-flows--individuals",
+      "chart_id": "fi-ofz-participant-flows",
+      "series_id": "individuals",
+      "label": "Физические лица",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-participant-flows--individuals.json",
+      "svg_file": "series/fi-ofz-participant-flows--individuals.svg"
+    },
+    {
+      "id": "fi-ofz-participant-flows--trust-management",
+      "chart_id": "fi-ofz-participant-flows",
+      "series_id": "trust-management",
+      "label": "Доверительное управление",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-participant-flows--trust-management.json",
+      "svg_file": "series/fi-ofz-participant-flows--trust-management.svg"
+    },
+    {
+      "id": "fi-ofz-participant-flows--nonfinancial-organizations",
+      "chart_id": "fi-ofz-participant-flows",
+      "series_id": "nonfinancial-organizations",
+      "label": "Нефинансовые организации",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-participant-flows--nonfinancial-organizations.json",
+      "svg_file": "series/fi-ofz-participant-flows--nonfinancial-organizations.svg"
+    },
+    {
+      "id": "fi-ofz-prices--ofz-26249",
+      "chart_id": "fi-ofz-prices",
+      "series_id": "ofz-26249",
+      "label": "ОФЗ 26249 (6 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-prices--ofz-26249.json",
+      "svg_file": "series/fi-ofz-prices--ofz-26249.svg"
+    },
+    {
+      "id": "fi-ofz-prices--ofz-26254",
+      "chart_id": "fi-ofz-prices",
+      "series_id": "ofz-26254",
+      "label": "ОФЗ 26254 (14 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-prices--ofz-26254.json",
+      "svg_file": "series/fi-ofz-prices--ofz-26254.svg"
+    },
+    {
+      "id": "fi-ofz-policy-yields--ofz-26254",
+      "chart_id": "fi-ofz-policy-yields",
+      "series_id": "ofz-26254",
+      "label": "ОФЗ 26254 (14 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-policy-yields--ofz-26254.json",
+      "svg_file": "series/fi-ofz-policy-yields--ofz-26254.svg"
+    },
+    {
+      "id": "fi-ofz-policy-yields--ofz-26232",
+      "chart_id": "fi-ofz-policy-yields",
+      "series_id": "ofz-26232",
+      "label": "ОФЗ 26232 (1,5 года)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-policy-yields--ofz-26232.json",
+      "svg_file": "series/fi-ofz-policy-yields--ofz-26232.svg"
+    },
+    {
+      "id": "fi-ofz-policy-yields--key-rate",
+      "chart_id": "fi-ofz-policy-yields",
+      "series_id": "key-rate",
+      "label": "Ключевая ставка",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-policy-yields--key-rate.json",
+      "svg_file": "series/fi-ofz-policy-yields--key-rate.svg"
+    },
+    {
+      "id": "fi-ofz-policy-yields--ofz-26249",
+      "chart_id": "fi-ofz-policy-yields",
+      "series_id": "ofz-26249",
+      "label": "ОФЗ 26249 (6 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-ofz-policy-yields--ofz-26249.json",
+      "svg_file": "series/fi-ofz-policy-yields--ofz-26249.svg"
+    },
+    {
+      "id": "fi-corporate-placements--volume",
+      "chart_id": "fi-corporate-placements",
+      "series_id": "volume",
+      "label": "Размещения",
+      "unit": "млрд руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-corporate-placements--volume.json",
+      "svg_file": "series/fi-corporate-placements--volume.svg"
+    },
+    {
+      "id": "fi-floater-placement-share--share",
+      "chart_id": "fi-floater-placement-share",
+      "series_id": "share",
+      "label": "Доля флоутеров",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-floater-placement-share--share.json",
+      "svg_file": "series/fi-floater-placement-share--share.svg"
+    },
+    {
+      "id": "fi-corporate-coupon-share--share",
+      "chart_id": "fi-corporate-coupon-share",
+      "series_id": "share",
+      "label": "Доля объема",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-corporate-coupon-share--share.json",
+      "svg_file": "series/fi-corporate-coupon-share--share.svg"
+    },
+    {
+      "id": "fi-primary-investors--share",
+      "chart_id": "fi-primary-investors",
+      "series_id": "share",
+      "label": "Доля инвесторов",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-primary-investors--share.json",
+      "svg_file": "series/fi-primary-investors--share.svg"
+    },
+    {
+      "id": "fi-credit-bonds-volume--credit",
+      "chart_id": "fi-credit-bonds-volume",
+      "series_id": "credit",
+      "label": "Кредиты юрлицам",
+      "unit": "трлн руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-credit-bonds-volume--credit.json",
+      "svg_file": "series/fi-credit-bonds-volume--credit.svg"
+    },
+    {
+      "id": "fi-credit-bonds-volume--bonds",
+      "chart_id": "fi-credit-bonds-volume",
+      "series_id": "bonds",
+      "label": "Облигации",
+      "unit": "трлн руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-credit-bonds-volume--bonds.json",
+      "svg_file": "series/fi-credit-bonds-volume--bonds.svg"
+    },
+    {
+      "id": "fi-rating-yields--aaa",
+      "chart_id": "fi-rating-yields",
+      "series_id": "aaa",
+      "label": "AAA",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-rating-yields--aaa.json",
+      "svg_file": "series/fi-rating-yields--aaa.svg"
+    },
+    {
+      "id": "fi-rating-yields--aa",
+      "chart_id": "fi-rating-yields",
+      "series_id": "aa",
+      "label": "AA",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-rating-yields--aa.json",
+      "svg_file": "series/fi-rating-yields--aa.svg"
+    },
+    {
+      "id": "fi-rating-yields--a",
+      "chart_id": "fi-rating-yields",
+      "series_id": "a",
+      "label": "A",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-rating-yields--a.json",
+      "svg_file": "series/fi-rating-yields--a.svg"
+    },
+    {
+      "id": "fi-rating-yields--ofz-1-3",
+      "chart_id": "fi-rating-yields",
+      "series_id": "ofz-1-3",
+      "label": "ОФЗ (1–3 года)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-rating-yields--ofz-1-3.json",
+      "svg_file": "series/fi-rating-yields--ofz-1-3.svg"
+    },
+    {
+      "id": "fi-rating-shares--aaa",
+      "chart_id": "fi-rating-shares",
+      "series_id": "aaa",
+      "label": "AAA",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-rating-shares--aaa.json",
+      "svg_file": "series/fi-rating-shares--aaa.svg"
+    },
+    {
+      "id": "fi-rating-shares--a-aa",
+      "chart_id": "fi-rating-shares",
+      "series_id": "a-aa",
+      "label": "От A- до AA+",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-rating-shares--a-aa.json",
+      "svg_file": "series/fi-rating-shares--a-aa.svg"
+    },
+    {
+      "id": "fi-rating-shares--unrated",
+      "chart_id": "fi-rating-shares",
+      "series_id": "unrated",
+      "label": "Отозван/нет рейтинга",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-rating-shares--unrated.json",
+      "svg_file": "series/fi-rating-shares--unrated.svg"
+    },
+    {
+      "id": "fi-rating-shares--bb-plus-to-bbb",
+      "chart_id": "fi-rating-shares",
+      "series_id": "bb-plus-to-bbb",
+      "label": "От BB+ до BBB+",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-rating-shares--bb-plus-to-bbb.json",
+      "svg_file": "series/fi-rating-shares--bb-plus-to-bbb.svg"
+    },
+    {
+      "id": "fi-rating-shares--bb-and-below",
+      "chart_id": "fi-rating-shares",
+      "series_id": "bb-and-below",
+      "label": "BB и ниже",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/fi-rating-shares--bb-and-below.json",
+      "svg_file": "series/fi-rating-shares--bb-and-below.svg"
+    },
+    {
+      "id": "fi-coupon-concentration--top10",
+      "chart_id": "fi-coupon-concentration",
+      "series_id": "top10",
+      "label": "Топ-10",
+      "unit": "трлн руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-coupon-concentration--top10.json",
+      "svg_file": "series/fi-coupon-concentration--top10.svg"
+    },
+    {
+      "id": "fi-coupon-concentration--others",
+      "chart_id": "fi-coupon-concentration",
+      "series_id": "others",
+      "label": "Прочие",
+      "unit": "трлн руб.",
+      "data_status": "labelled_values",
+      "json_file": "series/fi-coupon-concentration--others.json",
+      "svg_file": "series/fi-coupon-concentration--others.svg"
+    },
+    {
+      "id": "fi-bank-corporate-bonds--bank-investments",
+      "chart_id": "fi-bank-corporate-bonds",
+      "series_id": "bank-investments",
+      "label": "Вложения банков в корпоративные облигации",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/fi-bank-corporate-bonds--bank-investments.json",
+      "svg_file": "series/fi-bank-corporate-bonds--bank-investments.svg"
+    },
+    {
+      "id": "fi-floater-index--ruflbicp",
+      "chart_id": "fi-floater-index",
+      "series_id": "ruflbicp",
+      "label": "RUFLBICP",
+      "unit": "пункты индекса",
+      "data_status": "digitized",
+      "json_file": "series/fi-floater-index--ruflbicp.json",
+      "svg_file": "series/fi-floater-index--ruflbicp.svg"
+    },
+    {
+      "id": "alfa-7m26-car-sales-monthly--year-2025",
+      "chart_id": "alfa-7m26-car-sales-monthly",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-car-sales-monthly--year-2025.json",
+      "svg_file": "series/alfa-7m26-car-sales-monthly--year-2025.svg"
+    },
+    {
+      "id": "alfa-7m26-car-sales-monthly--year-2026",
+      "chart_id": "alfa-7m26-car-sales-monthly",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-car-sales-monthly--year-2026.json",
+      "svg_file": "series/alfa-7m26-car-sales-monthly--year-2026.svg"
+    },
+    {
+      "id": "alfa-7m26-retail-industry-dynamics--retail-trade",
+      "chart_id": "alfa-7m26-retail-industry-dynamics",
+      "series_id": "retail-trade",
+      "label": "Оборот розничной торговли",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-retail-industry-dynamics--retail-trade.json",
+      "svg_file": "series/alfa-7m26-retail-industry-dynamics--retail-trade.svg"
+    },
+    {
+      "id": "alfa-7m26-retail-industry-dynamics--industrial-production",
+      "chart_id": "alfa-7m26-retail-industry-dynamics",
+      "series_id": "industrial-production",
+      "label": "Промпроизводство",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-retail-industry-dynamics--industrial-production.json",
+      "svg_file": "series/alfa-7m26-retail-industry-dynamics--industrial-production.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative--year-2021",
+      "chart_id": "alfa-7m26-financial-result-cumulative",
+      "series_id": "year-2021",
+      "label": "2021",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-cumulative--year-2021.json",
+      "svg_file": "series/alfa-7m26-financial-result-cumulative--year-2021.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative--year-2022",
+      "chart_id": "alfa-7m26-financial-result-cumulative",
+      "series_id": "year-2022",
+      "label": "2022",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-cumulative--year-2022.json",
+      "svg_file": "series/alfa-7m26-financial-result-cumulative--year-2022.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative--year-2023",
+      "chart_id": "alfa-7m26-financial-result-cumulative",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-cumulative--year-2023.json",
+      "svg_file": "series/alfa-7m26-financial-result-cumulative--year-2023.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative--year-2024",
+      "chart_id": "alfa-7m26-financial-result-cumulative",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-cumulative--year-2024.json",
+      "svg_file": "series/alfa-7m26-financial-result-cumulative--year-2024.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative--year-2025",
+      "chart_id": "alfa-7m26-financial-result-cumulative",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-cumulative--year-2025.json",
+      "svg_file": "series/alfa-7m26-financial-result-cumulative--year-2025.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-cumulative--year-2026",
+      "chart_id": "alfa-7m26-financial-result-cumulative",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-cumulative--year-2026.json",
+      "svg_file": "series/alfa-7m26-financial-result-cumulative--year-2026.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-sectors--average-monthly-through-may-2026",
+      "chart_id": "alfa-7m26-financial-result-sectors",
+      "series_id": "average-monthly-through-may-2026",
+      "label": "в среднем в месяц за 5М26",
+      "unit": "трлн руб./мес.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-sectors--average-monthly-through-may-2026.json",
+      "svg_file": "series/alfa-7m26-financial-result-sectors--average-monthly-through-may-2026.svg"
+    },
+    {
+      "id": "alfa-7m26-financial-result-sectors--june-2026",
+      "chart_id": "alfa-7m26-financial-result-sectors",
+      "series_id": "june-2026",
+      "label": "июн.26",
+      "unit": "трлн руб./мес.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-financial-result-sectors--june-2026.json",
+      "svg_file": "series/alfa-7m26-financial-result-sectors--june-2026.svg"
+    },
+    {
+      "id": "alfa-7m26-nominal-wages-unemployment--2016-2022",
+      "chart_id": "alfa-7m26-nominal-wages-unemployment",
+      "series_id": "2016-2022",
+      "label": "2016-2022",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-nominal-wages-unemployment--2016-2022.json",
+      "svg_file": "series/alfa-7m26-nominal-wages-unemployment--2016-2022.svg"
+    },
+    {
+      "id": "alfa-7m26-nominal-wages-unemployment--year-2023",
+      "chart_id": "alfa-7m26-nominal-wages-unemployment",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-nominal-wages-unemployment--year-2023.json",
+      "svg_file": "series/alfa-7m26-nominal-wages-unemployment--year-2023.svg"
+    },
+    {
+      "id": "alfa-7m26-nominal-wages-unemployment--year-2024",
+      "chart_id": "alfa-7m26-nominal-wages-unemployment",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-nominal-wages-unemployment--year-2024.json",
+      "svg_file": "series/alfa-7m26-nominal-wages-unemployment--year-2024.svg"
+    },
+    {
+      "id": "alfa-7m26-nominal-wages-unemployment--year-2025",
+      "chart_id": "alfa-7m26-nominal-wages-unemployment",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-nominal-wages-unemployment--year-2025.json",
+      "svg_file": "series/alfa-7m26-nominal-wages-unemployment--year-2025.svg"
+    },
+    {
+      "id": "alfa-7m26-nominal-wages-unemployment--year-2026",
+      "chart_id": "alfa-7m26-nominal-wages-unemployment",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-nominal-wages-unemployment--year-2026.json",
+      "svg_file": "series/alfa-7m26-nominal-wages-unemployment--year-2026.svg"
+    },
+    {
+      "id": "alfa-7m26-vacancies--year-2022",
+      "chart_id": "alfa-7m26-vacancies",
+      "series_id": "year-2022",
+      "label": "2022",
+      "unit": "Дек T-1=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-vacancies--year-2022.json",
+      "svg_file": "series/alfa-7m26-vacancies--year-2022.svg"
+    },
+    {
+      "id": "alfa-7m26-vacancies--year-2023",
+      "chart_id": "alfa-7m26-vacancies",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "Дек T-1=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-vacancies--year-2023.json",
+      "svg_file": "series/alfa-7m26-vacancies--year-2023.svg"
+    },
+    {
+      "id": "alfa-7m26-vacancies--year-2024",
+      "chart_id": "alfa-7m26-vacancies",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "Дек T-1=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-vacancies--year-2024.json",
+      "svg_file": "series/alfa-7m26-vacancies--year-2024.svg"
+    },
+    {
+      "id": "alfa-7m26-vacancies--year-2025",
+      "chart_id": "alfa-7m26-vacancies",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "Дек T-1=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-vacancies--year-2025.json",
+      "svg_file": "series/alfa-7m26-vacancies--year-2025.svg"
+    },
+    {
+      "id": "alfa-7m26-vacancies--year-2026",
+      "chart_id": "alfa-7m26-vacancies",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "Дек T-1=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-7m26-vacancies--year-2026.json",
+      "svg_file": "series/alfa-7m26-vacancies--year-2026.svg"
+    },
+    {
+      "id": "alfa-policy-weekly-inflation--year-2026",
+      "chart_id": "alfa-policy-weekly-inflation",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-weekly-inflation--year-2026.json",
+      "svg_file": "series/alfa-policy-weekly-inflation--year-2026.svg"
+    },
+    {
+      "id": "alfa-policy-weekly-inflation--historical-range",
+      "chart_id": "alfa-policy-weekly-inflation",
+      "series_id": "historical-range",
+      "label": "Исторический диапазон*",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-weekly-inflation--historical-range.json",
+      "svg_file": "series/alfa-policy-weekly-inflation--historical-range.svg"
+    },
+    {
+      "id": "alfa-policy-inflation-expectations--population-enterprise-inflation-expectations",
+      "chart_id": "alfa-policy-inflation-expectations",
+      "series_id": "population-enterprise-inflation-expectations",
+      "label": "Инфляционные ожидания населения и предприятий",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-inflation-expectations--population-enterprise-inflation-expectations.json",
+      "svg_file": "series/alfa-policy-inflation-expectations--population-enterprise-inflation-expectations.svg"
+    },
+    {
+      "id": "alfa-policy-money-aggregates--m2",
+      "chart_id": "alfa-policy-money-aggregates",
+      "series_id": "m2",
+      "label": "M2",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-money-aggregates--m2.json",
+      "svg_file": "series/alfa-policy-money-aggregates--m2.svg"
+    },
+    {
+      "id": "alfa-policy-money-aggregates--cash-money",
+      "chart_id": "alfa-policy-money-aggregates",
+      "series_id": "cash-money",
+      "label": "Наличные деньги",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-money-aggregates--cash-money.json",
+      "svg_file": "series/alfa-policy-money-aggregates--cash-money.svg"
+    },
+    {
+      "id": "alfa-policy-money-aggregates--m2x",
+      "chart_id": "alfa-policy-money-aggregates",
+      "series_id": "m2x",
+      "label": "M2X",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-money-aggregates--m2x.json",
+      "svg_file": "series/alfa-policy-money-aggregates--m2x.svg"
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative--year-2021",
+      "chart_id": "alfa-policy-cash-money-cumulative",
+      "series_id": "year-2021",
+      "label": "2021",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-cash-money-cumulative--year-2021.json",
+      "svg_file": "series/alfa-policy-cash-money-cumulative--year-2021.svg"
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative--year-2022",
+      "chart_id": "alfa-policy-cash-money-cumulative",
+      "series_id": "year-2022",
+      "label": "2022",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-cash-money-cumulative--year-2022.json",
+      "svg_file": "series/alfa-policy-cash-money-cumulative--year-2022.svg"
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative--year-2023",
+      "chart_id": "alfa-policy-cash-money-cumulative",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-cash-money-cumulative--year-2023.json",
+      "svg_file": "series/alfa-policy-cash-money-cumulative--year-2023.svg"
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative--year-2024",
+      "chart_id": "alfa-policy-cash-money-cumulative",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-cash-money-cumulative--year-2024.json",
+      "svg_file": "series/alfa-policy-cash-money-cumulative--year-2024.svg"
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative--year-2025",
+      "chart_id": "alfa-policy-cash-money-cumulative",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-cash-money-cumulative--year-2025.json",
+      "svg_file": "series/alfa-policy-cash-money-cumulative--year-2025.svg"
+    },
+    {
+      "id": "alfa-policy-cash-money-cumulative--year-2026",
+      "chart_id": "alfa-policy-cash-money-cumulative",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-cash-money-cumulative--year-2026.json",
+      "svg_file": "series/alfa-policy-cash-money-cumulative--year-2026.svg"
+    },
+    {
+      "id": "alfa-policy-credit-portfolio-growth--credit-portfolio-growth",
+      "chart_id": "alfa-policy-credit-portfolio-growth",
+      "series_id": "credit-portfolio-growth",
+      "label": "Прирост кредитного портфеля по сегментам",
+      "unit": "% м/м",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-credit-portfolio-growth--credit-portfolio-growth.json",
+      "svg_file": "series/alfa-policy-credit-portfolio-growth--credit-portfolio-growth.svg"
+    },
+    {
+      "id": "alfa-policy-retail-deposits--year-2023",
+      "chart_id": "alfa-policy-retail-deposits",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "Дек T-1 = 100%",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-retail-deposits--year-2023.json",
+      "svg_file": "series/alfa-policy-retail-deposits--year-2023.svg"
+    },
+    {
+      "id": "alfa-policy-retail-deposits--year-2024",
+      "chart_id": "alfa-policy-retail-deposits",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "Дек T-1 = 100%",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-retail-deposits--year-2024.json",
+      "svg_file": "series/alfa-policy-retail-deposits--year-2024.svg"
+    },
+    {
+      "id": "alfa-policy-retail-deposits--year-2025",
+      "chart_id": "alfa-policy-retail-deposits",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "Дек T-1 = 100%",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-retail-deposits--year-2025.json",
+      "svg_file": "series/alfa-policy-retail-deposits--year-2025.svg"
+    },
+    {
+      "id": "alfa-policy-retail-deposits--year-2026",
+      "chart_id": "alfa-policy-retail-deposits",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "Дек T-1 = 100%",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-retail-deposits--year-2026.json",
+      "svg_file": "series/alfa-policy-retail-deposits--year-2026.svg"
+    },
+    {
+      "id": "alfa-policy-federal-budget-balance--year-2023",
+      "chart_id": "alfa-policy-federal-budget-balance",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-federal-budget-balance--year-2023.json",
+      "svg_file": "series/alfa-policy-federal-budget-balance--year-2023.svg"
+    },
+    {
+      "id": "alfa-policy-federal-budget-balance--year-2024",
+      "chart_id": "alfa-policy-federal-budget-balance",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-federal-budget-balance--year-2024.json",
+      "svg_file": "series/alfa-policy-federal-budget-balance--year-2024.svg"
+    },
+    {
+      "id": "alfa-policy-federal-budget-balance--year-2025",
+      "chart_id": "alfa-policy-federal-budget-balance",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-federal-budget-balance--year-2025.json",
+      "svg_file": "series/alfa-policy-federal-budget-balance--year-2025.svg"
+    },
+    {
+      "id": "alfa-policy-federal-budget-balance--year-2026",
+      "chart_id": "alfa-policy-federal-budget-balance",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "трлн руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-federal-budget-balance--year-2026.json",
+      "svg_file": "series/alfa-policy-federal-budget-balance--year-2026.svg"
+    },
+    {
+      "id": "alfa-policy-wages-unemployment--2016-2022",
+      "chart_id": "alfa-policy-wages-unemployment",
+      "series_id": "2016-2022",
+      "label": "2016-2022",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-wages-unemployment--2016-2022.json",
+      "svg_file": "series/alfa-policy-wages-unemployment--2016-2022.svg"
+    },
+    {
+      "id": "alfa-policy-wages-unemployment--year-2023",
+      "chart_id": "alfa-policy-wages-unemployment",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-wages-unemployment--year-2023.json",
+      "svg_file": "series/alfa-policy-wages-unemployment--year-2023.svg"
+    },
+    {
+      "id": "alfa-policy-wages-unemployment--year-2024",
+      "chart_id": "alfa-policy-wages-unemployment",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-wages-unemployment--year-2024.json",
+      "svg_file": "series/alfa-policy-wages-unemployment--year-2024.svg"
+    },
+    {
+      "id": "alfa-policy-wages-unemployment--year-2025",
+      "chart_id": "alfa-policy-wages-unemployment",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-wages-unemployment--year-2025.json",
+      "svg_file": "series/alfa-policy-wages-unemployment--year-2025.svg"
+    },
+    {
+      "id": "alfa-policy-wages-unemployment--year-2026",
+      "chart_id": "alfa-policy-wages-unemployment",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-wages-unemployment--year-2026.json",
+      "svg_file": "series/alfa-policy-wages-unemployment--year-2026.svg"
+    },
+    {
+      "id": "alfa-policy-key-rate-consensus--consensus",
+      "chart_id": "alfa-policy-key-rate-consensus",
+      "series_id": "consensus",
+      "label": "Ожидаемая консенсусом средняя КС",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-key-rate-consensus--consensus.json",
+      "svg_file": "series/alfa-policy-key-rate-consensus--consensus.svg"
+    },
+    {
+      "id": "alfa-policy-key-rate-consensus--central-bank-forecast-range",
+      "chart_id": "alfa-policy-key-rate-consensus",
+      "series_id": "central-bank-forecast-range",
+      "label": "Прогнозный диапазон ЦБ РФ по средней КС",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/alfa-policy-key-rate-consensus--central-bank-forecast-range.json",
+      "svg_file": "series/alfa-policy-key-rate-consensus--central-bank-forecast-range.svg"
+    },
+    {
+      "id": "alfa-policy-alfa-key-rate-forecast--key-rate",
+      "chart_id": "alfa-policy-alfa-key-rate-forecast",
+      "series_id": "key-rate",
+      "label": "Ключевая ставка",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-policy-alfa-key-rate-forecast--key-rate.json",
+      "svg_file": "series/alfa-policy-alfa-key-rate-forecast--key-rate.svg"
+    },
+    {
+      "id": "alfa-consumption-retail-turnover--food-segment",
+      "chart_id": "alfa-consumption-retail-turnover",
+      "series_id": "food-segment",
+      "label": "Продовольственный сегмент",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-retail-turnover--food-segment.json",
+      "svg_file": "series/alfa-consumption-retail-turnover--food-segment.svg"
+    },
+    {
+      "id": "alfa-consumption-retail-turnover--non-food-segment",
+      "chart_id": "alfa-consumption-retail-turnover",
+      "series_id": "non-food-segment",
+      "label": "Непродовольственный сегмент",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-retail-turnover--non-food-segment.json",
+      "svg_file": "series/alfa-consumption-retail-turnover--non-food-segment.svg"
+    },
+    {
+      "id": "alfa-consumption-retail-turnover--total-retail-turnover",
+      "chart_id": "alfa-consumption-retail-turnover",
+      "series_id": "total-retail-turnover",
+      "label": "Оборот розничной торговли (всего)",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-retail-turnover--total-retail-turnover.json",
+      "svg_file": "series/alfa-consumption-retail-turnover--total-retail-turnover.svg"
+    },
+    {
+      "id": "alfa-consumption-car-sales-cumulative--year-2023",
+      "chart_id": "alfa-consumption-car-sales-cumulative",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-car-sales-cumulative--year-2023.json",
+      "svg_file": "series/alfa-consumption-car-sales-cumulative--year-2023.svg"
+    },
+    {
+      "id": "alfa-consumption-car-sales-cumulative--year-2024",
+      "chart_id": "alfa-consumption-car-sales-cumulative",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-car-sales-cumulative--year-2024.json",
+      "svg_file": "series/alfa-consumption-car-sales-cumulative--year-2024.svg"
+    },
+    {
+      "id": "alfa-consumption-car-sales-cumulative--year-2025",
+      "chart_id": "alfa-consumption-car-sales-cumulative",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-car-sales-cumulative--year-2025.json",
+      "svg_file": "series/alfa-consumption-car-sales-cumulative--year-2025.svg"
+    },
+    {
+      "id": "alfa-consumption-car-sales-cumulative--year-2026",
+      "chart_id": "alfa-consumption-car-sales-cumulative",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-car-sales-cumulative--year-2026.json",
+      "svg_file": "series/alfa-consumption-car-sales-cumulative--year-2026.svg"
+    },
+    {
+      "id": "alfa-consumption-nominal-real-wages--nominal-wages",
+      "chart_id": "alfa-consumption-nominal-real-wages",
+      "series_id": "nominal-wages",
+      "label": "Номинальные зарплаты",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-nominal-real-wages--nominal-wages.json",
+      "svg_file": "series/alfa-consumption-nominal-real-wages--nominal-wages.svg"
+    },
+    {
+      "id": "alfa-consumption-nominal-real-wages--real-wages",
+      "chart_id": "alfa-consumption-nominal-real-wages",
+      "series_id": "real-wages",
+      "label": "Зарплаты в реал.выражении",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-nominal-real-wages--real-wages.json",
+      "svg_file": "series/alfa-consumption-nominal-real-wages--real-wages.svg"
+    },
+    {
+      "id": "alfa-consumption-nominal-wages-sectors--may-26",
+      "chart_id": "alfa-consumption-nominal-wages-sectors",
+      "series_id": "may-26",
+      "label": "май.26",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-consumption-nominal-wages-sectors--may-26.json",
+      "svg_file": "series/alfa-consumption-nominal-wages-sectors--may-26.svg"
+    },
+    {
+      "id": "alfa-consumption-nominal-wages-sectors--q1-26",
+      "chart_id": "alfa-consumption-nominal-wages-sectors",
+      "series_id": "q1-26",
+      "label": "1К26",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-consumption-nominal-wages-sectors--q1-26.json",
+      "svg_file": "series/alfa-consumption-nominal-wages-sectors--q1-26.svg"
+    },
+    {
+      "id": "alfa-consumption-hh-index-unemployment--hh-index",
+      "chart_id": "alfa-consumption-hh-index-unemployment",
+      "series_id": "hh-index",
+      "label": "Индекс HH",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-hh-index-unemployment--hh-index.json",
+      "svg_file": "series/alfa-consumption-hh-index-unemployment--hh-index.svg"
+    },
+    {
+      "id": "alfa-consumption-hh-index-unemployment--unemployment",
+      "chart_id": "alfa-consumption-hh-index-unemployment",
+      "series_id": "unemployment",
+      "label": "Безработица, % (пр.шк.)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-hh-index-unemployment--unemployment.json",
+      "svg_file": "series/alfa-consumption-hh-index-unemployment--unemployment.svg"
+    },
+    {
+      "id": "alfa-consumption-vacancies-resumes--vacancies",
+      "chart_id": "alfa-consumption-vacancies-resumes",
+      "series_id": "vacancies",
+      "label": "Вакансии",
+      "unit": "янв.2022=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-vacancies-resumes--vacancies.json",
+      "svg_file": "series/alfa-consumption-vacancies-resumes--vacancies.svg"
+    },
+    {
+      "id": "alfa-consumption-vacancies-resumes--resumes",
+      "chart_id": "alfa-consumption-vacancies-resumes",
+      "series_id": "resumes",
+      "label": "Резюме",
+      "unit": "янв.2022=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-vacancies-resumes--resumes.json",
+      "svg_file": "series/alfa-consumption-vacancies-resumes--resumes.svg"
+    },
+    {
+      "id": "alfa-consumption-weekly-inflation--food-excluding-fruit-vegetables",
+      "chart_id": "alfa-consumption-weekly-inflation",
+      "series_id": "food-excluding-fruit-vegetables",
+      "label": "Продовольствие (ex плодоовощи)",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-weekly-inflation--food-excluding-fruit-vegetables.json",
+      "svg_file": "series/alfa-consumption-weekly-inflation--food-excluding-fruit-vegetables.svg"
+    },
+    {
+      "id": "alfa-consumption-weekly-inflation--non-food-excluding-excise-goods",
+      "chart_id": "alfa-consumption-weekly-inflation",
+      "series_id": "non-food-excluding-excise-goods",
+      "label": "Непродовольствие (ex. акцизные товары)",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-weekly-inflation--non-food-excluding-excise-goods.json",
+      "svg_file": "series/alfa-consumption-weekly-inflation--non-food-excluding-excise-goods.svg"
+    },
+    {
+      "id": "alfa-consumption-weekly-inflation--base-services",
+      "chart_id": "alfa-consumption-weekly-inflation",
+      "series_id": "base-services",
+      "label": "Базовые услуги",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-weekly-inflation--base-services.json",
+      "svg_file": "series/alfa-consumption-weekly-inflation--base-services.svg"
+    },
+    {
+      "id": "alfa-consumption-weekly-inflation--base-inflation",
+      "chart_id": "alfa-consumption-weekly-inflation",
+      "series_id": "base-inflation",
+      "label": "Базовая инфляция",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-weekly-inflation--base-inflation.json",
+      "svg_file": "series/alfa-consumption-weekly-inflation--base-inflation.svg"
+    },
+    {
+      "id": "alfa-consumption-key-rate-forecast--key-rate",
+      "chart_id": "alfa-consumption-key-rate-forecast",
+      "series_id": "key-rate",
+      "label": "Ключевая ставка",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-consumption-key-rate-forecast--key-rate.json",
+      "svg_file": "series/alfa-consumption-key-rate-forecast--key-rate.svg"
+    },
+    {
+      "id": "alfa-consumption-retail-credit-growth--retail-credit-portfolio-growth",
+      "chart_id": "alfa-consumption-retail-credit-growth",
+      "series_id": "retail-credit-portfolio-growth",
+      "label": "Прирост розничного кредитного портфеля по сегментам",
+      "unit": "% м/м",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-retail-credit-growth--retail-credit-portfolio-growth.json",
+      "svg_file": "series/alfa-consumption-retail-credit-growth--retail-credit-portfolio-growth.svg"
+    },
+    {
+      "id": "alfa-consumption-cash-money--cash-money-12-month-growth",
+      "chart_id": "alfa-consumption-cash-money",
+      "series_id": "cash-money-12-month-growth",
+      "label": "Прирост наличных денег в обращении, сумма за 12-мес.",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-cash-money--cash-money-12-month-growth.json",
+      "svg_file": "series/alfa-consumption-cash-money--cash-money-12-month-growth.svg"
+    },
+    {
+      "id": "alfa-consumption-cash-money--last-month-change",
+      "chart_id": "alfa-consumption-cash-money",
+      "series_id": "last-month-change",
+      "label": "Изменение за последний месяц",
+      "unit": "млрд руб.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-consumption-cash-money--last-month-change.json",
+      "svg_file": "series/alfa-consumption-cash-money--last-month-change.svg"
+    },
+    {
+      "id": "alfa-macro-stat-industry-output--industrial-output-by-sector",
+      "chart_id": "alfa-macro-stat-industry-output",
+      "series_id": "industrial-output-by-sector",
+      "label": "Динамика выпуска в отраслях промышленности",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-industry-output--industrial-output-by-sector.json",
+      "svg_file": "series/alfa-macro-stat-industry-output--industrial-output-by-sector.svg"
+    },
+    {
+      "id": "alfa-macro-stat-retail-and-gdp--retail-trade",
+      "chart_id": "alfa-macro-stat-retail-and-gdp",
+      "series_id": "retail-trade",
+      "label": "Оборот розничной торговли",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-retail-and-gdp--retail-trade.json",
+      "svg_file": "series/alfa-macro-stat-retail-and-gdp--retail-trade.svg"
+    },
+    {
+      "id": "alfa-macro-stat-retail-and-gdp--gdp",
+      "chart_id": "alfa-macro-stat-retail-and-gdp",
+      "series_id": "gdp",
+      "label": "ВВП",
+      "unit": "% г/г",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-retail-and-gdp--gdp.json",
+      "svg_file": "series/alfa-macro-stat-retail-and-gdp--gdp.svg"
+    },
+    {
+      "id": "alfa-macro-stat-car-sales-cumulative--year-2023",
+      "chart_id": "alfa-macro-stat-car-sales-cumulative",
+      "series_id": "year-2023",
+      "label": "2023",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-car-sales-cumulative--year-2023.json",
+      "svg_file": "series/alfa-macro-stat-car-sales-cumulative--year-2023.svg"
+    },
+    {
+      "id": "alfa-macro-stat-car-sales-cumulative--year-2024",
+      "chart_id": "alfa-macro-stat-car-sales-cumulative",
+      "series_id": "year-2024",
+      "label": "2024",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-car-sales-cumulative--year-2024.json",
+      "svg_file": "series/alfa-macro-stat-car-sales-cumulative--year-2024.svg"
+    },
+    {
+      "id": "alfa-macro-stat-car-sales-cumulative--year-2025",
+      "chart_id": "alfa-macro-stat-car-sales-cumulative",
+      "series_id": "year-2025",
+      "label": "2025",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-car-sales-cumulative--year-2025.json",
+      "svg_file": "series/alfa-macro-stat-car-sales-cumulative--year-2025.svg"
+    },
+    {
+      "id": "alfa-macro-stat-car-sales-cumulative--year-2026",
+      "chart_id": "alfa-macro-stat-car-sales-cumulative",
+      "series_id": "year-2026",
+      "label": "2026",
+      "unit": "тыс. шт.",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-car-sales-cumulative--year-2026.json",
+      "svg_file": "series/alfa-macro-stat-car-sales-cumulative--year-2026.svg"
+    },
+    {
+      "id": "alfa-macro-stat-nominal-wages-sectors--may-26",
+      "chart_id": "alfa-macro-stat-nominal-wages-sectors",
+      "series_id": "may-26",
+      "label": "май.26",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-macro-stat-nominal-wages-sectors--may-26.json",
+      "svg_file": "series/alfa-macro-stat-nominal-wages-sectors--may-26.svg"
+    },
+    {
+      "id": "alfa-macro-stat-nominal-wages-sectors--q1-26",
+      "chart_id": "alfa-macro-stat-nominal-wages-sectors",
+      "series_id": "q1-26",
+      "label": "1К26",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-macro-stat-nominal-wages-sectors--q1-26.json",
+      "svg_file": "series/alfa-macro-stat-nominal-wages-sectors--q1-26.svg"
+    },
+    {
+      "id": "alfa-macro-stat-industry-retail-index--industry",
+      "chart_id": "alfa-macro-stat-industry-retail-index",
+      "series_id": "industry",
+      "label": "Промышленность",
+      "unit": "2021=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-industry-retail-index--industry.json",
+      "svg_file": "series/alfa-macro-stat-industry-retail-index--industry.svg"
+    },
+    {
+      "id": "alfa-macro-stat-industry-retail-index--retail-turnover",
+      "chart_id": "alfa-macro-stat-industry-retail-index",
+      "series_id": "retail-turnover",
+      "label": "Оборот розничной торговли",
+      "unit": "2021=100",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-industry-retail-index--retail-turnover.json",
+      "svg_file": "series/alfa-macro-stat-industry-retail-index--retail-turnover.svg"
+    },
+    {
+      "id": "alfa-macro-stat-import-ruble--import-yoy",
+      "chart_id": "alfa-macro-stat-import-ruble",
+      "series_id": "import-yoy",
+      "label": "Изменение импорта товаров",
+      "unit": "% г/г",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-macro-stat-import-ruble--import-yoy.json",
+      "svg_file": "series/alfa-macro-stat-import-ruble--import-yoy.svg"
+    },
+    {
+      "id": "alfa-macro-stat-import-ruble--import-volume",
+      "chart_id": "alfa-macro-stat-import-ruble",
+      "series_id": "import-volume",
+      "label": "Импорт товаров, $ млрд",
+      "unit": "$ млрд",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-import-ruble--import-volume.json",
+      "svg_file": "series/alfa-macro-stat-import-ruble--import-volume.svg"
+    },
+    {
+      "id": "alfa-macro-stat-import-ruble--ruble-exchange-rate",
+      "chart_id": "alfa-macro-stat-import-ruble",
+      "series_id": "ruble-exchange-rate",
+      "label": "Курс рубля на конец года, руб./$ (пр. шк)",
+      "unit": "руб./$",
+      "data_status": "digitized",
+      "json_file": "series/alfa-macro-stat-import-ruble--ruble-exchange-rate.json",
+      "svg_file": "series/alfa-macro-stat-import-ruble--ruble-exchange-rate.svg"
+    },
+    {
+      "id": "alfa-macro-stat-inflation-year-end--inflation",
+      "chart_id": "alfa-macro-stat-inflation-year-end",
+      "series_id": "inflation",
+      "label": "Инфляция",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-macro-stat-inflation-year-end--inflation.json",
+      "svg_file": "series/alfa-macro-stat-inflation-year-end--inflation.svg"
+    },
+    {
+      "id": "alfa-macro-stat-key-rate--key-rate",
+      "chart_id": "alfa-macro-stat-key-rate",
+      "series_id": "key-rate",
+      "label": "Ключевая ставка",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/alfa-macro-stat-key-rate--key-rate.json",
+      "svg_file": "series/alfa-macro-stat-key-rate--key-rate.svg"
+    },
+    {
+      "id": "gold-aug26-gold-vs-dollar-returns--return",
+      "chart_id": "gold-aug26-gold-vs-dollar-returns",
+      "series_id": "return",
+      "label": "Доходность",
+      "unit": "%",
+      "data_status": "labelled_values",
+      "json_file": "series/gold-aug26-gold-vs-dollar-returns--return.json",
+      "svg_file": "series/gold-aug26-gold-vs-dollar-returns--return.svg"
+    },
+    {
+      "id": "gold-aug26-price-ytd--gold-price",
+      "chart_id": "gold-aug26-price-ytd",
+      "series_id": "gold-price",
+      "label": "Цена золота",
+      "unit": "$ за унцию",
+      "data_status": "digitized",
+      "json_file": "series/gold-aug26-price-ytd--gold-price.json",
+      "svg_file": "series/gold-aug26-price-ytd--gold-price.svg"
+    },
+    {
+      "id": "gold-aug26-us-jobs-revisions--before-release",
+      "chart_id": "gold-aug26-us-jobs-revisions",
+      "series_id": "before-release",
+      "label": "До релиза 7 августа",
+      "unit": "тыс. рабочих мест",
+      "data_status": "labelled_values",
+      "json_file": "series/gold-aug26-us-jobs-revisions--before-release.json",
+      "svg_file": "series/gold-aug26-us-jobs-revisions--before-release.svg"
+    },
+    {
+      "id": "gold-aug26-us-jobs-revisions--release-aug-7",
+      "chart_id": "gold-aug26-us-jobs-revisions",
+      "series_id": "release-aug-7",
+      "label": "В релизе 7 августа",
+      "unit": "тыс. рабочих мест",
+      "data_status": "labelled_values",
+      "json_file": "series/gold-aug26-us-jobs-revisions--release-aug-7.json",
+      "svg_file": "series/gold-aug26-us-jobs-revisions--release-aug-7.svg"
+    },
+    {
+      "id": "gold-aug26-us-inflation--annual-inflation",
+      "chart_id": "gold-aug26-us-inflation",
+      "series_id": "annual-inflation",
+      "label": "Годовая инфляция в июле",
+      "unit": "% г/г",
+      "data_status": "labelled_values",
+      "json_file": "series/gold-aug26-us-inflation--annual-inflation.json",
+      "svg_file": "series/gold-aug26-us-inflation--annual-inflation.svg"
+    },
+    {
+      "id": "gold-aug26-us-inflation--fed-pce-target",
+      "chart_id": "gold-aug26-us-inflation",
+      "series_id": "fed-pce-target",
+      "label": "Цель ФРС по PCE: 2%",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/gold-aug26-us-inflation--fed-pce-target.json",
+      "svg_file": "series/gold-aug26-us-inflation--fed-pce-target.svg"
+    },
+    {
+      "id": "gold-aug26-us-debt--us-debt",
+      "chart_id": "gold-aug26-us-debt",
+      "series_id": "us-debt",
+      "label": "Госдолг США",
+      "unit": "$ трлн",
+      "data_status": "digitized",
+      "json_file": "series/gold-aug26-us-debt--us-debt.json",
+      "svg_file": "series/gold-aug26-us-debt--us-debt.svg"
+    },
+    {
+      "id": "gold-aug26-us-debt--threshold",
+      "chart_id": "gold-aug26-us-debt",
+      "series_id": "threshold",
+      "label": "Порог $40 трлн",
+      "unit": "$ трлн",
+      "data_status": "digitized",
+      "json_file": "series/gold-aug26-us-debt--threshold.json",
+      "svg_file": "series/gold-aug26-us-debt--threshold.svg"
+    },
+    {
+      "id": "gold-aug26-central-bank-operations--net-operations",
+      "chart_id": "gold-aug26-central-bank-operations",
+      "series_id": "net-operations",
+      "label": "Чистые покупки / продажи",
+      "unit": "тонны",
+      "data_status": "labelled_values",
+      "json_file": "series/gold-aug26-central-bank-operations--net-operations.json",
+      "svg_file": "series/gold-aug26-central-bank-operations--net-operations.svg"
+    },
+    {
+      "id": "gold-aug26-central-bank-monthly-purchases--central-bank-purchases",
+      "chart_id": "gold-aug26-central-bank-monthly-purchases",
+      "series_id": "central-bank-purchases",
+      "label": "Покупки мировых ЦБ",
+      "unit": "т",
+      "data_status": "labelled_values",
+      "json_file": "series/gold-aug26-central-bank-monthly-purchases--central-bank-purchases.json",
+      "svg_file": "series/gold-aug26-central-bank-monthly-purchases--central-bank-purchases.svg"
+    },
+    {
+      "id": "gold-aug26-central-bank-monthly-purchases--annual-average",
+      "chart_id": "gold-aug26-central-bank-monthly-purchases",
+      "series_id": "annual-average",
+      "label": "Среднее значение за год, т",
+      "unit": "т",
+      "data_status": "digitized",
+      "json_file": "series/gold-aug26-central-bank-monthly-purchases--annual-average.json",
+      "svg_file": "series/gold-aug26-central-bank-monthly-purchases--annual-average.svg"
+    },
+    {
+      "id": "gold-aug26-central-bank-monthly-purchases--gold-price-right-axis",
+      "chart_id": "gold-aug26-central-bank-monthly-purchases",
+      "series_id": "gold-price-right-axis",
+      "label": "Цена золота, $/унция (правая шкала)",
+      "unit": "$/унция",
+      "data_status": "digitized",
+      "json_file": "series/gold-aug26-central-bank-monthly-purchases--gold-price-right-axis.json",
+      "svg_file": "series/gold-aug26-central-bank-monthly-purchases--gold-price-right-axis.svg"
+    },
+    {
+      "id": "inflation-02-weekly-inflation--weekly-inflation",
+      "chart_id": "inflation-02-weekly-inflation",
+      "series_id": "weekly-inflation",
+      "label": "Недельная инфляция",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-weekly-inflation--weekly-inflation.json",
+      "svg_file": "series/inflation-02-weekly-inflation--weekly-inflation.svg"
+    },
+    {
+      "id": "inflation-02-weekly-segment-inflation--aug-25-31",
+      "chart_id": "inflation-02-weekly-segment-inflation",
+      "series_id": "aug-25-31",
+      "label": "Недельное значение за 25–31 августа",
+      "unit": "% н/н",
+      "data_status": "labelled_values",
+      "json_file": "series/inflation-02-weekly-segment-inflation--aug-25-31.json",
+      "svg_file": "series/inflation-02-weekly-segment-inflation--aug-25-31.svg"
+    },
+    {
+      "id": "inflation-02-weekly-segment-inflation--aug-18-24",
+      "chart_id": "inflation-02-weekly-segment-inflation",
+      "series_id": "aug-18-24",
+      "label": "Недельное значение за 18–24 августа",
+      "unit": "% н/н",
+      "data_status": "labelled_values",
+      "json_file": "series/inflation-02-weekly-segment-inflation--aug-18-24.json",
+      "svg_file": "series/inflation-02-weekly-segment-inflation--aug-18-24.svg"
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--tariffs",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "tariffs",
+      "label": "Тарифы",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--tariffs.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--fruit-and-vegetables",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "fruit-and-vegetables",
+      "label": "Плодоовощи",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--fruit-and-vegetables.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--base-services",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "base-services",
+      "label": "Базовые услуги",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--base-services.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--non-food-excise-excluded",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "non-food-excise-excluded",
+      "label": "Непродовольствие (ex. акцизные товары)",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--non-food-excise-excluded.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--weekly-inflation",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "weekly-inflation",
+      "label": "Недельная инфляция",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--weekly-inflation.json",
+      "svg_file": "series/inflation-02-weekly-decomposition-by-segment--weekly-inflation.svg"
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--excise-goods",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "excise-goods",
+      "label": "Акцизные товары",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--excise-goods.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--food-fruit-vegetables-excluded",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "food-fruit-vegetables-excluded",
+      "label": "Продовольствие (ex. плодоовощи)",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--food-fruit-vegetables-excluded.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--tourism-services",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "tourism-services",
+      "label": "Туристические услуги",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--tourism-services.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-by-segment--residual-inflation",
+      "chart_id": "inflation-02-weekly-decomposition-by-segment",
+      "series_id": "residual-inflation",
+      "label": "Остаточная инфляция",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-by-segment--residual-inflation.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-volatility--base-components",
+      "chart_id": "inflation-02-weekly-decomposition-volatility",
+      "series_id": "base-components",
+      "label": "Базовые компоненты",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-volatility--base-components.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-volatility--volatile-components",
+      "chart_id": "inflation-02-weekly-decomposition-volatility",
+      "series_id": "volatile-components",
+      "label": "Волатильные компоненты",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-volatility--volatile-components.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-volatility--residual-inflation",
+      "chart_id": "inflation-02-weekly-decomposition-volatility",
+      "series_id": "residual-inflation",
+      "label": "Остаточная инфляция",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-weekly-decomposition-volatility--residual-inflation.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-weekly-decomposition-volatility--weekly-inflation",
+      "chart_id": "inflation-02-weekly-decomposition-volatility",
+      "series_id": "weekly-inflation",
+      "label": "Недельная инфляция",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-weekly-decomposition-volatility--weekly-inflation.json",
+      "svg_file": "series/inflation-02-weekly-decomposition-volatility--weekly-inflation.svg"
+    },
+    {
+      "id": "inflation-02-core-inflation-decomposition--food-fruit-vegetables-excluded",
+      "chart_id": "inflation-02-core-inflation-decomposition",
+      "series_id": "food-fruit-vegetables-excluded",
+      "label": "Продовольствие (ex. плодоовощи)",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-core-inflation-decomposition--food-fruit-vegetables-excluded.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-core-inflation-decomposition--base-services",
+      "chart_id": "inflation-02-core-inflation-decomposition",
+      "series_id": "base-services",
+      "label": "Базовые услуги",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-core-inflation-decomposition--base-services.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-core-inflation-decomposition--non-food-excise-excluded",
+      "chart_id": "inflation-02-core-inflation-decomposition",
+      "series_id": "non-food-excise-excluded",
+      "label": "Непродовольствие (ex. акцизные товары)",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-core-inflation-decomposition--non-food-excise-excluded.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-core-inflation-decomposition--core-inflation",
+      "chart_id": "inflation-02-core-inflation-decomposition",
+      "series_id": "core-inflation",
+      "label": "Базовая инфляция",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-core-inflation-decomposition--core-inflation.json",
+      "svg_file": "series/inflation-02-core-inflation-decomposition--core-inflation.svg"
+    },
+    {
+      "id": "inflation-02-volatile-inflation-decomposition--excise-goods",
+      "chart_id": "inflation-02-volatile-inflation-decomposition",
+      "series_id": "excise-goods",
+      "label": "Акцизные товары",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-volatile-inflation-decomposition--excise-goods.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-volatile-inflation-decomposition--tourism-services",
+      "chart_id": "inflation-02-volatile-inflation-decomposition",
+      "series_id": "tourism-services",
+      "label": "Туристические услуги",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-volatile-inflation-decomposition--tourism-services.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-volatile-inflation-decomposition--fruit-and-vegetables",
+      "chart_id": "inflation-02-volatile-inflation-decomposition",
+      "series_id": "fruit-and-vegetables",
+      "label": "Плодоовощи",
+      "unit": "п.п.",
+      "data_status": "unavailable",
+      "json_file": "series/inflation-02-volatile-inflation-decomposition--fruit-and-vegetables.json",
+      "svg_file": null
+    },
+    {
+      "id": "inflation-02-volatile-inflation-decomposition--volatile-inflation",
+      "chart_id": "inflation-02-volatile-inflation-decomposition",
+      "series_id": "volatile-inflation",
+      "label": "Волатильная инфляция",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-volatile-inflation-decomposition--volatile-inflation.json",
+      "svg_file": "series/inflation-02-volatile-inflation-decomposition--volatile-inflation.svg"
+    },
+    {
+      "id": "inflation-02-average-weekly-inflation-range--inflation-2026",
+      "chart_id": "inflation-02-average-weekly-inflation-range",
+      "series_id": "inflation-2026",
+      "label": "2026",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-average-weekly-inflation-range--inflation-2026.json",
+      "svg_file": "series/inflation-02-average-weekly-inflation-range--inflation-2026.svg"
+    },
+    {
+      "id": "inflation-02-average-weekly-inflation-range--historical-range-2017-2025",
+      "chart_id": "inflation-02-average-weekly-inflation-range",
+      "series_id": "historical-range-2017-2025",
+      "label": "Исторический диапазон (2017–2025 гг., кроме 2022 г.)",
+      "unit": "% н/н",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-average-weekly-inflation-range--historical-range-2017-2025.json",
+      "svg_file": "series/inflation-02-average-weekly-inflation-range--historical-range-2017-2025.svg"
+    },
+    {
+      "id": "inflation-02-monthly-inflation--2026",
+      "chart_id": "inflation-02-monthly-inflation",
+      "series_id": "2026",
+      "label": "2026",
+      "unit": "% м/м",
+      "data_status": "labelled_values",
+      "json_file": "series/inflation-02-monthly-inflation--2026.json",
+      "svg_file": "series/inflation-02-monthly-inflation--2026.svg"
+    },
+    {
+      "id": "inflation-02-monthly-inflation--inflation-2024",
+      "chart_id": "inflation-02-monthly-inflation",
+      "series_id": "inflation-2024",
+      "label": "2024",
+      "unit": "% м/м",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-monthly-inflation--inflation-2024.json",
+      "svg_file": "series/inflation-02-monthly-inflation--inflation-2024.svg"
+    },
+    {
+      "id": "inflation-02-monthly-inflation--inflation-2025",
+      "chart_id": "inflation-02-monthly-inflation",
+      "series_id": "inflation-2025",
+      "label": "2025",
+      "unit": "% м/м",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-monthly-inflation--inflation-2025.json",
+      "svg_file": "series/inflation-02-monthly-inflation--inflation-2025.svg"
+    },
+    {
+      "id": "inflation-02-monthly-inflation--four-percent-target-dynamics",
+      "chart_id": "inflation-02-monthly-inflation",
+      "series_id": "four-percent-target-dynamics",
+      "label": "Динамика, соответствующая инфляции 4,0%",
+      "unit": "% м/м",
+      "data_status": "digitized",
+      "json_file": "series/inflation-02-monthly-inflation--four-percent-target-dynamics.json",
+      "svg_file": "series/inflation-02-monthly-inflation--four-percent-target-dynamics.svg"
+    },
+    {
+      "id": "bond-brief-weekly-ofz-yield-key-rate--ofz-26254-14-years",
+      "chart_id": "bond-brief-weekly-ofz-yield-key-rate",
+      "series_id": "ofz-26254-14-years",
+      "label": "ОФЗ 26254 (14 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-weekly-ofz-yield-key-rate--ofz-26254-14-years.json",
+      "svg_file": "series/bond-brief-weekly-ofz-yield-key-rate--ofz-26254-14-years.svg"
+    },
+    {
+      "id": "bond-brief-weekly-ofz-yield-key-rate--key-rate",
+      "chart_id": "bond-brief-weekly-ofz-yield-key-rate",
+      "series_id": "key-rate",
+      "label": "Ключевая ставка",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-weekly-ofz-yield-key-rate--key-rate.json",
+      "svg_file": "series/bond-brief-weekly-ofz-yield-key-rate--key-rate.svg"
+    },
+    {
+      "id": "bond-brief-weekly-ofz-yield-key-rate--ofz-26232-1-year",
+      "chart_id": "bond-brief-weekly-ofz-yield-key-rate",
+      "series_id": "ofz-26232-1-year",
+      "label": "ОФЗ 26232 (1 год)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-weekly-ofz-yield-key-rate--ofz-26232-1-year.json",
+      "svg_file": "series/bond-brief-weekly-ofz-yield-key-rate--ofz-26232-1-year.svg"
+    },
+    {
+      "id": "bond-brief-weekly-ofz-yield-key-rate--ofz-26249-6-years",
+      "chart_id": "bond-brief-weekly-ofz-yield-key-rate",
+      "series_id": "ofz-26249-6-years",
+      "label": "ОФЗ 26249 (6 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-weekly-ofz-yield-key-rate--ofz-26249-6-years.json",
+      "svg_file": "series/bond-brief-weekly-ofz-yield-key-rate--ofz-26249-6-years.svg"
+    },
+    {
+      "id": "bond-brief-weekly-indexes--rgbi",
+      "chart_id": "bond-brief-weekly-indexes",
+      "series_id": "rgbi",
+      "label": "RGBI",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-weekly-indexes--rgbi.json",
+      "svg_file": "series/bond-brief-weekly-indexes--rgbi.svg"
+    },
+    {
+      "id": "bond-brief-weekly-indexes--imoex-right-axis",
+      "chart_id": "bond-brief-weekly-indexes",
+      "series_id": "imoex-right-axis",
+      "label": "IMOEX (правая шкала)",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-weekly-indexes--imoex-right-axis.json",
+      "svg_file": "series/bond-brief-weekly-indexes--imoex-right-axis.svg"
+    },
+    {
+      "id": "bond-brief-oil-prices--urals",
+      "chart_id": "bond-brief-oil-prices",
+      "series_id": "urals",
+      "label": "Юралс, USD/барр",
+      "unit": "USD/барр",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-oil-prices--urals.json",
+      "svg_file": "series/bond-brief-oil-prices--urals.svg"
+    },
+    {
+      "id": "bond-brief-oil-prices--brent",
+      "chart_id": "bond-brief-oil-prices",
+      "series_id": "brent",
+      "label": "Brent, USD/барр",
+      "unit": "USD/барр",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-oil-prices--brent.json",
+      "svg_file": "series/bond-brief-oil-prices--brent.svg"
+    },
+    {
+      "id": "bond-brief-ruble-usd--ruble-usd-rate",
+      "chart_id": "bond-brief-ruble-usd",
+      "series_id": "ruble-usd-rate",
+      "label": "Динамика курса рубля к доллару США",
+      "unit": "",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-ruble-usd--ruble-usd-rate.json",
+      "svg_file": "series/bond-brief-ruble-usd--ruble-usd-rate.svg"
+    },
+    {
+      "id": "bond-brief-ofz-yields--ofz-26244-8-years",
+      "chart_id": "bond-brief-ofz-yields",
+      "series_id": "ofz-26244-8-years",
+      "label": "26244 (8 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-ofz-yields--ofz-26244-8-years.json",
+      "svg_file": "series/bond-brief-ofz-yields--ofz-26244-8-years.svg"
+    },
+    {
+      "id": "bond-brief-ofz-yields--ofz-26232-1-year",
+      "chart_id": "bond-brief-ofz-yields",
+      "series_id": "ofz-26232-1-year",
+      "label": "26232 (1 год)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-ofz-yields--ofz-26232-1-year.json",
+      "svg_file": "series/bond-brief-ofz-yields--ofz-26232-1-year.svg"
+    },
+    {
+      "id": "bond-brief-ofz-yields--ofz-26242-3-years",
+      "chart_id": "bond-brief-ofz-yields",
+      "series_id": "ofz-26242-3-years",
+      "label": "26242 (3 года)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-ofz-yields--ofz-26242-3-years.json",
+      "svg_file": "series/bond-brief-ofz-yields--ofz-26242-3-years.svg"
+    },
+    {
+      "id": "bond-brief-ofz-yields--ofz-26247-13-years",
+      "chart_id": "bond-brief-ofz-yields",
+      "series_id": "ofz-26247-13-years",
+      "label": "26247 (13 лет)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-ofz-yields--ofz-26247-13-years.json",
+      "svg_file": "series/bond-brief-ofz-yields--ofz-26247-13-years.svg"
+    },
+    {
+      "id": "bond-brief-corporate-yields-by-rating--aaa",
+      "chart_id": "bond-brief-corporate-yields-by-rating",
+      "series_id": "aaa",
+      "label": "AAA",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-corporate-yields-by-rating--aaa.json",
+      "svg_file": "series/bond-brief-corporate-yields-by-rating--aaa.svg"
+    },
+    {
+      "id": "bond-brief-corporate-yields-by-rating--aa",
+      "chart_id": "bond-brief-corporate-yields-by-rating",
+      "series_id": "aa",
+      "label": "AA",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-corporate-yields-by-rating--aa.json",
+      "svg_file": "series/bond-brief-corporate-yields-by-rating--aa.svg"
+    },
+    {
+      "id": "bond-brief-corporate-yields-by-rating--a",
+      "chart_id": "bond-brief-corporate-yields-by-rating",
+      "series_id": "a",
+      "label": "A",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-corporate-yields-by-rating--a.json",
+      "svg_file": "series/bond-brief-corporate-yields-by-rating--a.svg"
+    },
+    {
+      "id": "bond-brief-corporate-yields-by-rating--ofz-1-3y",
+      "chart_id": "bond-brief-corporate-yields-by-rating",
+      "series_id": "ofz-1-3y",
+      "label": "ОФЗ (1–3 года)",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-corporate-yields-by-rating--ofz-1-3y.json",
+      "svg_file": "series/bond-brief-corporate-yields-by-rating--ofz-1-3y.svg"
+    },
+    {
+      "id": "bond-brief-10y-sovereign-yields--brazil",
+      "chart_id": "bond-brief-10y-sovereign-yields",
+      "series_id": "brazil",
+      "label": "Бразилия",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-10y-sovereign-yields--brazil.json",
+      "svg_file": "series/bond-brief-10y-sovereign-yields--brazil.svg"
+    },
+    {
+      "id": "bond-brief-10y-sovereign-yields--mexico",
+      "chart_id": "bond-brief-10y-sovereign-yields",
+      "series_id": "mexico",
+      "label": "Мексика",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-10y-sovereign-yields--mexico.json",
+      "svg_file": "series/bond-brief-10y-sovereign-yields--mexico.svg"
+    },
+    {
+      "id": "bond-brief-10y-sovereign-yields--russia",
+      "chart_id": "bond-brief-10y-sovereign-yields",
+      "series_id": "russia",
+      "label": "РФ",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-10y-sovereign-yields--russia.json",
+      "svg_file": "series/bond-brief-10y-sovereign-yields--russia.svg"
+    },
+    {
+      "id": "bond-brief-key-rate-ruonia--ruonia",
+      "chart_id": "bond-brief-key-rate-ruonia",
+      "series_id": "ruonia",
+      "label": "RUONIA, %",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-key-rate-ruonia--ruonia.json",
+      "svg_file": "series/bond-brief-key-rate-ruonia--ruonia.svg"
+    },
+    {
+      "id": "bond-brief-key-rate-ruonia--key-rate",
+      "chart_id": "bond-brief-key-rate-ruonia",
+      "series_id": "key-rate",
+      "label": "Ключевая ставка, %",
+      "unit": "%",
+      "data_status": "digitized",
+      "json_file": "series/bond-brief-key-rate-ruonia--key-rate.json",
+      "svg_file": "series/bond-brief-key-rate-ruonia--key-rate.svg"
+    },
+    {
+      "id": "russian-steels-share-price--svst",
+      "chart_id": "russian-steels-share-price",
+      "series_id": "svst",
+      "label": "SVST",
+      "unit": "$/GDR",
+      "data_status": "digitized",
+      "json_file": "series/russian-steels-share-price--svst.json",
+      "svg_file": "series/russian-steels-share-price--svst.svg"
+    },
+    {
+      "id": "russian-steels-share-price--nlmk",
+      "chart_id": "russian-steels-share-price",
+      "series_id": "nlmk",
+      "label": "NLMK",
+      "unit": "$/GDR",
+      "data_status": "digitized",
+      "json_file": "series/russian-steels-share-price--nlmk.json",
+      "svg_file": "series/russian-steels-share-price--nlmk.svg"
+    },
+    {
+      "id": "russian-steels-share-price--mmk",
+      "chart_id": "russian-steels-share-price",
+      "series_id": "mmk",
+      "label": "MMK",
+      "unit": "$/GDR",
+      "data_status": "digitized",
+      "json_file": "series/russian-steels-share-price--mmk.json",
+      "svg_file": "series/russian-steels-share-price--mmk.svg"
+    }
+  ]
+}

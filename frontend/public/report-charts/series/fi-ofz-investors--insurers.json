@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "id": "fi-ofz-investors--insurers",
+  "chart_id": "fi-ofz-investors",
+  "series_id": "insurers",
+  "label": "Страховщики",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Структура инвесторов в ОФЗ",
+    "page": 15,
+    "crop": [
+      0.02479,
+      0.55018,
+      0.55128,
+      0.89
+    ],
+    "image": "images/fi-ofz-investors.jpg",
+    "image_sha256": "6b33fcbde33e228bd651571c76972514face9bc50cbedb7939e409574ed2fef6"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "Шесть рядов с числовыми подписями сохранены точно. Часть малых сегментов оцифрована приблизительно; неразличимые указаны отдельно. Это не полная декомпозиция 100%.",
+  "exact_points": [
+    {
+      "label": "31.12.2017",
+      "value": 3
+    },
+    {
+      "label": "31.12.2018",
+      "value": 6
+    },
+    {
+      "label": "31.12.2019",
+      "value": 5
+    },
+    {
+      "label": "31.12.2020",
+      "value": 4
+    },
+    {
+      "label": "31.12.2021",
+      "value": 4
+    },
+    {
+      "label": "31.12.2022",
+      "value": 4
+    },
+    {
+      "label": "31.12.2023",
+      "value": 5
+    },
+    {
+      "label": "31.12.2024",
+      "value": 3
+    },
+    {
+      "label": "31.12.2025",
+      "value": 4
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "31.12.2017",
+      "value": 3,
+      "source_index": 0
+    },
+    {
+      "x": "31.12.2018",
+      "value": 6,
+      "source_index": 1
+    },
+    {
+      "x": "31.12.2019",
+      "value": 5,
+      "source_index": 2
+    },
+    {
+      "x": "31.12.2020",
+      "value": 4,
+      "source_index": 3
+    },
+    {
+      "x": "31.12.2021",
+      "value": 4,
+      "source_index": 4
+    },
+    {
+      "x": "31.12.2022",
+      "value": 4,
+      "source_index": 5
+    },
+    {
+      "x": "31.12.2023",
+      "value": 5,
+      "source_index": 6
+    },
+    {
+      "x": "31.12.2024",
+      "value": 3,
+      "source_index": 7
+    },
+    {
+      "x": "31.12.2025",
+      "value": 4,
+      "source_index": 8
+    }
+  ],
+  "json_file": "series/fi-ofz-investors--insurers.json",
+  "svg_file": "series/fi-ofz-investors--insurers.svg"
+}

@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-central-bank-monthly-purchases--annual-average",
+  "chart_id": "gold-aug26-central-bank-monthly-purchases",
+  "series_id": "annual-average",
+  "label": "Среднее значение за год, т",
+  "unit": "т",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Ежемесячные покупки золота мировыми ЦБ, т",
+    "page": 7,
+    "crop": [
+      0.03,
+      0.62,
+      0.99,
+      0.92
+    ],
+    "image": "images/gold-aug26-central-bank-monthly-purchases.jpg",
+    "image_sha256": "c9be214fa21f7686d76bd86e089b3658a437ce5ee21b685ee3c90d3a52734277"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "Частичное покрытие: внесены все подписанные столбцы покупок. Среднее значение за год на пунктирной линии и цена золота на линии не подписаны точками.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "c9be214fa21f7686d76bd86e089b3658a437ce5ee21b685ee3c90d3a52734277",
+    "plot": [
+      78,
+      72,
+      1108,
+      451
+    ],
+    "x_ticks": [
+      {
+        "position": 0.037864077669902914,
+        "label": "июл.25"
+      },
+      {
+        "position": 0.2689320388349515,
+        "label": "окт.25"
+      },
+      {
+        "position": 0.5,
+        "label": "янв.26"
+      },
+      {
+        "position": 0.7300970873786408,
+        "label": "апр.26"
+      },
+      {
+        "position": 0.9611650485436893,
+        "label": "июл.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "annual-average",
+        "mode": "line",
+        "y_axis": {
+          "min": -40,
+          "max": 60
+        },
+        "anchors": [
+          [
+            0.03786,
+            0.35356
+          ],
+          [
+            0.96117,
+            0.35356
+          ]
+        ],
+        "estimated_error": 1,
+        "note": "Пунктирное среднее измерено по y=206; общая левая шкала -40…60 т."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.03786,
+      "value": 24.6
+    },
+    {
+      "x": 0.96117,
+      "value": 24.6
+    }
+  ],
+  "json_file": "series/gold-aug26-central-bank-monthly-purchases--annual-average.json",
+  "svg_file": "series/gold-aug26-central-bank-monthly-purchases--annual-average.svg"
+}

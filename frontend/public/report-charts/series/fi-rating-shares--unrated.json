@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "id": "fi-rating-shares--unrated",
+  "chart_id": "fi-rating-shares",
+  "series_id": "unrated",
+  "label": "Отозван/нет рейтинга",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Структура корпоративных облигаций по уровню кредитного рейтинга",
+    "page": 22,
+    "crop": [
+      0.56154,
+      0.52116,
+      0.97863,
+      0.86215
+    ],
+    "image": "images/fi-rating-shares.jpg",
+    "image_sha256": "8d5a12916652a73aedab617347c8db6cc8319b688c2e1423e99e71e6590633f3"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "Три сегмента с напечатанными значениями сохранены точно. Малые неподписанные сегменты оцифрованы приблизительно; их ошибки могут быть сопоставимы с самой долей. Сумма рядов не нормализуется до 100%.",
+  "exact_points": [
+    {
+      "label": "12.2017",
+      "value": 9
+    },
+    {
+      "label": "12.2018",
+      "value": 9
+    },
+    {
+      "label": "12.2019",
+      "value": 6
+    },
+    {
+      "label": "12.2020",
+      "value": 10
+    },
+    {
+      "label": "12.2021",
+      "value": 12
+    },
+    {
+      "label": "12.2022",
+      "value": 13
+    },
+    {
+      "label": "12.2023",
+      "value": 10
+    },
+    {
+      "label": "12.2024",
+      "value": 4
+    },
+    {
+      "label": "12.2025",
+      "value": 4
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "12.2017",
+      "value": 9,
+      "source_index": 0
+    },
+    {
+      "x": "12.2018",
+      "value": 9,
+      "source_index": 1
+    },
+    {
+      "x": "12.2019",
+      "value": 6,
+      "source_index": 2
+    },
+    {
+      "x": "12.2020",
+      "value": 10,
+      "source_index": 3
+    },
+    {
+      "x": "12.2021",
+      "value": 12,
+      "source_index": 4
+    },
+    {
+      "x": "12.2022",
+      "value": 13,
+      "source_index": 5
+    },
+    {
+      "x": "12.2023",
+      "value": 10,
+      "source_index": 6
+    },
+    {
+      "x": "12.2024",
+      "value": 4,
+      "source_index": 7
+    },
+    {
+      "x": "12.2025",
+      "value": 4,
+      "source_index": 8
+    }
+  ],
+  "json_file": "series/fi-rating-shares--unrated.json",
+  "svg_file": "series/fi-rating-shares--unrated.svg"
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "id": "inflation-02-core-inflation-decomposition--base-services",
+  "chart_id": "inflation-02-core-inflation-decomposition",
+  "series_id": "base-services",
+  "label": "Базовые услуги",
+  "unit": "п.п.",
+  "data_status": "unavailable",
+  "source": {
+    "document": {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    "chart_title": "Базовая инфляция, % н/н и ее декомпозиция по сегментам, п.п.",
+    "page": 2,
+    "crop": [
+      0.03,
+      0.38,
+      0.49,
+      0.68
+    ],
+    "image": "images/inflation-02-core-inflation-decomposition.jpg",
+    "image_sha256": "ae906da84640797c31a19ea7aebcb32630e5d43e6c11f1adfd85acb26dc29c27"
+  },
+  "x_axis": {
+    "label": "Дата",
+    "kind": "time"
+  },
+  "note": "Численные подписи к точкам и столбцам отсутствуют.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "ae906da84640797c31a19ea7aebcb32630e5d43e6c11f1adfd85acb26dc29c27",
+    "plot": [
+      51,
+      195,
+      1114,
+      785
+    ],
+    "x_ticks": [
+      {
+        "position": 0.01881467544684854,
+        "label": "02.03"
+      },
+      {
+        "position": 0.24111730226499747,
+        "label": "13.04"
+      },
+      {
+        "position": 0.46341992908314644,
+        "label": "25.05"
+      },
+      {
+        "position": 0.6857225559012953,
+        "label": "06.07"
+      },
+      {
+        "position": 0.9080251827194443,
+        "label": "17.08"
+      },
+      {
+        "position": 0.9821260583254939,
+        "label": "31.08"
+      }
+    ],
+    "series": [
+      {
+        "id": "base-services",
+        "mode": "unreadable",
+        "note": "Контур не отделяется от соседних элементов при заданном масштабе."
+      }
+    ]
+  },
+  "points": [],
+  "json_file": "series/inflation-02-core-inflation-decomposition--base-services.json",
+  "svg_file": null
+}

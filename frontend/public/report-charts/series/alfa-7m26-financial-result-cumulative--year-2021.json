@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "id": "alfa-7m26-financial-result-cumulative--year-2021",
+  "chart_id": "alfa-7m26-financial-result-cumulative",
+  "series_id": "year-2021",
+  "label": "2021",
+  "unit": "трлн руб.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-7m26",
+      "file": "ALFA-7M26.pdf",
+      "sha256": "3c64c1e43f3b46a795f9581967f2dbc8efb0994cb77ab82e95da180830e9ff8c",
+      "pages": 4,
+      "title": "Макростатистика 7М26"
+    },
+    "chart_title": "Рис. 3: Сальдированный финансовый результат компаний, накопленным итогом, млрд руб.",
+    "page": 2,
+    "crop": [
+      0.08,
+      0.11,
+      0.5,
+      0.34
+    ],
+    "image": "images/alfa-7m26-financial-result-cumulative.jpg",
+    "image_sha256": "c58081dadc9a21ef9f864d3916e73e30dce37459f70893e15e46072fa091e9bf"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      136,
+      192,
+      1062,
+      738
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "Янв"
+      },
+      {
+        "position": 0.090713,
+        "label": "Фев"
+      },
+      {
+        "position": 0.181425,
+        "label": "Мар"
+      },
+      {
+        "position": 0.272138,
+        "label": "Апр"
+      },
+      {
+        "position": 0.362851,
+        "label": "Май"
+      },
+      {
+        "position": 0.454644,
+        "label": "Июн"
+      },
+      {
+        "position": 0.545356,
+        "label": "Июл"
+      },
+      {
+        "position": 0.636069,
+        "label": "Авг"
+      },
+      {
+        "position": 0.726782,
+        "label": "Сен"
+      },
+      {
+        "position": 0.817495,
+        "label": "Окт"
+      },
+      {
+        "position": 0.909287,
+        "label": "Ноя"
+      },
+      {
+        "position": 1.0,
+        "label": "Дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2021",
+        "mode": "line",
+        "y_axis": {
+          "min": 0,
+          "max": 35
+        },
+        "anchors": [
+          [
+            0.273218,
+            0.791209
+          ],
+          [
+            0.362851,
+            0.730769
+          ],
+          [
+            0.545356,
+            0.587912
+          ],
+          [
+            0.636069,
+            0.514652
+          ],
+          [
+            0.726782,
+            0.421245
+          ],
+          [
+            0.817495,
+            0.35348
+          ],
+          [
+            0.909287,
+            0.258242
+          ],
+          [
+            0.99892,
+            0.152015
+          ]
+        ],
+        "estimated_error": 0.385,
+        "note": "Опорные точки повторно измерены по координатам JPEG; значения приблизительны, интерполяция не является исходным рядом. Январь–март светло-серой линии не включены: ветви сливаются. Отдельные опоры, не подтвержденные цветом/штрихом в радиусе 6 пикселей, исключены."
+      }
+    ],
+    "image_sha256": "c58081dadc9a21ef9f864d3916e73e30dce37459f70893e15e46072fa091e9bf"
+  },
+  "points": [
+    {
+      "x": 0.273218,
+      "value": 7.31
+    },
+    {
+      "x": 0.362851,
+      "value": 9.42
+    },
+    {
+      "x": 0.545356,
+      "value": 14.42
+    },
+    {
+      "x": 0.636069,
+      "value": 16.99
+    },
+    {
+      "x": 0.726782,
+      "value": 20.26
+    },
+    {
+      "x": 0.817495,
+      "value": 22.63
+    },
+    {
+      "x": 0.909287,
+      "value": 25.96
+    },
+    {
+      "x": 0.99892,
+      "value": 29.68
+    }
+  ],
+  "json_file": "series/alfa-7m26-financial-result-cumulative--year-2021.json",
+  "svg_file": "series/alfa-7m26-financial-result-cumulative--year-2021.svg"
+}

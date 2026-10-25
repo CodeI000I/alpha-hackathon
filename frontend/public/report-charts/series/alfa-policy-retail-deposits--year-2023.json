@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-retail-deposits--year-2023",
+  "chart_id": "alfa-policy-retail-deposits",
+  "series_id": "year-2023",
+  "label": "2023",
+  "unit": "Дек T-1 = 100%",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 6: Динамика рублевых розничных депозитов, дек T-1 = 100%",
+    "page": 3,
+    "crop": [
+      0.52,
+      0.12,
+      0.93,
+      0.38
+    ],
+    "image": "images/alfa-policy-retail-deposits.jpg",
+    "image_sha256": "39d49f645c94a3142bafc4d850bfd8a38353764643416ec8f2cbaffe49331b19"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      158,
+      191,
+      1128,
+      849
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "Дек T-1"
+      },
+      {
+        "position": 0.083505,
+        "label": "Янв"
+      },
+      {
+        "position": 0.16701,
+        "label": "Фев"
+      },
+      {
+        "position": 0.250515,
+        "label": "Мар"
+      },
+      {
+        "position": 0.334021,
+        "label": "Апр"
+      },
+      {
+        "position": 0.417526,
+        "label": "Май"
+      },
+      {
+        "position": 0.5,
+        "label": "Июн"
+      },
+      {
+        "position": 0.583505,
+        "label": "Июл"
+      },
+      {
+        "position": 0.66701,
+        "label": "Авг"
+      },
+      {
+        "position": 0.750515,
+        "label": "Сен"
+      },
+      {
+        "position": 0.834021,
+        "label": "Окт"
+      },
+      {
+        "position": 0.916495,
+        "label": "Ноя"
+      },
+      {
+        "position": 1.0,
+        "label": "Дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2023",
+        "mode": "line",
+        "y_axis": {
+          "min": 94,
+          "max": 133
+        },
+        "anchors": [
+          [
+            0.0,
+            0.840426
+          ],
+          [
+            0.083505,
+            0.925532
+          ],
+          [
+            0.16701,
+            0.858663
+          ],
+          [
+            0.334021,
+            0.758359
+          ],
+          [
+            0.5,
+            0.648936
+          ],
+          [
+            0.585567,
+            0.604863
+          ],
+          [
+            0.66701,
+            0.572948
+          ],
+          [
+            0.750515,
+            0.533435
+          ],
+          [
+            0.834021,
+            0.481763
+          ],
+          [
+            0.916495,
+            0.413374
+          ],
+          [
+            1.0,
+            0.18845
+          ]
+        ],
+        "estimated_error": 0.356,
+        "note": "Опорные точки повторно измерены по координатам JPEG; значения приблизительны, интерполяция не является исходным рядом. Отдельные опоры, не подтвержденные цветом/штрихом в радиусе 6 пикселей, исключены."
+      }
+    ],
+    "image_sha256": "39d49f645c94a3142bafc4d850bfd8a38353764643416ec8f2cbaffe49331b19"
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value": 100.22
+    },
+    {
+      "x": 0.083505,
+      "value": 96.9
+    },
+    {
+      "x": 0.16701,
+      "value": 99.51
+    },
+    {
+      "x": 0.334021,
+      "value": 103.42
+    },
+    {
+      "x": 0.5,
+      "value": 107.69
+    },
+    {
+      "x": 0.585567,
+      "value": 109.41
+    },
+    {
+      "x": 0.66701,
+      "value": 110.66
+    },
+    {
+      "x": 0.750515,
+      "value": 112.2
+    },
+    {
+      "x": 0.834021,
+      "value": 114.21
+    },
+    {
+      "x": 0.916495,
+      "value": 116.88
+    },
+    {
+      "x": 1.0,
+      "value": 125.65
+    }
+  ],
+  "json_file": "series/alfa-policy-retail-deposits--year-2023.json",
+  "svg_file": "series/alfa-policy-retail-deposits--year-2023.svg"
+}

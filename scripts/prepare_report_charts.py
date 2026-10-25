@@ -14,6 +14,11 @@ import tempfile
 
 import pymupdf
 
+if __package__:
+    from .report_chart_series import build_series_exports
+else:
+    from report_chart_series import build_series_exports
+
 ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SHA_RE = re.compile(r"^[a-f0-9]{64}$")
 KINDS = {"line", "bar", "pie", "scatter", "mixed"}
@@ -187,12 +192,25 @@ def prepare(input_dir, output_dir, catalog):
             chart.update(image=f"images/{chart['id']}.jpg", image_sha256=hashlib.sha256(image).hexdigest(), image_width=width, image_height=height)
         (stage / "points.csv").write_bytes(_csv_bytes(catalog))
         (stage / "catalog.json").write_text(json.dumps(exported, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        series_exports = build_series_exports(exported)
+        (stage / "series").mkdir()
+        for relative, data in series_exports.items():
+            (stage / relative).write_bytes(data)
 
         output.mkdir(parents=True, exist_ok=True)
         (output / "images").mkdir(exist_ok=True)
         for image in sorted((stage / "images").iterdir()):
             os.replace(image, output / "images" / image.name)
+        (output / "series").mkdir(exist_ok=True)
+        for relative in series_exports:
+            if relative.startswith("series/"):
+                os.replace(stage / relative, output / relative)
+        # This directory contains generated artifacts only; remove obsolete series.
+        for path in (output / "series").iterdir():
+            if path.is_file() and path.suffix in {".json", ".svg"} and f"series/{path.name}" not in series_exports:
+                path.unlink()
         os.replace(stage / "points.csv", output / "points.csv")
+        os.replace(stage / "series-index.json", output / "series-index.json")
         os.replace(stage / "catalog.json", output / "catalog.json")
     finally:
         shutil.rmtree(stage, ignore_errors=True)
@@ -216,6 +234,12 @@ def verify_export(output_dir, catalog):
         _need((width, height) == (chart["image_width"], chart["image_height"]) and width <= 1200 and height <= 1600, f"invalid image dimensions: {chart['id']}")
         _need(hashlib.sha256(data).hexdigest() == chart["image_sha256"], f"image hash mismatch: {chart['id']}")
     _need((output / "points.csv").read_bytes() == _csv_bytes(catalog), "points.csv differs from annotations")
+    series_exports = build_series_exports(exported)
+    for relative, expected in series_exports.items():
+        path = output / relative
+        _need(path.is_file() and path.read_bytes() == expected, f"missing or changed export: {relative}")
+    actual = {f"series/{path.name}" for path in (output / "series").iterdir() if path.is_file()}
+    _need(actual == {path for path in series_exports if path.startswith("series/")}, "unexpected series export files")
     return True
 
 

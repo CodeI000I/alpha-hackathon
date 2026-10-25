@@ -14,6 +14,12 @@ export interface ReportChartSeries {
   points: ReportChartPoint[];
 }
 
+export interface ReportChartUnavailableSeries {
+  id: string;
+  label: string;
+  unit: string;
+}
+
 export interface ReportDocument {
   id: string;
   file: string;
@@ -32,8 +38,10 @@ export interface ReportChart {
   data_status: ReportChartDataStatus;
   x_axis: { label: string; kind: "time" | "category" };
   series: ReportChartSeries[];
+  unavailable_series: ReportChartUnavailableSeries[];
   note: string;
   image: string;
+  image_sha256?: string;
 }
 
 export interface ReportChartCatalog {
@@ -88,9 +96,18 @@ export function parseReportChartCatalog(value: unknown): ReportChartCatalog {
       });
       return { id: entry.id, label: entry.label, unit: entry.unit, points };
     });
+    const unavailableSeries = item.unavailable_series === undefined ? [] : item.unavailable_series;
+    if (!Array.isArray(unavailableSeries)) return fail(`${path}.unavailable_series`);
+    const unavailableIds = new Set<string>();
+    const parsedUnavailable = unavailableSeries.map((entry, unavailableIndex): ReportChartUnavailableSeries => {
+      if (!isRecord(entry) || !isString(entry.id) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.id) || seriesIds.has(entry.id) || unavailableIds.has(entry.id) || !isString(entry.label) || !isString(entry.unit)) return fail(`${path}.unavailable_series[${unavailableIndex}]`);
+      unavailableIds.add(entry.id);
+      return { id: entry.id, label: entry.label, unit: entry.unit };
+    });
     if (item.data_status === "image_only" && series.length) return fail(`${path}.image_only требует пустой series`);
     if (item.data_status === "labelled_values" && !series.length) return fail(`${path}.labelled_values требует series`);
     if (!isString(item.image) || item.image !== `images/${item.id}.jpg`) return fail(`${path}.image`);
+    if (item.image_sha256 !== undefined && (!isString(item.image_sha256) || !/^[a-f0-9]{64}$/.test(item.image_sha256))) return fail(`${path}.image_sha256`);
 
     return {
       id: item.id,
@@ -102,8 +119,10 @@ export function parseReportChartCatalog(value: unknown): ReportChartCatalog {
       data_status: item.data_status,
       x_axis: { label: item.x_axis.label, kind: item.x_axis.kind },
       series,
+      unavailable_series: parsedUnavailable,
       note: item.note,
       image: item.image,
+      ...(item.image_sha256 !== undefined ? { image_sha256: item.image_sha256 as string } : {}),
     };
   });
 

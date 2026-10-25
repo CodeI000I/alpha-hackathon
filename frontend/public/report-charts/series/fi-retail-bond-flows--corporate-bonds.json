@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "fi-retail-bond-flows--corporate-bonds",
+  "chart_id": "fi-retail-bond-flows",
+  "series_id": "corporate-bonds",
+  "label": "Рублёвые корпоративные облигации",
+  "unit": "млрд руб.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Среднемесячные притоки новых вложений физических лиц в ОФЗ и корпоративные облигации, млрд руб.",
+    "page": 17,
+    "crop": [
+      0.58718,
+      0.55381,
+      0.96239,
+      0.86699
+    ],
+    "image": "images/fi-retail-bond-flows.jpg",
+    "image_sha256": "4073461cac6cd30aa360c085570c1dfcfa0b92daa41d3f0f547b999fcaa02dc0"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "На графике нет подписей значений наблюдений. Приблизительные значения находятся в отдельных оцифрованных рядах.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "4073461cac6cd30aa360c085570c1dfcfa0b92daa41d3f0f547b999fcaa02dc0",
+    "plot": [
+      112,
+      177,
+      1165,
+      580
+    ],
+    "x_ticks": [
+      {
+        "position": 0.025,
+        "label": "Июл.25"
+      },
+      {
+        "position": 0.1114,
+        "label": "Авг.25"
+      },
+      {
+        "position": 0.1978,
+        "label": "Сен.25"
+      },
+      {
+        "position": 0.2842,
+        "label": "Окт.25"
+      },
+      {
+        "position": 0.3706,
+        "label": "Ноя.25"
+      },
+      {
+        "position": 0.457,
+        "label": "Дек.25"
+      },
+      {
+        "position": 0.5434,
+        "label": "Янв.26"
+      },
+      {
+        "position": 0.6298,
+        "label": "Фев.26"
+      },
+      {
+        "position": 0.7162,
+        "label": "Мар.26"
+      },
+      {
+        "position": 0.8026,
+        "label": "Апр.26"
+      },
+      {
+        "position": 0.889,
+        "label": "Май.26"
+      },
+      {
+        "position": 0.9754,
+        "label": "Июн.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "corporate-bonds",
+        "mode": "bar",
+        "y_axis": {
+          "min": 0,
+          "max": 160
+        },
+        "anchors": [
+          [
+            0.033,
+            0.4375
+          ],
+          [
+            0.1194,
+            0.3625
+          ],
+          [
+            0.2058,
+            0.55
+          ],
+          [
+            0.2922,
+            0.6937
+          ],
+          [
+            0.3786,
+            0.55
+          ],
+          [
+            0.465,
+            0.1938
+          ],
+          [
+            0.5514,
+            0.7438
+          ],
+          [
+            0.6378,
+            0.4875
+          ],
+          [
+            0.7242,
+            0.1688
+          ],
+          [
+            0.8106,
+            0.1125
+          ],
+          [
+            0.897,
+            0.4875
+          ],
+          [
+            0.9834,
+            0.0813
+          ]
+        ],
+        "estimated_error": 9,
+        "note": "Приближённые высоты серых столбцов по шкале 0–160 млрд руб."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.033,
+      "value": 90.0
+    },
+    {
+      "x": 0.1194,
+      "value": 102.0
+    },
+    {
+      "x": 0.2058,
+      "value": 72.0
+    },
+    {
+      "x": 0.2922,
+      "value": 49.0
+    },
+    {
+      "x": 0.3786,
+      "value": 72.0
+    },
+    {
+      "x": 0.465,
+      "value": 129.0
+    },
+    {
+      "x": 0.5514,
+      "value": 41.0
+    },
+    {
+      "x": 0.6378,
+      "value": 82.0
+    },
+    {
+      "x": 0.7242,
+      "value": 133.0
+    },
+    {
+      "x": 0.8106,
+      "value": 142.0
+    },
+    {
+      "x": 0.897,
+      "value": 82.0
+    },
+    {
+      "x": 0.9834,
+      "value": 147.0
+    }
+  ],
+  "json_file": "series/fi-retail-bond-flows--corporate-bonds.json",
+  "svg_file": "series/fi-retail-bond-flows--corporate-bonds.svg"
+}

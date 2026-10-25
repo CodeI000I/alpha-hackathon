@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "id": "alfa-7m26-car-sales-monthly--year-2026",
+  "chart_id": "alfa-7m26-car-sales-monthly",
+  "series_id": "year-2026",
+  "label": "2026",
+  "unit": "тыс. шт.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-7m26",
+      "file": "ALFA-7M26.pdf",
+      "sha256": "3c64c1e43f3b46a795f9581967f2dbc8efb0994cb77ab82e95da180830e9ff8c",
+      "pages": 4,
+      "title": "Макростатистика 7М26"
+    },
+    "chart_title": "Рис. 1: Продажи новых легковых автомобилей, тыс. шт.",
+    "page": 1,
+    "crop": [
+      0.08,
+      0.49,
+      0.5,
+      0.735
+    ],
+    "image": "images/alfa-7m26-car-sales-monthly.jpg",
+    "image_sha256": "651529ee319e1f1e48b2e19a661cc68629f97f004d5c5e23e70e3fe2e6e0617c"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      104,
+      209,
+      1158,
+      802
+    ],
+    "x_ticks": [
+      {
+        "position": 0.039848,
+        "label": "Янв"
+      },
+      {
+        "position": 0.12334,
+        "label": "Фев"
+      },
+      {
+        "position": 0.206831,
+        "label": "Мар"
+      },
+      {
+        "position": 0.290323,
+        "label": "Апр"
+      },
+      {
+        "position": 0.373814,
+        "label": "Май"
+      },
+      {
+        "position": 0.457306,
+        "label": "Июн"
+      },
+      {
+        "position": 0.540797,
+        "label": "Июл"
+      },
+      {
+        "position": 0.624288,
+        "label": "Авг"
+      },
+      {
+        "position": 0.70778,
+        "label": "Сен"
+      },
+      {
+        "position": 0.791271,
+        "label": "Окт"
+      },
+      {
+        "position": 0.874763,
+        "label": "Ноя"
+      },
+      {
+        "position": 0.958254,
+        "label": "Дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2026",
+        "mode": "bar",
+        "y_axis": {
+          "min": 0,
+          "max": 180
+        },
+        "anchors": [
+          [
+            0.055977,
+            0.578415
+          ],
+          [
+            0.139469,
+            0.573356
+          ],
+          [
+            0.22296,
+            0.435076
+          ],
+          [
+            0.306452,
+            0.349073
+          ],
+          [
+            0.389943,
+            0.384486
+          ],
+          [
+            0.473435,
+            0.3457
+          ],
+          [
+            0.556926,
+            0.310287
+          ],
+          [
+            0.640417,
+            0.357504
+          ]
+        ],
+        "estimated_error": 1.821,
+        "note": "Опорные точки повторно измерены по координатам JPEG; значения приблизительны, интерполяция не является исходным рядом."
+      }
+    ],
+    "image_sha256": "651529ee319e1f1e48b2e19a661cc68629f97f004d5c5e23e70e3fe2e6e0617c"
+  },
+  "points": [
+    {
+      "x": 0.055977,
+      "value": 75.9
+    },
+    {
+      "x": 0.139469,
+      "value": 76.8
+    },
+    {
+      "x": 0.22296,
+      "value": 101.7
+    },
+    {
+      "x": 0.306452,
+      "value": 117.2
+    },
+    {
+      "x": 0.389943,
+      "value": 110.8
+    },
+    {
+      "x": 0.473435,
+      "value": 117.8
+    },
+    {
+      "x": 0.556926,
+      "value": 124.1
+    },
+    {
+      "x": 0.640417,
+      "value": 115.6
+    }
+  ],
+  "json_file": "series/alfa-7m26-car-sales-monthly--year-2026.json",
+  "svg_file": "series/alfa-7m26-car-sales-monthly--year-2026.svg"
+}

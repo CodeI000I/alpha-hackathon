@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "id": "alfa-consumption-weekly-inflation--base-inflation",
+  "chart_id": "alfa-consumption-weekly-inflation",
+  "series_id": "base-inflation",
+  "label": "Базовая инфляция",
+  "unit": "% н/н",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    "chart_title": "Рис. 7: Динамика базовой недельной инфляции и ее структура, % н/н",
+    "page": 2,
+    "crop": [
+      0.08,
+      0.63,
+      0.5,
+      0.89
+    ],
+    "image": "images/alfa-consumption-weekly-inflation.jpg",
+    "image_sha256": "f92bd89f658be330f028df176e5f3af3ecd7ad18c015faa33761fc2a0d50d239"
+  },
+  "x_axis": {
+    "label": "Неделя",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      57,
+      208,
+      988,
+      744
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "02.03"
+      },
+      {
+        "position": 0.0476,
+        "label": "10.03"
+      },
+      {
+        "position": 0.0952,
+        "label": "16.03"
+      },
+      {
+        "position": 0.1429,
+        "label": "23.03"
+      },
+      {
+        "position": 0.1905,
+        "label": "30.03"
+      },
+      {
+        "position": 0.2381,
+        "label": "06.04"
+      },
+      {
+        "position": 0.2857,
+        "label": "13.04"
+      },
+      {
+        "position": 0.3333,
+        "label": "20.04"
+      },
+      {
+        "position": 0.381,
+        "label": "27.04"
+      },
+      {
+        "position": 0.4286,
+        "label": "04.05"
+      },
+      {
+        "position": 0.4762,
+        "label": "12.05"
+      },
+      {
+        "position": 0.5238,
+        "label": "18.05"
+      },
+      {
+        "position": 0.5714,
+        "label": "25.05"
+      },
+      {
+        "position": 0.619,
+        "label": "01.06"
+      },
+      {
+        "position": 0.6667,
+        "label": "08.06"
+      },
+      {
+        "position": 0.7143,
+        "label": "15.06"
+      },
+      {
+        "position": 0.7619,
+        "label": "22.06"
+      },
+      {
+        "position": 0.8095,
+        "label": "29.06"
+      },
+      {
+        "position": 0.8571,
+        "label": "06.07"
+      },
+      {
+        "position": 0.9048,
+        "label": "13.07"
+      },
+      {
+        "position": 0.9524,
+        "label": "20.07"
+      },
+      {
+        "position": 1.0,
+        "label": "27.07"
+      }
+    ],
+    "series": [
+      {
+        "id": "base-inflation",
+        "mode": "line",
+        "y_axis": {
+          "min": -0.15,
+          "max": 0.25
+        },
+        "anchors": [
+          [
+            0.0,
+            0.45522
+          ],
+          [
+            0.04762,
+            0.19963
+          ],
+          [
+            0.09524,
+            0.39179
+          ],
+          [
+            0.14286,
+            0.26679
+          ],
+          [
+            0.19048,
+            0.35075
+          ],
+          [
+            0.2381,
+            0.26493
+          ],
+          [
+            0.28571,
+            0.52425
+          ],
+          [
+            0.33333,
+            0.57649
+          ],
+          [
+            0.38095,
+            0.52425
+          ],
+          [
+            0.42857,
+            0.62873
+          ],
+          [
+            0.47619,
+            0.54851
+          ],
+          [
+            0.52381,
+            0.80224
+          ],
+          [
+            0.57143,
+            0.72575
+          ],
+          [
+            0.61905,
+            0.57463
+          ],
+          [
+            0.66667,
+            0.65299
+          ],
+          [
+            0.71429,
+            0.75
+          ],
+          [
+            0.7619,
+            0.57463
+          ],
+          [
+            0.80952,
+            0.37313
+          ],
+          [
+            0.85714,
+            0.13619
+          ],
+          [
+            0.90476,
+            0.27799
+          ],
+          [
+            0.95238,
+            0.22015
+          ],
+          [
+            1.0,
+            0.17537
+          ]
+        ],
+        "estimated_error": 0.01,
+        "note": "22 видимых недельных маркера, даты сопоставлены по порядку подписей; ручное измерение центров с погрешностью около нескольких пикселей."
+      }
+    ],
+    "image_sha256": "f92bd89f658be330f028df176e5f3af3ecd7ad18c015faa33761fc2a0d50d239"
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value": 0.068
+    },
+    {
+      "x": 0.04762,
+      "value": 0.17
+    },
+    {
+      "x": 0.09524,
+      "value": 0.093
+    },
+    {
+      "x": 0.14286,
+      "value": 0.143
+    },
+    {
+      "x": 0.19048,
+      "value": 0.11
+    },
+    {
+      "x": 0.2381,
+      "value": 0.144
+    },
+    {
+      "x": 0.28571,
+      "value": 0.04
+    },
+    {
+      "x": 0.33333,
+      "value": 0.019
+    },
+    {
+      "x": 0.38095,
+      "value": 0.04
+    },
+    {
+      "x": 0.42857,
+      "value": -0.001
+    },
+    {
+      "x": 0.47619,
+      "value": 0.031
+    },
+    {
+      "x": 0.52381,
+      "value": -0.071
+    },
+    {
+      "x": 0.57143,
+      "value": -0.04
+    },
+    {
+      "x": 0.61905,
+      "value": 0.02
+    },
+    {
+      "x": 0.66667,
+      "value": -0.011
+    },
+    {
+      "x": 0.71429,
+      "value": -0.05
+    },
+    {
+      "x": 0.7619,
+      "value": 0.02
+    },
+    {
+      "x": 0.80952,
+      "value": 0.101
+    },
+    {
+      "x": 0.85714,
+      "value": 0.196
+    },
+    {
+      "x": 0.90476,
+      "value": 0.139
+    },
+    {
+      "x": 0.95238,
+      "value": 0.162
+    },
+    {
+      "x": 1.0,
+      "value": 0.18
+    }
+  ],
+  "json_file": "series/alfa-consumption-weekly-inflation--base-inflation.json",
+  "svg_file": "series/alfa-consumption-weekly-inflation--base-inflation.svg"
+}

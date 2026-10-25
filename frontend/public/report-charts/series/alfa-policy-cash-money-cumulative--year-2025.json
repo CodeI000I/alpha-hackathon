@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-cash-money-cumulative--year-2025",
+  "chart_id": "alfa-policy-cash-money-cumulative",
+  "series_id": "year-2025",
+  "label": "2025",
+  "unit": "млрд руб.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 4: Изменение наличных денег в обращении, накопленным итогом с начала года, млрд руб.",
+    "page": 2,
+    "crop": [
+      0.52,
+      0.65,
+      0.93,
+      0.91
+    ],
+    "image": "images/alfa-policy-cash-money-cumulative.jpg",
+    "image_sha256": "c3ab2fa7ae7584db4bf348af3a27b5e013a2eaecc6a1860ed84166c0f067ed21"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      184,
+      223,
+      1094,
+      910
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "янв"
+      },
+      {
+        "position": 0.091209,
+        "label": "фев"
+      },
+      {
+        "position": 0.181319,
+        "label": "мар"
+      },
+      {
+        "position": 0.272527,
+        "label": "апр"
+      },
+      {
+        "position": 0.363736,
+        "label": "май"
+      },
+      {
+        "position": 0.454945,
+        "label": "июн"
+      },
+      {
+        "position": 0.545055,
+        "label": "июл"
+      },
+      {
+        "position": 0.636264,
+        "label": "авг"
+      },
+      {
+        "position": 0.727473,
+        "label": "сен"
+      },
+      {
+        "position": 0.817582,
+        "label": "окт"
+      },
+      {
+        "position": 0.908791,
+        "label": "ноя"
+      },
+      {
+        "position": 1.0,
+        "label": "дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2025",
+        "mode": "line",
+        "y_axis": {
+          "min": -1500,
+          "max": 3000
+        },
+        "anchors": [
+          [
+            0.0,
+            0.80786
+          ],
+          [
+            0.091209,
+            0.852984
+          ],
+          [
+            0.181319,
+            0.908297
+          ],
+          [
+            0.272527,
+            0.852984
+          ],
+          [
+            0.363736,
+            0.876274
+          ],
+          [
+            0.454945,
+            0.829694
+          ],
+          [
+            0.545055,
+            0.783115
+          ],
+          [
+            0.636264,
+            0.733624
+          ],
+          [
+            0.727473,
+            0.695779
+          ],
+          [
+            0.817582,
+            0.663755
+          ],
+          [
+            0.908791,
+            0.644833
+          ],
+          [
+            1.0,
+            0.462882
+          ]
+        ],
+        "estimated_error": 39.301,
+        "note": "Опорные точки повторно измерены по координатам JPEG; значения приблизительны, интерполяция не является исходным рядом."
+      }
+    ],
+    "image_sha256": "c3ab2fa7ae7584db4bf348af3a27b5e013a2eaecc6a1860ed84166c0f067ed21"
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value": -635.0
+    },
+    {
+      "x": 0.091209,
+      "value": -838.0
+    },
+    {
+      "x": 0.181319,
+      "value": -1087.0
+    },
+    {
+      "x": 0.272527,
+      "value": -838.0
+    },
+    {
+      "x": 0.363736,
+      "value": -943.0
+    },
+    {
+      "x": 0.454945,
+      "value": -734.0
+    },
+    {
+      "x": 0.545055,
+      "value": -524.0
+    },
+    {
+      "x": 0.636264,
+      "value": -301.0
+    },
+    {
+      "x": 0.727473,
+      "value": -131.0
+    },
+    {
+      "x": 0.817582,
+      "value": 13.0
+    },
+    {
+      "x": 0.908791,
+      "value": 98.0
+    },
+    {
+      "x": 1.0,
+      "value": 917.0
+    }
+  ],
+  "json_file": "series/alfa-policy-cash-money-cumulative--year-2025.json",
+  "svg_file": "series/alfa-policy-cash-money-cumulative--year-2025.svg"
+}

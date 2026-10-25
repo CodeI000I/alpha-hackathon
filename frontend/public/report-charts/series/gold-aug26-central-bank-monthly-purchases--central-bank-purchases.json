@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-central-bank-monthly-purchases--central-bank-purchases",
+  "chart_id": "gold-aug26-central-bank-monthly-purchases",
+  "series_id": "central-bank-purchases",
+  "label": "Покупки мировых ЦБ",
+  "unit": "т",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Ежемесячные покупки золота мировыми ЦБ, т",
+    "page": 7,
+    "crop": [
+      0.03,
+      0.62,
+      0.99,
+      0.92
+    ],
+    "image": "images/gold-aug26-central-bank-monthly-purchases.jpg",
+    "image_sha256": "c9be214fa21f7686d76bd86e089b3658a437ce5ee21b685ee3c90d3a52734277"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "Частичное покрытие: внесены все подписанные столбцы покупок. Среднее значение за год на пунктирной линии и цена золота на линии не подписаны точками.",
+  "exact_points": [
+    {
+      "label": "июл.25",
+      "value": 10
+    },
+    {
+      "label": "авг.25",
+      "value": 19
+    },
+    {
+      "label": "сен.25",
+      "value": 39
+    },
+    {
+      "label": "окт.25",
+      "value": 53
+    },
+    {
+      "label": "ноя.25",
+      "value": 45
+    },
+    {
+      "label": "дек.25",
+      "value": 30
+    },
+    {
+      "label": "янв.26",
+      "value": 5
+    },
+    {
+      "label": "фев.26",
+      "value": 27
+    },
+    {
+      "label": "мар.26",
+      "value": -30
+    },
+    {
+      "label": "апр.26",
+      "value": 17
+    },
+    {
+      "label": "май.26",
+      "value": 41
+    },
+    {
+      "label": "июн.26",
+      "value": 51
+    },
+    {
+      "label": "июл.26",
+      "value": 23
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "июл.25",
+      "value": 10,
+      "source_index": 0
+    },
+    {
+      "x": "авг.25",
+      "value": 19,
+      "source_index": 1
+    },
+    {
+      "x": "сен.25",
+      "value": 39,
+      "source_index": 2
+    },
+    {
+      "x": "окт.25",
+      "value": 53,
+      "source_index": 3
+    },
+    {
+      "x": "ноя.25",
+      "value": 45,
+      "source_index": 4
+    },
+    {
+      "x": "дек.25",
+      "value": 30,
+      "source_index": 5
+    },
+    {
+      "x": "янв.26",
+      "value": 5,
+      "source_index": 6
+    },
+    {
+      "x": "фев.26",
+      "value": 27,
+      "source_index": 7
+    },
+    {
+      "x": "мар.26",
+      "value": -30,
+      "source_index": 8
+    },
+    {
+      "x": "апр.26",
+      "value": 17,
+      "source_index": 9
+    },
+    {
+      "x": "май.26",
+      "value": 41,
+      "source_index": 10
+    },
+    {
+      "x": "июн.26",
+      "value": 51,
+      "source_index": 11
+    },
+    {
+      "x": "июл.26",
+      "value": 23,
+      "source_index": 12
+    }
+  ],
+  "json_file": "series/gold-aug26-central-bank-monthly-purchases--central-bank-purchases.json",
+  "svg_file": "series/gold-aug26-central-bank-monthly-purchases--central-bank-purchases.svg"
+}

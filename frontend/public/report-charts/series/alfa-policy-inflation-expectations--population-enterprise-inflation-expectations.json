@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-inflation-expectations--population-enterprise-inflation-expectations",
+  "chart_id": "alfa-policy-inflation-expectations",
+  "series_id": "population-enterprise-inflation-expectations",
+  "label": "Инфляционные ожидания населения и предприятий",
+  "unit": "",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 2: Инфляционные ожидания населения, % и инфляционные ожидания предприятий, п.",
+    "page": 2,
+    "crop": [
+      0.52,
+      0.35,
+      0.93,
+      0.65
+    ],
+    "image": "images/alfa-policy-inflation-expectations.jpg",
+    "image_sha256": "04816461c895739f61ef76b3edc161a66000b610532d89e596b950275778ce11"
+  },
+  "x_axis": {
+    "label": "Инфляционные ожидания населения, %",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      156,
+      270,
+      1150,
+      905
+    ],
+    "x_ticks": [
+      {
+        "position": 0,
+        "label": "0"
+      },
+      {
+        "position": 0.1667,
+        "label": "5"
+      },
+      {
+        "position": 0.3333,
+        "label": "10"
+      },
+      {
+        "position": 0.5,
+        "label": "15"
+      },
+      {
+        "position": 0.6667,
+        "label": "20"
+      },
+      {
+        "position": 0.8333,
+        "label": "25"
+      },
+      {
+        "position": 1,
+        "label": "30"
+      }
+    ],
+    "series": [
+      {
+        "id": "population-enterprise-inflation-expectations",
+        "mode": "scatter",
+        "y_axis": {
+          "min": 0,
+          "max": 30
+        },
+        "anchors": [
+          [
+            0.290744,
+            0.818898
+          ],
+          [
+            0.300805,
+            0.770079
+          ],
+          [
+            0.341046,
+            0.516535
+          ],
+          [
+            0.384306,
+            0.494488
+          ],
+          [
+            0.404427,
+            0.39685
+          ],
+          [
+            0.414487,
+            0.722835
+          ],
+          [
+            0.434608,
+            0.680315
+          ],
+          [
+            0.457746,
+            0.190551
+          ],
+          [
+            0.457746,
+            0.24252
+          ],
+          [
+            0.464789,
+            0.07874
+          ],
+          [
+            0.475855,
+            0.288189
+          ],
+          [
+            0.49497,
+            0.297638
+          ],
+          [
+            0.518109,
+            0.337008
+          ],
+          [
+            0.54829,
+            0.618898
+          ],
+          [
+            0.581489,
+            0.524409
+          ]
+        ],
+        "estimated_error": 0.283,
+        "note": "Центры 15 видимых маркеров: x — ожидания населения, y — ожидания предприятий; подписи лет не преобразованы в отдельные временные ряды."
+      }
+    ],
+    "image_sha256": "04816461c895739f61ef76b3edc161a66000b610532d89e596b950275778ce11"
+  },
+  "points": [
+    {
+      "x": 0.290744,
+      "value": 5.43
+    },
+    {
+      "x": 0.300805,
+      "value": 6.9
+    },
+    {
+      "x": 0.341046,
+      "value": 14.5
+    },
+    {
+      "x": 0.384306,
+      "value": 15.17
+    },
+    {
+      "x": 0.404427,
+      "value": 18.09
+    },
+    {
+      "x": 0.414487,
+      "value": 8.31
+    },
+    {
+      "x": 0.434608,
+      "value": 9.59
+    },
+    {
+      "x": 0.457746,
+      "value": 24.28
+    },
+    {
+      "x": 0.457746,
+      "value": 22.72
+    },
+    {
+      "x": 0.464789,
+      "value": 27.64
+    },
+    {
+      "x": 0.475855,
+      "value": 21.35
+    },
+    {
+      "x": 0.49497,
+      "value": 21.07
+    },
+    {
+      "x": 0.518109,
+      "value": 19.89
+    },
+    {
+      "x": 0.54829,
+      "value": 11.43
+    },
+    {
+      "x": 0.581489,
+      "value": 14.27
+    }
+  ],
+  "json_file": "series/alfa-policy-inflation-expectations--population-enterprise-inflation-expectations.json",
+  "svg_file": "series/alfa-policy-inflation-expectations--population-enterprise-inflation-expectations.svg"
+}

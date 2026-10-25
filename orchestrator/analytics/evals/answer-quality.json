@@ -1,0 +1,21 @@
+{
+  "source": "Synthetic response patches over the existing SyntheticGateway; not recorded real model answers.",
+  "cases": [
+    {"fixture_id": "floating-contract", "expected_label": "accepted"},
+    {"fixture_id": "fixed-contract", "contract": "Компания закупает комплектующие у supplier_x. Цена фиксирована для ноябрьского заказа.", "expected_label": "accepted"},
+    {"fixture_id": "missing-company-context", "contract": null, "expected_label": "needs_context", "expected_fact_ids": [], "max_calls": 1},
+    {"fixture_id": "cancelled-event", "responses": {"EventDraft": {"status": "cancelled"}}, "expected_label": "irrelevant", "max_calls": 2},
+    {"fixture_id": "expired-event", "responses": {"EventDraft": {"effective_from": null, "effective_until": "2026-10-01T00:00:00Z"}}, "expected_label": "irrelevant", "max_calls": 2},
+    {"fixture_id": "conflicting-company-fact", "fact_patch": {"status": "conflicting"}, "expected_label": "inconsistent"},
+    {"fixture_id": "missing-causal-chain", "responses": {"ImpactAssessment": {"causal_chain": []}}, "expected_label": "needs_context"},
+    {"fixture_id": "foreign-citation", "responses": {"ImpactAssessment": {"causal_chain": [{"text": "Неподтверждённое основание", "evidence_ids": ["foreign-company-fact"]}]}}, "expected_label": "invalid_response"},
+    {"fixture_id": "invalid-schema", "responses": {"ImpactAssessment": {"urgency": "invented-urgency"}}, "expected_label": "invalid_response"},
+    {"fixture_id": "truncated-negative", "fact_count": 3, "top_k": 1, "responses": {"ImpactAssessment": {"relevance": "irrelevant", "risk_supported": "no", "opportunity_supported": "no", "evidence_sufficiency": "sufficient"}}, "expected_label": "needs_context"},
+    {"fixture_id": "truncated-neutral", "fact_count": 3, "top_k": 1, "contract": "Компания закупает комплектующие у supplier_x. Цена фиксирована для ноябрьского заказа.", "expected_label": "needs_context"},
+    {"fixture_id": "mixed-impact", "responses": {"ImpactAssessment": {"opportunity_supported": "yes"}}, "expected_label": "accepted"},
+    {"fixture_id": "uncited-chat", "question": "Как изменится прибыль?", "responses": {"Answer": {"text": "Прибыль вырастет на миллион рублей.", "evidence_ids": [], "missing_facts": []}}, "expected_label": "invalid_response", "max_calls": 4},
+    {"fixture_id": "blank-unknown-chat", "question": "Как изменится прибыль?", "responses": {"Answer": {"text": "Прибыль вырастет.", "evidence_ids": [], "missing_facts": [" "]}}, "expected_label": "invalid_response", "max_calls": 4},
+    {"fixture_id": "abstaining-chat", "question": "Как изменится прибыль?", "responses": {"Answer": {"text": "Не хватает суммы закупок и текущей маржи.", "evidence_ids": [], "missing_facts": ["Сумма закупок и текущая маржа"]}}, "expected_label": "answered", "max_calls": 4},
+    {"fixture_id": "cited-chat", "question": "Что если цена фиксирована?", "expected_label": "answered", "max_calls": 4}
+  ]
+}

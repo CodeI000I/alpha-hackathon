@@ -7,6 +7,7 @@
 Результаты проверки: [analytics-prototype-report.md](../../docs/analytics-prototype-report.md).
 Исторический аудит: [pipeline-audit-2026-10-23.md](../../docs/pipeline-audit-2026-10-23.md).
 Текущее подключение и проверки: [integration-main-2026-10-24.md](../../docs/integration-main-2026-10-24.md).
+Проверки ответов, безопасные логи и offline corpus: [agent-answer-quality.md](../../docs/agent-answer-quality.md).
 
 `app.py` регистрирует router в закрытом HTTP host, совместимом с Go `/rank`.
 Go проверяет сессию/компанию/роль и проксирует разрешённые маршруты из Signal.

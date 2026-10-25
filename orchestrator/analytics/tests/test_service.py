@@ -29,15 +29,20 @@ class FakeModel:
             pack = context['evidence']
             facts = pack['company_facts']
             fixed = any('fixed' in f['text'] for f in facts)
+            summary = ('Зафиксированная цена защищает закупку.' if fixed
+                       else 'Прайс может изменить стоимость закупки.')
             value = dict(relevance='relevant', evidence_sufficiency='sufficient',
                          link_type='direct', risk_supported='no' if fixed else 'yes',
                          opportunity_supported='no', impact_magnitude='low' if fixed else 'high',
                          urgency='monitor', impact_horizon='short', business_factors=['procurement_cost'],
                          supporting_fact_ids=[facts[0]['fact_id']], supporting_path_ids=[],
-                         missing_factors=[], summary='Зафиксированная цена защищает закупку.' if fixed else 'Прайс может изменить стоимость закупки.',
+                         causal_chain=[dict(text=summary,
+                             evidence_ids=[facts[0]['fact_id'], NewsArticle.model_validate(pack['news'][0]).evidence_id])],
+                         missing_factors=[], summary=summary,
                          suggested_action='Проверить ближайшую поставку.', exposure='order-1')
         elif schema.__name__ == 'Answer':
-            value = dict(text='Гипотеза не меняет сохранённый договор.', evidence_ids=[], missing_facts=[])
+            value = dict(text='Гипотеза не меняет сохранённый договор.',
+                         evidence_ids=[context['evidence'][0]['company_facts'][0]['fact_id']], missing_facts=[])
         else:
             raise AssertionError(schema.__name__)
         result = schema.model_validate(value)
@@ -63,6 +68,38 @@ class ServiceTests(unittest.TestCase):
     def article(self, **kwargs):
         return NewsArticle(news_id='n1', title='Изменение цены', content='Поставщик изменил прайс.',
                            published_at=NOW, received_at=NOW, **kwargs)
+
+    def test_chat_rejects_answers_without_evidence_or_nonblank_missing_facts(self):
+        from orchestrator.models import Answer
+        self.service.ingest_news(self.article(), scopes=[self.scope])
+        issue = self.service.list_company_issues(self.scope)[0]
+        for missing in ([], [''], [' \t']):
+            with self.subTest(missing=missing):
+                answer = Answer(text='Компания получит 123 миллиона рублей.',
+                                evidence_ids=[], missing_facts=missing)
+                with patch.object(self.model, 'structured', return_value=answer) as call:
+                    with self.assertRaises(ValueError):
+                        self.service.ask_about_issue(self.scope, issue.issue_id, 'Каков эффект?',
+                            conversation_id='unsupported', request_id='q1')
+                self.assertEqual(call.call_count, 1)
+                with self.assertRaises(KeyError):
+                    self.service.get_conversation(self.scope, 'unsupported')
+
+    def test_chat_preserves_explicit_insufficiency_and_rejects_foreign_citations(self):
+        from orchestrator.models import Answer
+        self.service.ingest_news(self.article(), scopes=[self.scope])
+        issue = self.service.list_company_issues(self.scope)[0]
+        answer = Answer(text='Недостаточно сведений о размере закупки.', evidence_ids=[],
+                        missing_facts=['Размер закупки'])
+        with patch.object(self.model, 'structured', return_value=answer):
+            reply = self.service.ask_about_issue(self.scope, issue.issue_id, 'Каков эффект?',
+                conversation_id='insufficient', request_id='q1')
+        self.assertEqual(reply['answer']['missing_facts'], ['Размер закупки'])
+        with patch.object(self.model, 'structured', return_value=answer.model_copy(
+                update={'evidence_ids': ['foreign']})):
+            with self.assertRaises(ValueError):
+                self.service.ask_about_issue(self.scope, issue.issue_id, 'Каков эффект?',
+                    conversation_id='foreign', request_id='q1')
 
     def test_duplicate_ingestion_and_reads_do_not_call_model(self):
         first = self.service.ingest_news(self.article(), scopes=[self.scope])

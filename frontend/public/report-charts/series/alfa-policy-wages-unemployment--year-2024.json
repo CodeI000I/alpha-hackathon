@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-wages-unemployment--year-2024",
+  "chart_id": "alfa-policy-wages-unemployment",
+  "series_id": "year-2024",
+  "label": "2024",
+  "unit": "",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 8: Уровень безработицы, % и динамика номинальных зарплат, % г/г",
+    "page": 3,
+    "crop": [
+      0.52,
+      0.42,
+      0.93,
+      0.66
+    ],
+    "image": "images/alfa-policy-wages-unemployment.jpg",
+    "image_sha256": "70f8bbba641bbb3d3e5eaac5611cfc88ed62f7748de0031a5f7fb1888491bdd1"
+  },
+  "x_axis": {
+    "label": "Номинальные зарплаты, % г/г",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      137,
+      206,
+      1143,
+      823
+    ],
+    "x_ticks": [
+      {
+        "position": 0,
+        "label": "5%"
+      },
+      {
+        "position": 0.25,
+        "label": "10%"
+      },
+      {
+        "position": 0.5,
+        "label": "15%"
+      },
+      {
+        "position": 0.75,
+        "label": "20%"
+      },
+      {
+        "position": 1,
+        "label": "25%"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2024",
+        "mode": "scatter",
+        "y_axis": {
+          "min": 2,
+          "max": 7
+        },
+        "anchors": [
+          [
+            0.513917,
+            0.920583
+          ],
+          [
+            0.570577,
+            0.941653
+          ],
+          [
+            0.578529,
+            0.820097
+          ],
+          [
+            0.588469,
+            0.941653
+          ],
+          [
+            0.599404,
+            0.880065
+          ],
+          [
+            0.620278,
+            0.922204
+          ],
+          [
+            0.639165,
+            0.880065
+          ],
+          [
+            0.639165,
+            0.922204
+          ],
+          [
+            0.651093,
+            0.922204
+          ],
+          [
+            0.713718,
+            0.841167
+          ],
+          [
+            0.829026,
+            0.860616
+          ],
+          [
+            0.843936,
+            0.941653
+          ]
+        ],
+        "estimated_error": 0.049,
+        "note": "Центры различимых пустых красных маркеров; перекрытые точки опущены."
+      }
+    ],
+    "image_sha256": "70f8bbba641bbb3d3e5eaac5611cfc88ed62f7748de0031a5f7fb1888491bdd1"
+  },
+  "points": [
+    {
+      "x": 0.513917,
+      "value": 2.397
+    },
+    {
+      "x": 0.570577,
+      "value": 2.292
+    },
+    {
+      "x": 0.578529,
+      "value": 2.9
+    },
+    {
+      "x": 0.588469,
+      "value": 2.292
+    },
+    {
+      "x": 0.599404,
+      "value": 2.6
+    },
+    {
+      "x": 0.620278,
+      "value": 2.389
+    },
+    {
+      "x": 0.639165,
+      "value": 2.6
+    },
+    {
+      "x": 0.639165,
+      "value": 2.389
+    },
+    {
+      "x": 0.651093,
+      "value": 2.389
+    },
+    {
+      "x": 0.713718,
+      "value": 2.794
+    },
+    {
+      "x": 0.829026,
+      "value": 2.697
+    },
+    {
+      "x": 0.843936,
+      "value": 2.292
+    }
+  ],
+  "json_file": "series/alfa-policy-wages-unemployment--year-2024.json",
+  "svg_file": "series/alfa-policy-wages-unemployment--year-2024.svg"
+}

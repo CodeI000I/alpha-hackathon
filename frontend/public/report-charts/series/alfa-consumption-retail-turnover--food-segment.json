@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "alfa-consumption-retail-turnover--food-segment",
+  "chart_id": "alfa-consumption-retail-turnover",
+  "series_id": "food-segment",
+  "label": "Продовольственный сегмент",
+  "unit": "% г/г",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    "chart_title": "Рис. 1: Динамика оборота розничной торговли по сегментам, % г/г",
+    "page": 1,
+    "crop": [
+      0.08,
+      0.34,
+      0.5,
+      0.56
+    ],
+    "image": "images/alfa-consumption-retail-turnover.jpg",
+    "image_sha256": "79b9f88434182f8c1115c89dc80bb33ea9ca3539d7a69a8cb3e1912edb5bf849"
+  },
+  "x_axis": {
+    "label": "Квартал",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      128,
+      211,
+      1130,
+      703
+    ],
+    "x_ticks": [
+      {
+        "position": 0.035928,
+        "label": "1К24"
+      },
+      {
+        "position": 0.11976,
+        "label": "2К24"
+      },
+      {
+        "position": 0.204591,
+        "label": "3К24"
+      },
+      {
+        "position": 0.288423,
+        "label": "4К24"
+      },
+      {
+        "position": 0.372255,
+        "label": "1К25"
+      },
+      {
+        "position": 0.456088,
+        "label": "2К25"
+      },
+      {
+        "position": 0.53992,
+        "label": "3К25"
+      },
+      {
+        "position": 0.623752,
+        "label": "4К25"
+      },
+      {
+        "position": 0.707585,
+        "label": "1К26"
+      },
+      {
+        "position": 0.792415,
+        "label": "апр.26"
+      },
+      {
+        "position": 0.876248,
+        "label": "май.26"
+      },
+      {
+        "position": 0.96008,
+        "label": "июн.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "food-segment",
+        "mode": "bar",
+        "y_axis": {
+          "min": 0,
+          "max": 16
+        },
+        "anchors": [
+          [
+            0.020958,
+            0.495935
+          ],
+          [
+            0.10479,
+            0.583333
+          ],
+          [
+            0.188623,
+            0.660569
+          ],
+          [
+            0.272455,
+            0.760163
+          ],
+          [
+            0.356287,
+            0.898374
+          ],
+          [
+            0.44012,
+            0.833333
+          ],
+          [
+            0.523952,
+            0.829268
+          ],
+          [
+            0.607784,
+            0.914634
+          ],
+          [
+            0.691617,
+            0.878049
+          ],
+          [
+            0.776447,
+            0.778455
+          ],
+          [
+            0.860279,
+            0.74187
+          ],
+          [
+            0.944112,
+            0.715447
+          ]
+        ],
+        "estimated_error": 0.15,
+        "note": "Повторная ручная калибровка непосредственно по маркерам/границам JPEG; приблизительные опорные точки, не исходный ряд."
+      }
+    ],
+    "image_sha256": "79b9f88434182f8c1115c89dc80bb33ea9ca3539d7a69a8cb3e1912edb5bf849"
+  },
+  "points": [
+    {
+      "x": 0.020958,
+      "value": 8.07
+    },
+    {
+      "x": 0.10479,
+      "value": 6.67
+    },
+    {
+      "x": 0.188623,
+      "value": 5.43
+    },
+    {
+      "x": 0.272455,
+      "value": 3.84
+    },
+    {
+      "x": 0.356287,
+      "value": 1.63
+    },
+    {
+      "x": 0.44012,
+      "value": 2.67
+    },
+    {
+      "x": 0.523952,
+      "value": 2.73
+    },
+    {
+      "x": 0.607784,
+      "value": 1.37
+    },
+    {
+      "x": 0.691617,
+      "value": 1.95
+    },
+    {
+      "x": 0.776447,
+      "value": 3.54
+    },
+    {
+      "x": 0.860279,
+      "value": 4.13
+    },
+    {
+      "x": 0.944112,
+      "value": 4.55
+    }
+  ],
+  "json_file": "series/alfa-consumption-retail-turnover--food-segment.json",
+  "svg_file": "series/alfa-consumption-retail-turnover--food-segment.svg"
+}

@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-credit-portfolio-growth--credit-portfolio-growth",
+  "chart_id": "alfa-policy-credit-portfolio-growth",
+  "series_id": "credit-portfolio-growth",
+  "label": "Прирост кредитного портфеля по сегментам",
+  "unit": "% м/м",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 5: Прирост кредитного портфеля по сегментам, % м/м",
+    "page": 3,
+    "crop": [
+      0.08,
+      0.12,
+      0.5,
+      0.38
+    ],
+    "image": "images/alfa-policy-credit-portfolio-growth.jpg",
+    "image_sha256": "341502ad8c20ca1644a141dfcc3043050dd8ea03f72d12d96e9cce446fc51e93"
+  },
+  "x_axis": {
+    "label": "Корп. сегмент, % м/м",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      290,
+      243,
+      1140,
+      840
+    ],
+    "x_ticks": [
+      {
+        "position": 0,
+        "label": "-1%"
+      },
+      {
+        "position": 0.25,
+        "label": "0%"
+      },
+      {
+        "position": 0.5,
+        "label": "1%"
+      },
+      {
+        "position": 0.75,
+        "label": "2%"
+      },
+      {
+        "position": 1,
+        "label": "3%"
+      }
+    ],
+    "series": [
+      {
+        "id": "credit-portfolio-growth",
+        "mode": "scatter",
+        "y_axis": {
+          "min": -0.4,
+          "max": 1.6
+        },
+        "anchors": [
+          [
+            0.049412,
+            0.938023
+          ],
+          [
+            0.127059,
+            0.460637
+          ],
+          [
+            0.324706,
+            0.676717
+          ],
+          [
+            0.325882,
+            0.251256
+          ],
+          [
+            0.369412,
+            0.107203
+          ],
+          [
+            0.375294,
+            0.802345
+          ],
+          [
+            0.402353,
+            0.943049
+          ],
+          [
+            0.402353,
+            0.79062
+          ],
+          [
+            0.424706,
+            0.512563
+          ],
+          [
+            0.424706,
+            0.549414
+          ],
+          [
+            0.451765,
+            0.61809
+          ],
+          [
+            0.550588,
+            0.299832
+          ],
+          [
+            0.575294,
+            0.562814
+          ],
+          [
+            0.575294,
+            0.400335
+          ],
+          [
+            0.601176,
+            0.775544
+          ],
+          [
+            0.676471,
+            0.396985
+          ],
+          [
+            0.727059,
+            0.365159
+          ],
+          [
+            0.727059,
+            0.551089
+          ],
+          [
+            0.875294,
+            0.40201
+          ]
+        ],
+        "estimated_error": 0.02,
+        "note": "Центры 19 различимых месячных маркеров; отрицательные наблюдения сохранены ниже горизонтальной оси."
+      }
+    ],
+    "image_sha256": "341502ad8c20ca1644a141dfcc3043050dd8ea03f72d12d96e9cce446fc51e93"
+  },
+  "points": [
+    {
+      "x": 0.049412,
+      "value": -0.276
+    },
+    {
+      "x": 0.127059,
+      "value": 0.679
+    },
+    {
+      "x": 0.324706,
+      "value": 0.247
+    },
+    {
+      "x": 0.325882,
+      "value": 1.097
+    },
+    {
+      "x": 0.369412,
+      "value": 1.386
+    },
+    {
+      "x": 0.375294,
+      "value": -0.005
+    },
+    {
+      "x": 0.402353,
+      "value": -0.286
+    },
+    {
+      "x": 0.402353,
+      "value": 0.019
+    },
+    {
+      "x": 0.424706,
+      "value": 0.575
+    },
+    {
+      "x": 0.424706,
+      "value": 0.501
+    },
+    {
+      "x": 0.451765,
+      "value": 0.364
+    },
+    {
+      "x": 0.550588,
+      "value": 1.0
+    },
+    {
+      "x": 0.575294,
+      "value": 0.474
+    },
+    {
+      "x": 0.575294,
+      "value": 0.799
+    },
+    {
+      "x": 0.601176,
+      "value": 0.049
+    },
+    {
+      "x": 0.676471,
+      "value": 0.806
+    },
+    {
+      "x": 0.727059,
+      "value": 0.87
+    },
+    {
+      "x": 0.727059,
+      "value": 0.498
+    },
+    {
+      "x": 0.875294,
+      "value": 0.796
+    }
+  ],
+  "json_file": "series/alfa-policy-credit-portfolio-growth--credit-portfolio-growth.json",
+  "svg_file": "series/alfa-policy-credit-portfolio-growth--credit-portfolio-growth.svg"
+}

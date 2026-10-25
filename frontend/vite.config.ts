@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         app: new URL("./index.html", import.meta.url).pathname,
         bank: new URL("./bank.html", import.meta.url).pathname,
+        reportCharts: new URL("./report-charts.html", import.meta.url).pathname,
       },
     },
   },

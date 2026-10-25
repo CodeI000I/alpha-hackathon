@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "fi-ofz-investors--other",
+  "chart_id": "fi-ofz-investors",
+  "series_id": "other",
+  "label": "Прочие",
+  "unit": "%",
+  "data_status": "unavailable",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Структура инвесторов в ОФЗ",
+    "page": 15,
+    "crop": [
+      0.02479,
+      0.55018,
+      0.55128,
+      0.89
+    ],
+    "image": "images/fi-ofz-investors.jpg",
+    "image_sha256": "6b33fcbde33e228bd651571c76972514face9bc50cbedb7939e409574ed2fef6"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "Шесть рядов с числовыми подписями сохранены точно. Часть малых сегментов оцифрована приблизительно; неразличимые указаны отдельно. Это не полная декомпозиция 100%.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "6b33fcbde33e228bd651571c76972514face9bc50cbedb7939e409574ed2fef6",
+    "plot": [
+      91,
+      72,
+      774,
+      347
+    ],
+    "x_ticks": [
+      {
+        "position": 0.05,
+        "label": "31.12.2017"
+      },
+      {
+        "position": 0.5,
+        "label": "31.12.2021"
+      },
+      {
+        "position": 0.95,
+        "label": "31.12.2025"
+      }
+    ],
+    "series": [
+      {
+        "id": "other",
+        "mode": "unreadable",
+        "note": "Тонкие сегменты прочих инвесторов сливаются с границами соседних долей; по этому JPEG устойчиво измерить высоту нельзя."
+      }
+    ]
+  },
+  "points": [],
+  "json_file": "series/fi-ofz-investors--other.json",
+  "svg_file": null
+}

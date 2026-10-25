@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "id": "alfa-macro-stat-import-ruble--import-yoy",
+  "chart_id": "alfa-macro-stat-import-ruble",
+  "series_id": "import-yoy",
+  "label": "Изменение импорта товаров",
+  "unit": "% г/г",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "alfa-macro-stat-1h26",
+      "file": "ALFA-macro_stat1H26.pdf",
+      "sha256": "84899553fadf3e49abac7074c7b7d2afc2fa5c70b7fde0bf4c3eabe3d7402266",
+      "pages": 5,
+      "title": "Макростатистика 1П26"
+    },
+    "chart_title": "Рис. 6: Импорт товаров, $млрд и % г/г и курс рубля на конец года, руб./$",
+    "page": 3,
+    "crop": [
+      0.51,
+      0.545,
+      0.99,
+      0.75
+    ],
+    "image": "images/alfa-macro-stat-import-ruble.jpg",
+    "image_sha256": "b97a76950a11b78b2e64b7d9fa5c6b32590fc29c7e196804afc646dafb93a6da"
+  },
+  "x_axis": {
+    "label": "Год",
+    "kind": "category"
+  },
+  "note": "Частичное покрытие: подписаны только темпы роста импорта; значения столбцов импорта и точки курса рубля не подписаны. Прогнозные годы в подписи отмечены «П».",
+  "exact_points": [
+    {
+      "label": "2016",
+      "value": -1
+    },
+    {
+      "label": "2017",
+      "value": 24
+    },
+    {
+      "label": "2018",
+      "value": 4
+    },
+    {
+      "label": "2019",
+      "value": 2
+    },
+    {
+      "label": "2020",
+      "value": -5
+    },
+    {
+      "label": "2021",
+      "value": 25
+    },
+    {
+      "label": "2022",
+      "value": -8
+    },
+    {
+      "label": "2023",
+      "value": 10
+    },
+    {
+      "label": "2024",
+      "value": -1
+    },
+    {
+      "label": "2025",
+      "value": 2
+    },
+    {
+      "label": "2026П",
+      "value": 11,
+      "forecast": true
+    },
+    {
+      "label": "2027П",
+      "value": 3,
+      "forecast": true
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "2016",
+      "value": -1,
+      "source_index": 0
+    },
+    {
+      "x": "2017",
+      "value": 24,
+      "source_index": 1
+    },
+    {
+      "x": "2018",
+      "value": 4,
+      "source_index": 2
+    },
+    {
+      "x": "2019",
+      "value": 2,
+      "source_index": 3
+    },
+    {
+      "x": "2020",
+      "value": -5,
+      "source_index": 4
+    },
+    {
+      "x": "2021",
+      "value": 25,
+      "source_index": 5
+    },
+    {
+      "x": "2022",
+      "value": -8,
+      "source_index": 6
+    },
+    {
+      "x": "2023",
+      "value": 10,
+      "source_index": 7
+    },
+    {
+      "x": "2024",
+      "value": -1,
+      "source_index": 8
+    },
+    {
+      "x": "2025",
+      "value": 2,
+      "source_index": 9
+    },
+    {
+      "x": "2026П",
+      "value": 11,
+      "source_index": 10,
+      "forecast": true
+    },
+    {
+      "x": "2027П",
+      "value": 3,
+      "source_index": 11,
+      "forecast": true
+    }
+  ],
+  "json_file": "series/alfa-macro-stat-import-ruble--import-yoy.json",
+  "svg_file": "series/alfa-macro-stat-import-ruble--import-yoy.svg"
+}

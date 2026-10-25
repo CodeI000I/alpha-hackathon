@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "fi-credit-bonds-volume--credit",
+  "chart_id": "fi-credit-bonds-volume",
+  "series_id": "credit",
+  "label": "Кредиты юрлицам",
+  "unit": "трлн руб.",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Динамика объема корпоративных кредитов и корпоративных облигаций, трлн руб.",
+    "page": 22,
+    "crop": [
+      0.55641,
+      0.20314,
+      0.95043,
+      0.51149
+    ],
+    "image": "images/fi-credit-bonds-volume.jpg",
+    "image_sha256": "22fa5c3d9f13ce03e583c383127fc64957197814c3506e4409ced03db208e6a4"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "Все подписи столбцов. Последние даты именно 01.01.2026 и 30.06.2026; промежуточные даты не добавлены.",
+  "exact_points": [
+    {
+      "label": "31.12.2019 г.",
+      "value": 39.0
+    },
+    {
+      "label": "31.12.2020 г.",
+      "value": 44.8
+    },
+    {
+      "label": "31.12.2021 г.",
+      "value": 52.7
+    },
+    {
+      "label": "31.12.2022 г.",
+      "value": 59.1
+    },
+    {
+      "label": "31.12.2023 г.",
+      "value": 73.8
+    },
+    {
+      "label": "31.12.2024 г.",
+      "value": 95.3
+    },
+    {
+      "label": "01.01.2026",
+      "value": 96.6
+    },
+    {
+      "label": "30.06.2026",
+      "value": 100.2
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "31.12.2019 г.",
+      "value": 39.0,
+      "source_index": 0
+    },
+    {
+      "x": "31.12.2020 г.",
+      "value": 44.8,
+      "source_index": 1
+    },
+    {
+      "x": "31.12.2021 г.",
+      "value": 52.7,
+      "source_index": 2
+    },
+    {
+      "x": "31.12.2022 г.",
+      "value": 59.1,
+      "source_index": 3
+    },
+    {
+      "x": "31.12.2023 г.",
+      "value": 73.8,
+      "source_index": 4
+    },
+    {
+      "x": "31.12.2024 г.",
+      "value": 95.3,
+      "source_index": 5
+    },
+    {
+      "x": "01.01.2026",
+      "value": 96.6,
+      "source_index": 6
+    },
+    {
+      "x": "30.06.2026",
+      "value": 100.2,
+      "source_index": 7
+    }
+  ],
+  "json_file": "series/fi-credit-bonds-volume--credit.json",
+  "svg_file": "series/fi-credit-bonds-volume--credit.svg"
+}

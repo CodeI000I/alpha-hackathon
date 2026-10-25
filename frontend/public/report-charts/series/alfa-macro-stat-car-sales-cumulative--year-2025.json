@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "alfa-macro-stat-car-sales-cumulative--year-2025",
+  "chart_id": "alfa-macro-stat-car-sales-cumulative",
+  "series_id": "year-2025",
+  "label": "2025",
+  "unit": "тыс. шт.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-macro-stat-1h26",
+      "file": "ALFA-macro_stat1H26.pdf",
+      "sha256": "84899553fadf3e49abac7074c7b7d2afc2fa5c70b7fde0bf4c3eabe3d7402266",
+      "pages": 5,
+      "title": "Макростатистика 1П26"
+    },
+    "chart_title": "Рис. 3: Продажи новых легковых машин, накопленным итогом, тыс. шт.",
+    "page": 2,
+    "crop": [
+      0.03,
+      0.81,
+      0.49,
+      0.995
+    ],
+    "image": "images/alfa-macro-stat-car-sales-cumulative.jpg",
+    "image_sha256": "4555ff91fd61f749d83e010ea6fb765abcfe110fbc111b721e98e48248abe22b"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      190,
+      174,
+      1110,
+      548
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "янв"
+      },
+      {
+        "position": 0.0909,
+        "label": "фев"
+      },
+      {
+        "position": 0.1818,
+        "label": "мар"
+      },
+      {
+        "position": 0.2727,
+        "label": "апр"
+      },
+      {
+        "position": 0.3636,
+        "label": "май"
+      },
+      {
+        "position": 0.4545,
+        "label": "июн"
+      },
+      {
+        "position": 0.5455,
+        "label": "июл"
+      },
+      {
+        "position": 0.6364,
+        "label": "авг"
+      },
+      {
+        "position": 0.7273,
+        "label": "сен"
+      },
+      {
+        "position": 0.8182,
+        "label": "окт"
+      },
+      {
+        "position": 0.9091,
+        "label": "ноя"
+      },
+      {
+        "position": 1.0,
+        "label": "дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2025",
+        "mode": "line",
+        "y_axis": {
+          "min": 0,
+          "max": 2000
+        },
+        "anchors": [
+          [
+            0.0,
+            0.95187
+          ],
+          [
+            0.0913,
+            0.90374
+          ],
+          [
+            0.18152,
+            0.86898
+          ],
+          [
+            0.27283,
+            0.81551
+          ],
+          [
+            0.36304,
+            0.77273
+          ],
+          [
+            0.45435,
+            0.73262
+          ],
+          [
+            0.54457,
+            0.6631
+          ],
+          [
+            0.63587,
+            0.6016
+          ],
+          [
+            0.72609,
+            0.54011
+          ],
+          [
+            0.81848,
+            0.45455
+          ],
+          [
+            0.9087,
+            0.3877
+          ],
+          [
+            1.0,
+            0.32086
+          ]
+        ],
+        "estimated_error": 45,
+        "note": "Помесячные опорные точки по центрам видимых маркеров; близкие линии в начале года частично перекрываются. 2026 год заканчивается июнем."
+      }
+    ],
+    "image_sha256": "4555ff91fd61f749d83e010ea6fb765abcfe110fbc111b721e98e48248abe22b"
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value": 96.0
+    },
+    {
+      "x": 0.0913,
+      "value": 193.0
+    },
+    {
+      "x": 0.18152,
+      "value": 262.0
+    },
+    {
+      "x": 0.27283,
+      "value": 369.0
+    },
+    {
+      "x": 0.36304,
+      "value": 455.0
+    },
+    {
+      "x": 0.45435,
+      "value": 535.0
+    },
+    {
+      "x": 0.54457,
+      "value": 674.0
+    },
+    {
+      "x": 0.63587,
+      "value": 797.0
+    },
+    {
+      "x": 0.72609,
+      "value": 920.0
+    },
+    {
+      "x": 0.81848,
+      "value": 1091.0
+    },
+    {
+      "x": 0.9087,
+      "value": 1225.0
+    },
+    {
+      "x": 1.0,
+      "value": 1358.0
+    }
+  ],
+  "json_file": "series/alfa-macro-stat-car-sales-cumulative--year-2025.json",
+  "svg_file": "series/alfa-macro-stat-car-sales-cumulative--year-2025.svg"
+}

@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-key-rate-consensus--consensus",
+  "chart_id": "alfa-policy-key-rate-consensus",
+  "series_id": "consensus",
+  "label": "Ожидаемая консенсусом средняя КС",
+  "unit": "%",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 9: Изменение ожидаемой средней ключевой ставки на 2027 г., %",
+    "page": 3,
+    "crop": [
+      0.08,
+      0.66,
+      0.5,
+      0.92
+    ],
+    "image": "images/alfa-policy-key-rate-consensus.jpg",
+    "image_sha256": "26d6d70c8ecaa1a60b76e76d0c81ab64bffdbaba7072c1c9739aa1a43042bb94"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "Шесть подписанных маркеров консенсус-прогноза средней ставки на 2027 год, опубликованных в указанные месяцы 2026 года. Нет наблюдений за май и август. Серые 8,0–12,5% — границы диапазона ЦБ, не точки консенсуса; они не включены в этот ряд.",
+  "exact_points": [
+    {
+      "label": "фев.26",
+      "value": 10.4,
+      "forecast": true
+    },
+    {
+      "label": "мар.26",
+      "value": 10.3,
+      "forecast": true
+    },
+    {
+      "label": "апр.26",
+      "value": 10.7,
+      "forecast": true
+    },
+    {
+      "label": "июн.26",
+      "value": 10.6,
+      "forecast": true
+    },
+    {
+      "label": "июл.26",
+      "value": 12.2,
+      "forecast": true
+    },
+    {
+      "label": "сен.26",
+      "value": 12.4,
+      "forecast": true
+    }
+  ],
+  "digitization": {
+    "plot": [
+      159,
+      286,
+      1035,
+      853
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "фев.26"
+      },
+      {
+        "position": 0.142694,
+        "label": "мар.26"
+      },
+      {
+        "position": 0.285388,
+        "label": "апр.26"
+      },
+      {
+        "position": 0.429224,
+        "label": "май.26"
+      },
+      {
+        "position": 0.573059,
+        "label": "июн.26"
+      },
+      {
+        "position": 0.71347,
+        "label": "июл.26"
+      },
+      {
+        "position": 0.857306,
+        "label": "авг.26"
+      },
+      {
+        "position": 1.0,
+        "label": "сен.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "consensus",
+        "mode": "line",
+        "y_axis": {
+          "min": 7,
+          "max": 13
+        },
+        "anchors": [
+          [
+            0.001142,
+            0.43739
+          ],
+          [
+            0.142694,
+            0.449735
+          ],
+          [
+            0.285388,
+            0.389771
+          ],
+          [
+            0.573059,
+            0.396825
+          ],
+          [
+            0.71347,
+            0.132275
+          ],
+          [
+            1.0,
+            0.098765
+          ]
+        ],
+        "estimated_error": 0.063,
+        "note": "Только шесть видимых подписанных маркеров. Май и август не добавлены как наблюдения; точные подписанные значения сохранены в основном ряду.",
+        "forecast_from": 0.0
+      }
+    ],
+    "image_sha256": "26d6d70c8ecaa1a60b76e76d0c81ab64bffdbaba7072c1c9739aa1a43042bb94"
+  },
+  "points": [
+    {
+      "x": 0.001142,
+      "value": 10.376,
+      "forecast": true
+    },
+    {
+      "x": 0.142694,
+      "value": 10.302,
+      "forecast": true
+    },
+    {
+      "x": 0.285388,
+      "value": 10.661,
+      "forecast": true
+    },
+    {
+      "x": 0.573059,
+      "value": 10.619,
+      "forecast": true
+    },
+    {
+      "x": 0.71347,
+      "value": 12.206,
+      "forecast": true
+    },
+    {
+      "x": 1.0,
+      "value": 12.407,
+      "forecast": true
+    }
+  ],
+  "json_file": "series/alfa-policy-key-rate-consensus--consensus.json",
+  "svg_file": "series/alfa-policy-key-rate-consensus--consensus.svg"
+}

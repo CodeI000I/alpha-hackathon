@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "id": "fi-monetary-policy--inflation-target",
+  "chart_id": "fi-monetary-policy",
+  "series_id": "inflation-target",
+  "label": "Цель по инфляции",
+  "unit": "%",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Показатели жесткости ДКП",
+    "page": 12,
+    "crop": [
+      0.64188,
+      0.21524,
+      0.9735,
+      0.66385
+    ],
+    "image": "images/fi-monetary-policy.jpg",
+    "image_sha256": "75d3600dfd8bff863789c22786ebf0241c57f86d720f6bb44a3e70b130875212"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "Ключевая ставка, ожидаемая инфляция, сезонно скорректированная инфляция и цель. Числа на шкале не переносились как наблюдения.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "75d3600dfd8bff863789c22786ebf0241c57f86d720f6bb44a3e70b130875212",
+    "plot": [
+      130,
+      128,
+      1170,
+      718
+    ],
+    "x_ticks": [
+      {
+        "position": 0.01,
+        "label": "янв.23"
+      },
+      {
+        "position": 0.29,
+        "label": "янв.24"
+      },
+      {
+        "position": 0.57,
+        "label": "янв.25"
+      },
+      {
+        "position": 0.85,
+        "label": "янв.26"
+      },
+      {
+        "position": 0.99,
+        "label": "июл.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "inflation-target",
+        "mode": "line",
+        "y_axis": {
+          "min": 0,
+          "max": 22
+        },
+        "anchors": [
+          [
+            0.00962,
+            0.8178
+          ],
+          [
+            0.99327,
+            0.81949
+          ]
+        ],
+        "estimated_error": 0.2,
+        "note": "Приблизительная оцифровка цветового контура по JPEG; опорные точки упрощены с допуском 2,5 пикселя. Между точками используется линейное соединение; это не исходный временной ряд."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.00962,
+      "value": 4.01
+    },
+    {
+      "x": 0.99327,
+      "value": 3.97
+    }
+  ],
+  "json_file": "series/fi-monetary-policy--inflation-target.json",
+  "svg_file": "series/fi-monetary-policy--inflation-target.svg"
+}

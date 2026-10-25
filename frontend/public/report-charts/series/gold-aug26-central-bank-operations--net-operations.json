@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-central-bank-operations--net-operations",
+  "chart_id": "gold-aug26-central-bank-operations",
+  "series_id": "net-operations",
+  "label": "Чистые покупки / продажи",
+  "unit": "тонны",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Крупнейшие заявленные операции мировых ЦБ в июле",
+    "page": 7,
+    "crop": [
+      0.03,
+      0.18,
+      0.96,
+      0.48
+    ],
+    "image": "images/gold-aug26-central-bank-operations.jpg",
+    "image_sha256": "43b168fa8431ca01f428f33e7c5109871b03643051add5fa727149fb52404c9e"
+  },
+  "x_axis": {
+    "label": "Страна",
+    "kind": "category"
+  },
+  "note": "За июль 2026 года; значения подписаны у столбцов.",
+  "exact_points": [
+    {
+      "label": "Китай",
+      "value": 20
+    },
+    {
+      "label": "Польша",
+      "value": 8
+    },
+    {
+      "label": "Чехия",
+      "value": 2
+    },
+    {
+      "label": "Казахстан",
+      "value": 1
+    },
+    {
+      "label": "Малайзия",
+      "value": 1
+    },
+    {
+      "label": "Боливия",
+      "value": 1
+    },
+    {
+      "label": "Россия",
+      "value": -6
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "Китай",
+      "value": 20,
+      "source_index": 0
+    },
+    {
+      "x": "Польша",
+      "value": 8,
+      "source_index": 1
+    },
+    {
+      "x": "Чехия",
+      "value": 2,
+      "source_index": 2
+    },
+    {
+      "x": "Казахстан",
+      "value": 1,
+      "source_index": 3
+    },
+    {
+      "x": "Малайзия",
+      "value": 1,
+      "source_index": 4
+    },
+    {
+      "x": "Боливия",
+      "value": 1,
+      "source_index": 5
+    },
+    {
+      "x": "Россия",
+      "value": -6,
+      "source_index": 6
+    }
+  ],
+  "json_file": "series/gold-aug26-central-bank-operations--net-operations.json",
+  "svg_file": "series/gold-aug26-central-bank-operations--net-operations.svg"
+}

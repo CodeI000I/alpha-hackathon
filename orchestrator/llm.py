@@ -16,6 +16,7 @@ from openai.types.chat import ChatCompletion
 from pydantic import ValidationError
 
 from .models import canonical, digest
+from .observability import log_event
 
 
 class AIError(RuntimeError):
@@ -93,6 +94,9 @@ class LLMClient:
         return delay
 
     def complete(self, stage, messages, *, max_tokens=None):
+        return self._complete(stage, messages, max_tokens=max_tokens)
+
+    def _complete(self, stage, messages, *, max_tokens=None, validate=None):
         s = self.settings
         if len(canonical(messages)) > s.max_input_chars:
             raise AIError('input_limit', 'Контекст превышает лимит; сократите документы или top_k.')
@@ -148,6 +152,15 @@ class LLMClient:
                     if getattr(choice, 'finish_reason', None) not in ('stop', None):
                         self.store.record_call(call_id, 'incomplete_response', result.usage)
                         raise AIError('incomplete_response', 'Ответ модели не завершён; результат не опубликован.')
+                    if validate:
+                        try:
+                            content = validate(content)
+                        except Exception:
+                            self.store.record_call(call_id, 'invalid_response', result.usage)
+                            raise
+                        except BaseException:
+                            self.store.record_call(call_id, 'cancelled', result.usage)
+                            raise
                     self.store.record_call(call_id, 'ok', result.usage)
                     return content
                 delay = self._delay(response, attempt)
@@ -159,21 +172,45 @@ class LLMClient:
             self.semaphore.release()
 
     def structured(self, stage, instruction, context, schema, validate=None):
-        messages = structured_messages(instruction, context, schema)
-        key = digest(dict(model=self.settings.model_for(stage), messages=messages,
-                          max_tokens=self.settings.max_output_tokens, gateway=self.settings.base_url))
-        cached = self.store.cache_get(key)
-        raw = canonical(cached) if cached is not None else self.complete(stage, messages)
-        raw = raw.strip()
-        if raw.startswith('```') and raw.endswith('```'):
-            raw = raw.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
+        started = time.monotonic()
+        cache_hit, validation_outcome, error_code = False, 'not_run', None
+
+        def parse(raw):
+            nonlocal validation_outcome
+            validation_outcome = 'invalid'
+            raw = raw.strip()
+            if raw.startswith('```') and raw.endswith('```'):
+                raw = raw.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
+            try:
+                output = schema.model_validate_json(raw)
+                if validate:
+                    validate(output)
+            except (ValidationError, ValueError, json.JSONDecodeError):
+                # Invalid outputs are not repaired via additional paid calls.
+                raise AIError('invalid_response', 'Ответ не прошёл проверку структуры или оснований.') from None
+            validation_outcome = 'valid'
+            return output
+
         try:
-            output = schema.model_validate_json(raw)
-            if validate:
-                validate(output)
-        except (ValidationError, ValueError, json.JSONDecodeError):
-            # Invalid outputs are not silently repaired via additional paid calls.
-            raise AIError('invalid_response', 'Ответ не прошёл проверку структуры или оснований.') from None
-        if cached is None:
-            self.store.cache_put(key, output.model_dump(mode='json'))
-        return output
+            messages = structured_messages(instruction, context, schema)
+            key = digest(dict(model=self.settings.model_for(stage), messages=messages,
+                              max_tokens=self.settings.max_output_tokens, gateway=self.settings.base_url))
+            cached = self.store.cache_get(key)
+            cache_hit = cached is not None
+            output = parse(canonical(cached)) if cache_hit else self._complete(stage, messages, validate=parse)
+            if not cache_hit:
+                self.store.cache_put(key, output.model_dump(mode='json'))
+            return output
+        except AIError as exc:
+            error_code = exc.code
+            raise
+        except Exception:
+            error_code = 'internal'
+            raise
+        except BaseException:
+            validation_outcome, error_code = 'cancelled', 'cancelled'
+            raise
+        finally:
+            log_event('llm_structured', stage=stage, model=self.settings.model_for(stage),
+                      schema=schema.__name__, cache_hit=cache_hit, validation_outcome=validation_outcome,
+                      error_code=error_code, duration_ms=round((time.monotonic() - started) * 1000))

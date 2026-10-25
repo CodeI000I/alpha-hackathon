@@ -113,3 +113,16 @@ knowledge, storage, tenant, temporal, idempotency and concurrency tests; T01–T
 acceptance matrix; temporary PostgreSQL migrations/search; complete offline demo;
 final diff review. Empirical quality and a real gateway test require later real data
 and deliberate budget use and will be reported separately from code correctness.
+
+## Agent answer quality — 2026-10-25
+
+Scope: strengthen the deployed AnalyticsService using existing contracts and stores.
+First close reproduced grounding gaps; add local, content-free tracing and a labeled
+offline regression corpus. Keep the fixed graph and existing PostgreSQL memory.
+No new model calls, recursive critic, external telemetry export or deployment.
+
+Parallel ownership: grounding/fixtures, shared LLM validation/metrics, and coordinator
+evaluation/graph diagnostics/docs. Every coding agent uses Ponytail and Agent Skills.
+Acceptance: outputs without required citations cannot be published, incomplete negative evidence
+cannot silently become irrelevant, failures are attributable to a graph node or model
+validation, and the repeatable offline suite passes without claiming model accuracy.

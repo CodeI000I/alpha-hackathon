@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ApiError, api, isDemoMode } from '../api/client';
 import { useWorkspace } from '../appContext';
 import { Button, StatePanel } from '../components/ui';
+import type { AnalyticsEvidencePack } from '../api/types';
 import { localKey, useStoredState } from '../localState';
 
 function makeId(): string {
@@ -18,6 +19,33 @@ function dateText(value: string): string {
   const date = new Date(value);
   return Number.isFinite(date.getTime()) ? date.toLocaleString('ru-RU') : 'Дата не указана';
 }
+function evidenceTarget(packIndex: number, kind: string, reference: string, itemIndex: number): string {
+  return `evidence-${packIndex}-${kind}-${encodeURIComponent(reference)}-${itemIndex}`;
+}
+function evidenceTargets(packs: AnalyticsEvidencePack[] | undefined): Map<string, string> {
+  const targets = new Map<string, string>();
+  const repeated = new Set<string>();
+  const add = (reference: string, target: string) => {
+    if (repeated.has(reference)) return;
+    if (targets.has(reference)) {
+      targets.delete(reference);
+      repeated.add(reference);
+      return;
+    }
+    targets.set(reference, target);
+  };
+  for (const [packIndex, pack] of (packs ?? []).entries()) {
+    pack.company_facts.forEach((fact, itemIndex) => add(fact.fact_id, evidenceTarget(packIndex, 'fact', fact.fact_id, itemIndex)));
+    pack.chunks.forEach((chunk, itemIndex) => add(chunk.chunk_id, evidenceTarget(packIndex, 'chunk', chunk.chunk_id, itemIndex)));
+    pack.candidate_paths.forEach((path, itemIndex) => add(path.path_id, evidenceTarget(packIndex, 'path', path.path_id, itemIndex)));
+    // The API returns both lists sorted by evidence ID. If old article revisions
+    // were collapsed, their counts differ; leave those citations unlinked.
+    if (pack.event.source_news_ids.length === pack.news.length) {
+      [...pack.event.source_news_ids].sort().forEach((reference, itemIndex) => add(reference, evidenceTarget(packIndex, 'news', reference, itemIndex)));
+    }
+  }
+  return targets;
+}
 
 export default function IssueDetailPage() {
   const { issueId = '' } = useParams();
@@ -27,7 +55,8 @@ export default function IssueDetailPage() {
   const pendingRequest = useRef<{ question: string; id: string } | null>(null);
   const [conversationId, setConversationId] = useStoredState(localKey(user.id, `issue-chat-${issueId}-${activeRole}`, user.companyId), makeId());
   const issueQuery = useQuery({ queryKey: ['analytics', 'issue', activeRole, issueId], queryFn: ({ signal }) => api.analytics.issue(issueId, activeRole, signal), enabled: !!issueId && !!activeRole && !isDemoMode });
-  const evidenceQuery = useQuery({ queryKey: ['analytics', 'evidence', activeRole, issueId], queryFn: ({ signal }) => api.analytics.evidence(issueId, activeRole, signal), enabled: !!issueId && !!activeRole && !isDemoMode });
+  const evidenceVersion = issueQuery.data?.version;
+  const evidenceQuery = useQuery({ queryKey: ['analytics', 'evidence', activeRole, issueId, evidenceVersion], queryFn: ({ signal }) => api.analytics.evidence(issueId, activeRole, signal, evidenceVersion), enabled: !!issueId && !!activeRole && !!evidenceVersion && !isDemoMode });
   const historyQuery = useQuery({ queryKey: ['analytics', 'history', activeRole, issueId], queryFn: ({ signal }) => api.analytics.history(issueId, activeRole, signal), enabled: !!issueId && !!activeRole && !isDemoMode });
   const stateQuery = useQuery({ queryKey: ['analytics', 'state', activeRole, issueId], queryFn: ({ signal }) => api.analytics.state(issueId, activeRole, signal), enabled: !!issueId && !!activeRole && !isDemoMode });
   const conversationQuery = useQuery({ queryKey: ['analytics', 'conversation', activeRole, conversationId], queryFn: ({ signal }) => api.analytics.conversation(conversationId, activeRole, signal), enabled: !!conversationId && !!activeRole && !isDemoMode, retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 1 });
@@ -50,6 +79,7 @@ export default function IssueDetailPage() {
   }, [stateQuery.data?.unread, stateQuery.data?.workflow, stateQuery.data?.pinned]);
 
   const history = useMemo(() => [...(historyQuery.data ?? [])].sort((left, right) => left.version - right.version), [historyQuery.data]);
+  const linkedEvidence = useMemo(() => evidenceTargets(evidenceQuery.data), [evidenceQuery.data]);
   if (isDemoMode) return <StatePanel title="Разборы бизнес-ситуаций недоступны в деморежиме" text="Для просмотра используются только данные аналитического сервиса." action={<Link className="button button--secondary" to="/dashboard">Вернуться к обзору</Link>} />;
   if (!activeRole) return <StatePanel title="Для разбора нужна роль" text="Выберите роль в профиле и откройте ситуацию ещё раз." action={<Link className="button button--secondary" to="/profile?tab=roles">Перейти к ролям</Link>} />;
   if (issueQuery.isPending) return <StatePanel title="Загружаем разбор ситуации…" />;
@@ -92,10 +122,10 @@ export default function IssueDetailPage() {
       {evidenceQuery.isError && <StatePanel tone="error" title="Основания не загрузились" text={evidenceQuery.error.message} action={<Button onClick={() => evidenceQuery.refetch()}>Повторить</Button>} />}
       {evidenceQuery.data?.map((pack, index) => <article className="analytics-evidence-pack" key={`${pack.event.event_id}-${index}`}><h3>{pack.event.summary}</h3><p className="w-muted">Модальность: {pack.event.modality}</p>
         {pack.event.evidence_quote && <blockquote>{pack.event.evidence_quote}</blockquote>}
-        {pack.news.map((news, newsIndex) => { const url = safeHttpUrl(news.source_url); return <div className="analytics-evidence-item" key={`${news.title}-${newsIndex}`}><strong>{url ? <a href={url} target="_blank" rel="noopener noreferrer">{news.title}</a> : news.title}</strong><p>{news.content}</p><small>{dateText(news.published_at)}</small></div>; })}
-        {pack.company_facts.map((fact) => <details className="analytics-evidence-item" key={fact.fact_id}><summary>Факт компании · {fact.verification_status}</summary><p>{fact.text}</p>{fact.source_quote && <blockquote>{fact.source_quote}</blockquote>}<small>{fact.source_refs.join(' · ')}</small></details>)}
-        {pack.chunks.map((chunk) => <details className="analytics-evidence-item" key={chunk.chunk_id}><summary>Документ · {chunk.locator || chunk.document_id}</summary><p>{chunk.text}</p></details>)}
-        {pack.candidate_paths.map((path) => <details className="analytics-evidence-item" key={path.path_id}><summary>Связь · {path.status}</summary><p>{path.relation_types.join(' → ')}</p><small>Основания: {path.evidence_refs.join(', ')}</small></details>)}
+        {pack.news.map((news, newsIndex) => { const url = safeHttpUrl(news.source_url); const ref = pack.event.source_news_ids.length === pack.news.length ? [...pack.event.source_news_ids].sort()[newsIndex] : undefined; return <div className="analytics-evidence-item" id={ref ? evidenceTarget(index, 'news', ref, newsIndex) : undefined} key={`${news.title}-${newsIndex}`}><strong>{url ? <a href={url} target="_blank" rel="noopener noreferrer">{news.title}</a> : news.title}</strong><p>{news.content}</p><small>{dateText(news.published_at)}</small></div>; })}
+        {pack.company_facts.map((fact, itemIndex) => <details className="analytics-evidence-item" id={evidenceTarget(index, 'fact', fact.fact_id, itemIndex)} key={`${fact.fact_id}-${itemIndex}`}><summary>Факт компании · {fact.verification_status}</summary><p>{fact.text}</p>{fact.source_quote && <blockquote>{fact.source_quote}</blockquote>}<small>{fact.source_refs.join(' · ')}</small></details>)}
+        {pack.chunks.map((chunk, itemIndex) => <details className="analytics-evidence-item" id={evidenceTarget(index, 'chunk', chunk.chunk_id, itemIndex)} key={`${chunk.chunk_id}-${itemIndex}`}><summary>Документ · {chunk.locator || chunk.document_id}</summary><p>{chunk.text}</p></details>)}
+        {pack.candidate_paths.map((path, itemIndex) => <details className="analytics-evidence-item" id={evidenceTarget(index, 'path', path.path_id, itemIndex)} key={`${path.path_id}-${itemIndex}`}><summary>Связь · {path.status}</summary><p>{path.relation_types.join(' → ')}</p><small>Основания: {path.evidence_refs.join(', ')}</small></details>)}
       </article>)}
       {evidenceQuery.data?.length === 0 && <p className="w-muted">Подтверждённые основания не переданы.</p>}
     </section>
@@ -110,7 +140,10 @@ export default function IssueDetailPage() {
       {conversationNotFound && <p className="w-small">Новый диалог для версии {issue.version}</p>}
       {conversationStale && <div className="integration-warning" role="status"><p>Текущая ситуация обновилась до версии {issue.version}. Этот диалог относится к версии {conversationQuery.data?.issue_version}.</p><Button variant="secondary" disabled={ask.isPending} onClick={startNewConversation}>Начать новый диалог для версии {issue.version}</Button></div>}
       {conversationQuery.isError && !conversationNotFound && <p role="alert">Не удалось загрузить историю вопросов: {conversationQuery.error.message} <Button variant="secondary" onClick={() => conversationQuery.refetch()}>Повторить</Button></p>}
-      {conversationQuery.data?.replies.map((reply) => <article className="analytics-chat-reply" key={reply.request_id}><p className="analytics-chat-question">{reply.question}</p><p>{reply.answer.text}</p>{reply.answer.evidence_ids.length > 0 && <small>Основания: {reply.answer.evidence_ids.join(', ')}</small>}{reply.answer.missing_facts.length > 0 && <small>Не хватает данных: {reply.answer.missing_facts.join(', ')}</small>}</article>)}
+      {conversationQuery.data?.replies.map((reply) => <article className="analytics-chat-reply" key={reply.request_id}><p className="analytics-chat-question">{reply.question}</p><p>{reply.answer.text}</p>{reply.answer.evidence_ids.length > 0 && <small>Основания: {reply.answer.evidence_ids.map((reference, index) => {
+        const target = conversationQuery.data?.issue_version === issue.version ? linkedEvidence.get(reference) : undefined;
+        return <span key={`${reference}-${index}`}>{index > 0 ? ', ' : ''}{target ? <a href={`#${target}`} onClick={() => { const element = document.getElementById(target); if (element instanceof HTMLDetailsElement) element.open = true; }}>{reference}</a> : reference}</span>;
+      })}</small>}{reply.answer.missing_facts.length > 0 && <small>Не хватает данных: {reply.answer.missing_facts.join(', ')}</small>}</article>)}
       <form onSubmit={submitQuestion}><label htmlFor="issue-question">Вопрос об этой ситуации</label><textarea id="issue-question" value={question} maxLength={6000} onChange={(event) => setQuestion(event.target.value)} required disabled={conversationQuery.isPending || conversationStale || (conversationQuery.isError && !conversationNotFound)} /><Button type="submit" disabled={ask.isPending || !question.trim() || conversationQuery.isPending || conversationStale || (conversationQuery.isError && !conversationNotFound)}>{ask.isPending ? 'Готовим ответ…' : 'Задать вопрос'}</Button></form>
       {ask.isError && <p role="alert">Не удалось получить ответ. Повторите отправку без изменения текста, чтобы сохранить тот же идентификатор запроса: {ask.error.message}</p>}
     </section>

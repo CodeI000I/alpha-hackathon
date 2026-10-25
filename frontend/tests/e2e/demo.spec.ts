@@ -532,7 +532,7 @@ test('widget catalog and bank offer dialogs close with Escape and restore their 
   const trigger = page.getByRole('button', { name: 'Добавить виджет', exact: true });
   await trigger.click();
   await expect(page.getByRole('dialog', { name: 'Добавить виджет' })).toBeVisible();
-  await expect(page.locator('.widget-catalog-card')).toHaveCount(7);
+  await expect(page.locator('.widget-catalog-card')).toHaveCount(8);
   await page.keyboard.press('Escape');
   await expect(trigger).toBeFocused();
   const bankTrigger = page.getByRole('button', { name: 'Подобрать размещение', exact: true });
@@ -594,7 +594,11 @@ test('interface omits demo badges and profile codes while keeping local-feature 
       await expect(page.locator('.w-card-foot')).not.toContainText(/Контекст|Элементы профиля|Б[0-9]|С[0-9]/);
       await expect(page.getByText('Серверные бизнес-ситуации в этом режиме недоступны.', { exact: false })).toBeVisible();
       await expect(page.getByText('Здесь используются подготовленные ответы, а не аналитика ИИ.', { exact: false })).toBeVisible();
-      await expect(page.getByText('Виджет не подключён к рынку', { exact: false })).toBeVisible();
+      const reportWidget = page.locator('.widget-board .report-widget').first();
+      await expect(reportWidget.getByText('Архивный отчёт · не текущие котировки', { exact: true })).toBeVisible();
+      await expect(reportWidget).toContainText('FI_Strategy_3Q26_22072026.pdf');
+      await reportWidget.locator('details').evaluate(detail => detail.setAttribute('open', ''));
+      await expect(reportWidget.getByText(/Оценка погрешности ±.+не является гарантией точности/)).toBeVisible();
     }
   }
 });

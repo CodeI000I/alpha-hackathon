@@ -567,11 +567,14 @@ test('shows company situations with evidence, history, issue state, chat, and re
   await page.route('**/api/v1/analytics/issues?**', route => json(route, [issue]));
   await page.route('**/api/v1/analytics/issues/issue-1?**', route => json(route, issue));
   await page.route('**/api/v1/analytics/issues/issue-1/evidence**', route => json(route, [{
-    event: { event_id: 'event-1', summary: 'Экспортные ограничения расширены.', evidence_quote: 'Ограничения вступают в силу в ноябре.', source_news_ids: ['news-1'], modality: 'announcement' },
+    event: { event_id: 'event-1', summary: 'Экспортные ограничения расширены.', evidence_quote: 'Ограничения вступают в силу в ноябре.', source_news_ids: ['news:alpha:v1'], modality: 'announcement' },
     news: [{ title: 'Новые ограничения экспорта', content: 'Поставки компонента могут задержаться.', source_url: 'https://example.test/source', published_at: '2026-10-23T09:00:00Z' }],
     company_facts: [{ fact_id: 'fact-1', text: 'Компания использует импортный компонент.', source_quote: 'Доля импортных компонентов составляет 40%.', source_refs: ['budget.pdf:p.4'], verification_status: 'source_supported' }],
     chunks: [{ chunk_id: 'chunk-1', document_id: 'budget-1', locator: 'budget.pdf, стр. 4', text: 'Компания использует импортный компонент в ключевом продукте.' }],
     candidate_paths: [{ path_id: 'path-1', node_ids: ['supplier', 'component'], relation_types: ['supplies'], evidence_refs: ['fact-1'], status: 'supported' }],
+  }, {
+    event: { event_id: 'event-2', summary: 'Другое событие.', evidence_quote: '', source_news_ids: [], modality: 'announcement' },
+    news: [], company_facts: [{ fact_id: 'fact-1', text: 'Другое содержимое для того же ID.', source_quote: '', source_refs: [], verification_status: 'source_supported' }], chunks: [], candidate_paths: [],
   }]));
   await page.route('**/api/v1/analytics/issues/issue-1/history**', route => json(route, [{ ...issue, version: 1, summary: 'Предыдущая версия ситуации.' }, issue]));
   await page.route('**/api/v1/analytics/issues/issue-1/state**', async route => {
@@ -587,7 +590,7 @@ test('shows company situations with evidence, history, issue state, chat, and re
     : json(route, { detail: 'not found' }, 404));
   await page.route('**/api/v1/analytics/issues/issue-1/questions**', async route => {
     const body = route.request().postDataJSON() as { question: string; request_id: string };
-    const reply = { request_id: body.request_id, question: body.question, answer: { text: 'Проверьте сроки и договорные условия.', evidence_ids: ['fact-1'], missing_facts: ['Сроки поставщика'] }, created_at: '2026-10-24T10:10:00Z' };
+    const reply = { request_id: body.request_id, question: body.question, answer: { text: 'Проверьте сроки и договорные условия.', evidence_ids: ['fact-1', 'news:alpha:v1', 'chunk-1', 'path-1', 'missing-ref'], missing_facts: ['Сроки поставщика'] }, created_at: '2026-10-24T10:10:00Z' };
     replies.push(reply);
     return json(route, reply);
   });
@@ -602,7 +605,7 @@ test('shows company situations with evidence, history, issue state, chat, and re
   await page.getByRole('link', { name: /Поставки компонента под риском/ }).click();
   await expect(page.getByRole('heading', { name: 'Поставки компонента под риском', level: 1 })).toBeVisible();
   await expect(page.getByText('Ограничения вступают в силу в ноябре.')).toBeVisible();
-  await page.getByText('Факт компании · source_supported').click();
+  await page.locator('#evidence-0-fact-fact-1-0 summary').click();
   await expect(page.getByText('Доля импортных компонентов составляет 40%.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'История изменений' })).toBeVisible();
   await page.getByRole('button', { name: 'Закрепить ситуацию' }).click();
@@ -610,6 +613,17 @@ test('shows company situations with evidence, history, issue state, chat, and re
   await page.getByLabel('Вопрос об этой ситуации').fill('Какие сроки стоит проверить?');
   await page.getByRole('button', { name: 'Задать вопрос' }).click();
   await expect(page.getByText('Проверьте сроки и договорные условия.')).toBeVisible();
+  const chatReply = page.locator('.analytics-chat-reply');
+  await expect(chatReply.getByRole('link', { name: 'fact-1' })).toHaveCount(0);
+  await expect(page.locator('#evidence-0-fact-fact-1-0')).toHaveCount(1);
+  await expect(page.locator('#evidence-1-fact-fact-1-0')).toHaveCount(1);
+  await expect(page.getByRole('link', { name: 'news:alpha:v1' })).toHaveAttribute('href', '#evidence-0-news-news%3Aalpha%3Av1-0');
+  await expect(page.getByRole('link', { name: 'chunk-1' })).toHaveAttribute('href', '#evidence-0-chunk-chunk-1-0');
+  await page.getByRole('link', { name: 'chunk-1' }).click();
+  await expect(page.locator('#evidence-0-chunk-chunk-1-0')).toHaveAttribute('open', '');
+  await expect(page.getByRole('link', { name: 'path-1' })).toHaveAttribute('href', '#evidence-0-path-path-1-0');
+  await expect(chatReply).toContainText('missing-ref');
+  await expect(chatReply.getByRole('link', { name: 'missing-ref' })).toHaveCount(0);
   expect(replies).toHaveLength(1);
   expect(state.unknown).toEqual([]);
 });
@@ -620,6 +634,7 @@ test('starts a fresh pinned conversation when the issue version has changed', as
   const staleConversationId = 'conversation-v1';
   const postedQuestions: Array<{ question: string; conversation_id: string; request_id: string; version: number }> = [];
   const newReplies: Array<Record<string, unknown>> = [];
+  const staleReplies = [{ request_id: 'old-question', question: 'Старый вопрос', answer: { text: 'Старый ответ', evidence_ids: ['fact-1'], missing_facts: [] }, created_at: '2026-10-23T10:10:00Z' }];
   await page.addInitScript(() => {
     localStorage.setItem('alpha.insights.v2.api.company.9.user.41.issue-chat-issue-versioned-cfo', JSON.stringify('conversation-v1'));
   });
@@ -630,13 +645,16 @@ test('starts a fresh pinned conversation when the issue version has changed', as
     urgency: 'soon', impact_magnitude: 'medium', version: 2, as_of: '2026-10-24T10:00:00Z',
   };
   await page.route('**/api/v1/analytics/issues/issue-versioned?**', route => json(route, issue));
-  await page.route('**/api/v1/analytics/issues/issue-versioned/evidence**', route => json(route, []));
+  await page.route('**/api/v1/analytics/issues/issue-versioned/evidence**', route => json(route, [{
+    event: { event_id: 'event-new', summary: 'Новое основание.', evidence_quote: 'Текущая версия.', source_news_ids: [], modality: 'announcement' },
+    news: [], company_facts: [{ fact_id: 'fact-1', text: 'Факт только новой версии.', source_quote: '', source_refs: [], verification_status: 'source_supported' }], chunks: [], candidate_paths: [],
+  }]));
   await page.route('**/api/v1/analytics/issues/issue-versioned/history**', route => json(route, [issue]));
   await page.route('**/api/v1/analytics/issues/issue-versioned/state**', route => json(route, { issue_id: issue.issue_id, workflow: 'open', pinned: false, read_version: 2, unread: false }));
   await page.route('**/api/v1/analytics/conversations/**', route => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/' + staleConversationId)) {
-      return json(route, { issue_id: issue.issue_id, issue_version: 1, replies: [] });
+      return json(route, { issue_id: issue.issue_id, issue_version: 1, replies: staleReplies });
     }
     if (newReplies.length) return json(route, { issue_id: issue.issue_id, issue_version: 2, replies: newReplies });
     return json(route, { detail: 'not found' }, 404);
@@ -652,6 +670,8 @@ test('starts a fresh pinned conversation when the issue version has changed', as
   await expect(page.getByRole('heading', { name: issue.title, level: 1 })).toBeVisible();
   await expect(page.getByText(/Этот диалог относится к версии 1/)).toBeVisible();
   await expect(page.getByLabel('Вопрос об этой ситуации')).toBeDisabled();
+  await expect(page.locator('.analytics-chat-reply')).toContainText('fact-1');
+  await expect(page.locator('.analytics-chat-reply').getByRole('link', { name: 'fact-1' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Начать новый диалог для версии 2' }).click();
   await expect(page.getByText('Новый диалог для версии 2')).toBeVisible();
   const question = page.getByLabel('Вопрос об этой ситуации');
@@ -663,6 +683,59 @@ test('starts a fresh pinned conversation when the issue version has changed', as
   expect(postedQuestions[0]).toMatchObject({ question: 'Что изменилось?', version: 2 });
   expect(postedQuestions[0].conversation_id).not.toBe(staleConversationId);
   expect(state.unknown).toEqual([]);
+});
+
+test('reloads evidence for an updated issue version before rendering citations', async ({ page }) => {
+  expectedHttpStatuses = [409];
+  await installApiMocks(page);
+  await page.addInitScript(() => {
+    localStorage.setItem('alpha.insights.v2.api.company.9.user.41.issue-chat-issue-race-cfo', JSON.stringify('conversation-race'));
+  });
+  let serverVersion = 1;
+  const evidenceVersions: string[] = [];
+  let releaseVersionTwoEvidence = () => {};
+  const issue = {
+    issue_id: 'issue-race', title: 'Ситуация обновляется', summary: 'Проверка оснований по версии.',
+    overall_effect: 'risk', evidence_sufficiency: 'conditional', key_unknowns: [], conditions: [], suggested_action: 'Проверить данные.',
+    business_factors: [], exposure: '', horizon: 'short', event_ids: [], impact_ids: [], impact_versions: {}, status: 'active',
+    urgency: 'soon', impact_magnitude: 'medium', version: 1, as_of: '2026-10-24T10:00:00Z',
+  };
+  const pack = (summary: string) => [{
+    event: { event_id: `event-v${serverVersion}`, summary, evidence_quote: summary, source_news_ids: [], modality: 'announcement' },
+    news: [], company_facts: [{ fact_id: 'fact-shared', text: summary, source_quote: '', source_refs: [], verification_status: 'source_supported' }], chunks: [], candidate_paths: [],
+  }];
+  await page.route('**/api/v1/analytics/issues/issue-race?**', route => json(route, { ...issue, version: serverVersion }));
+  await page.route('**/api/v1/analytics/issues/issue-race/evidence**', route => {
+    const version = new URL(route.request().url()).searchParams.get('version') ?? '';
+    evidenceVersions.push(version);
+    if (version === '2') return new Promise<void>(resolve => {
+      releaseVersionTwoEvidence = () => { void json(route, pack('Основание версии 2.')); resolve(); };
+    });
+    return json(route, pack('Основание версии 1.'));
+  });
+  await page.route('**/api/v1/analytics/issues/issue-race/history**', route => json(route, [{ ...issue, version: serverVersion }]));
+  await page.route('**/api/v1/analytics/issues/issue-race/state**', route => json(route, { issue_id: issue.issue_id, workflow: 'open', pinned: false, read_version: 1, unread: false }));
+  await page.route('**/api/v1/analytics/conversations/conversation-race**', route => json(route, {
+    issue_id: issue.issue_id, issue_version: 1,
+    replies: [{ request_id: 'old-reply', question: 'Старый вопрос', answer: { text: 'Старый ответ', evidence_ids: ['fact-shared'], missing_facts: [] }, created_at: '2026-10-24T10:00:00Z' }],
+  }));
+  await page.route('**/api/v1/analytics/issues/issue-race/questions**', route => {
+    serverVersion = 2;
+    return json(route, { detail: 'revision conflict' }, 409);
+  });
+
+  await openApiSession(page, '/issues/issue-race');
+  await expect(page.locator('#evidence-0-fact-fact-shared-0 p')).toHaveText('Основание версии 1.');
+  await expect(page.getByRole('link', { name: 'fact-shared' })).toHaveAttribute('href', '#evidence-0-fact-fact-shared-0');
+  await page.getByLabel('Вопрос об этой ситуации').fill('Что изменилось?');
+  await page.getByRole('button', { name: 'Задать вопрос' }).click();
+  await expect(page.getByText(/Этот диалог относится к версии 1/)).toBeVisible();
+  await expect.poll(() => evidenceVersions).toEqual(['1', '2']);
+  await expect(page.getByText('Основание версии 1.')).toHaveCount(0);
+  await expect(page.locator('.analytics-chat-reply').getByRole('link', { name: 'fact-shared' })).toHaveCount(0);
+  releaseVersionTwoEvidence();
+  await expect(page.locator('#evidence-0-fact-fact-shared-0 p')).toHaveText('Основание версии 2.');
+  await expect(page.locator('.analytics-chat-reply').getByRole('link', { name: 'fact-shared' })).toHaveCount(0);
 });
 
 test('updates assigned roles through the exact PUT contract', async ({ page }) => {

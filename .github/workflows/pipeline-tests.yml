@@ -156,9 +156,9 @@ jobs:
                   db.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(name)))
           PY
 
-      - name: Validate offline report charts
+      - name: Validate report charts and demo profile loader
         run: |
-          python -m unittest scripts.test_report_charts scripts.test_report_chart_series -v
+          python -m unittest scripts.test_report_charts scripts.test_report_chart_series scripts.test_seed_demo_profiles -v
           python scripts/prepare_report_charts.py --check
 
       - name: Install the Cyrillic PDF test font

@@ -38,6 +38,7 @@ type feedDoc struct {
 		FullText    string   `xml:"full-text"` // yandex:full-text, rbc_news:full-text
 		Encoded     string   `xml:"encoded"`   // content:encoded
 		PubDate     string   `xml:"pubDate"`
+		Categories  []string `xml:"category"`
 	} `xml:"channel>item"`
 	Entries []struct {
 		ID    string `xml:"id"`
@@ -45,11 +46,14 @@ type feedDoc struct {
 			Href string `xml:"href,attr"`
 			Rel  string `xml:"rel,attr"`
 		} `xml:"link"`
-		Title     string `xml:"title"`
-		Summary   string `xml:"summary"`
-		Content   string `xml:"content"`
-		Published string `xml:"published"`
-		Updated   string `xml:"updated"`
+		Title      string `xml:"title"`
+		Summary    string `xml:"summary"`
+		Content    string `xml:"content"`
+		Published  string `xml:"published"`
+		Updated    string `xml:"updated"`
+		Categories []struct {
+			Term string `xml:"term,attr"`
+		} `xml:"category"`
 	} `xml:"entry"`
 }
 
@@ -61,6 +65,50 @@ func (f RSSFetcher) Fetch(ctx context.Context, src postgres.SourceConfig) ([]dom
 	parsedURL, err := url.ParseRequestURI(feedURL)
 	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") || parsedURL.Host == "" || parsedURL.User != nil || !publicFeedHost(parsedURL.Hostname()) {
 		return nil, fmt.Errorf("source %s: config.feed_url must be a public HTTP(S) URL", src.ID)
+	}
+	https443 := func(value *url.URL) bool {
+		return value.Scheme == "https" && value.User == nil &&
+			(value.Port() == "" || value.Port() == "443") && !strings.HasSuffix(value.Host, ":")
+	}
+	contentPolicy := ""
+	if raw, configured := src.Config["content_policy"]; configured {
+		var ok bool
+		contentPolicy, ok = raw.(string)
+		if !ok || (contentPolicy != "metadata_only" && contentPolicy != "feed_content") {
+			return nil, fmt.Errorf("source %s: config.content_policy must be metadata_only or feed_content", src.ID)
+		}
+	}
+	var articleHosts map[string]bool
+	if raw, configured := src.Config["article_hosts"]; configured {
+		hosts, ok := raw.([]any) // JSON arrays in sources.config decode to []any.
+		if !ok || len(hosts) == 0 {
+			return nil, fmt.Errorf("source %s: config.article_hosts must be a nonempty array", src.ID)
+		}
+		articleHosts = make(map[string]bool, len(hosts))
+		for _, value := range hosts {
+			host, ok := value.(string)
+			if !ok || host == "" || host != strings.TrimSpace(host) || strings.ContainsAny(host, "/:@?#\\") || !publicFeedHost(host) {
+				return nil, fmt.Errorf("source %s: config.article_hosts contains an invalid host", src.ID)
+			}
+			articleHosts[strings.ToLower(host)] = true
+		}
+		if !https443(parsedURL) || !articleHosts[strings.ToLower(parsedURL.Hostname())] {
+			return nil, fmt.Errorf("source %s: curated feed must use an approved HTTPS origin", src.ID)
+		}
+	}
+	var categories []string
+	if raw, configured := src.Config["categories"]; configured {
+		values, ok := raw.([]any)
+		if !ok || len(values) == 0 {
+			return nil, fmt.Errorf("source %s: config.categories must be a nonempty array", src.ID)
+		}
+		for _, value := range values {
+			category, ok := value.(string)
+			if !ok || strings.TrimSpace(category) == "" {
+				return nil, fmt.Errorf("source %s: config.categories contains an invalid category", src.ID)
+			}
+			categories = append(categories, strings.TrimSpace(category))
+		}
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feedURL, nil)
 	if err != nil {
@@ -75,14 +123,18 @@ func (f RSSFetcher) Fetch(ctx context.Context, src postgres.SourceConfig) ([]dom
 	clientCopy := *client
 	priorRedirect := clientCopy.CheckRedirect
 	clientCopy.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		if (req.URL.Scheme != "http" && req.URL.Scheme != "https") || !publicFeedHost(req.URL.Hostname()) {
+		if req.URL.User != nil || (req.URL.Scheme != "http" && req.URL.Scheme != "https") ||
+			(parsedURL.Scheme == "https" && req.URL.Scheme != "https") || !publicFeedHost(req.URL.Hostname()) {
 			return fmt.Errorf("rss redirect to non-public URL rejected")
-		}
-		if priorRedirect != nil {
-			return priorRedirect(req, via)
 		}
 		if len(via) >= 10 {
 			return fmt.Errorf("too many redirects")
+		}
+		if articleHosts != nil && (!https443(req.URL) || !strings.EqualFold(req.URL.Hostname(), parsedURL.Hostname())) {
+			return fmt.Errorf("curated rss redirect to another origin rejected")
+		}
+		if priorRedirect != nil {
+			return priorRedirect(req, via)
 		}
 		return nil
 	}
@@ -101,16 +153,28 @@ func (f RSSFetcher) Fetch(ctx context.Context, src postgres.SourceConfig) ([]dom
 	if len(body) > maxFeed {
 		return nil, fmt.Errorf("rss source %s: feed exceeds %d bytes", src.ID, maxFeed)
 	}
-	items, err := parseFeed(strings.NewReader(string(body)), time.Now())
+	items, err := parseFeed(strings.NewReader(string(body)), time.Now(), categories...)
 	if err != nil {
 		return nil, fmt.Errorf("rss %s: %w", feedURL, err)
 	}
+	accepted := items[:0]
 	for _, item := range items {
+		if articleHosts != nil {
+			article, err := url.Parse(item.URL)
+			if err != nil || !https443(article) || strings.Contains(item.URL, "#") ||
+				!articleHosts[strings.ToLower(article.Hostname())] {
+				continue
+			}
+		}
 		if item.URL == "" && item.ExternalID == item.Title {
 			return nil, fmt.Errorf("rss source %s: item has no stable identity", src.ID)
 		}
+		if contentPolicy == "metadata_only" {
+			item.Body = ""
+		}
+		accepted = append(accepted, item)
 	}
-	return items, nil
+	return accepted, nil
 }
 
 func publicFeedHost(host string) bool {
@@ -125,7 +189,7 @@ func publicFeedHost(host string) bool {
 
 // parseFeed разбирает RSS 2.0 или Atom. Российские ленты бывают в windows-1251
 // и с HTML-сущностями вроде &mdash;, поэтому разбор нестрогий.
-func parseFeed(r io.Reader, now time.Time) ([]domain.NewsItem, error) {
+func parseFeed(r io.Reader, now time.Time, categories ...string) ([]domain.NewsItem, error) {
 	dec := xml.NewDecoder(r)
 	dec.CharsetReader = charset.NewReaderLabel
 	dec.Strict = false
@@ -136,6 +200,10 @@ func parseFeed(r io.Reader, now time.Time) ([]domain.NewsItem, error) {
 	}
 	if doc.XMLName.Local != "rss" && doc.XMLName.Local != "feed" {
 		return nil, fmt.Errorf("expected RSS or Atom document, got %q", doc.XMLName.Local)
+	}
+	wanted := make(map[string]bool, len(categories))
+	for _, category := range categories {
+		wanted[category] = true
 	}
 
 	out := make([]domain.NewsItem, 0, len(doc.Items)+len(doc.Entries))
@@ -170,6 +238,13 @@ func parseFeed(r io.Reader, now time.Time) ([]domain.NewsItem, error) {
 		})
 	}
 	for _, it := range doc.Items {
+		matches := len(wanted) == 0
+		for _, category := range it.Categories {
+			matches = matches || wanted[strings.TrimSpace(category)]
+		}
+		if !matches {
+			continue
+		}
 		link := ""
 		for _, l := range it.Links {
 			if link = strings.TrimSpace(l); link != "" {
@@ -186,6 +261,13 @@ func parseFeed(r io.Reader, now time.Time) ([]domain.NewsItem, error) {
 		}
 	}
 	for _, e := range doc.Entries {
+		matches := len(wanted) == 0
+		for _, category := range e.Categories {
+			matches = matches || wanted[strings.TrimSpace(category.Term)]
+		}
+		if !matches {
+			continue
+		}
 		link := ""
 		for _, l := range e.Links {
 			if l.Rel == "" || l.Rel == "alternate" {

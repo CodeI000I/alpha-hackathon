@@ -230,14 +230,13 @@ func TestCollect(t *testing.T) {
 	if err := p.Collect(ctx); err != nil {
 		t.Fatal(err)
 	}
-	// Миграция 0003 включает RSS-ленты, у которых нашёлся адрес.
-	for _, id := range []string{"S085", "S086", "S136", "S137", "S138", "S139", "S140", "S141", "S142", "S144"} {
-		if !seen[id] {
-			t.Errorf("source %s is not collected", id)
-		}
+	var got []string
+	for id := range seen {
+		got = append(got, id)
 	}
-	if seen["S112"] || seen["manual"] {
-		t.Errorf("unexpected sources collected: %v", seen)
+	slices.Sort(got)
+	if want := []string{"S077", "S136", "S142"}; !slices.Equal(got, want) {
+		t.Fatalf("collected sources = %v, want curated sources %v", got, want)
 	}
 }
 

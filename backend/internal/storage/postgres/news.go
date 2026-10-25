@@ -20,7 +20,9 @@ type SourceConfig struct {
 
 func (s *Store) EnabledSources(ctx context.Context) ([]SourceConfig, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, adapter, url, config FROM sources WHERE enabled AND adapter IS NOT NULL ORDER BY id`)
+		`SELECT id, adapter, url, config FROM sources WHERE enabled AND adapter IS NOT NULL
+		 ORDER BY CASE WHEN config->>'priority' ~ '^[1-9][0-9]{0,2}$'
+		               THEN (config->>'priority')::int ELSE 1000 END, id`)
 	if err != nil {
 		return nil, err
 	}

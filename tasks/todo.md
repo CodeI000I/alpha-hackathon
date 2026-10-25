@@ -42,6 +42,18 @@ build, npm audit (zero findings), Helm/actionlint and unified HTTP smoke. Local
 Docker build, live model/source calls and cluster rollout are not claimed.
 See docs/integration-main-2026-10-24.md.
 
+## Agent answer quality (2026-10-25)
+
+- [x] Audit the deployed AnalyticsService and compare existing validators, memory, prompts and evaluation helpers.
+- [x] Add regression tests and conservative gates for uncited answers, unsupported causal chains and incomplete retrieval.
+- [x] Record validation failures accurately and add content-free graph/model diagnostics.
+- [x] Add a repeatable offline quality corpus using the real service and existing evaluation harness.
+- [x] Run isolated Python/PostgreSQL checks, review the diff and document measured results and limits.
+
+Verification: 404 Python tests without skips using disposable PostgreSQL; 16/16
+synthetic contract-replay scenarios; dependency check and Python compilation.
+See docs/agent-answer-quality.md for scope, baseline comparison and limitations.
+
 ## Completed prototype
 
 - [x] Inspect repository, update branch, map reusable code and differences.

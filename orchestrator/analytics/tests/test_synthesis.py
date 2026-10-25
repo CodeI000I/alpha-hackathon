@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from orchestrator.models import Claim
 from orchestrator.analytics.models import (
     CandidatePath, CompanyFact, CompanyImpact, Event, EvidencePack,
-    ImpactAssessment, IssueSynthesis, SnapshotSynthesis,
+    ImpactAssessment, IssueSynthesis, NewsArticle, SnapshotSynthesis,
     SourceChunk,
 )
 from orchestrator.analytics.synthesis import (
@@ -37,7 +37,8 @@ def make_impact(*, event_id='event-1', impact_id=None, summary='Цена лог�
     pack = EvidencePack(
         tenant_id='tenant-1', company_id='company-1', event=event, as_of=NOW,
         company_knowledge_revision=2,
-        news=[],
+        news=[NewsArticle(news_id=event_id, title=event.summary, content=event.evidence_quote,
+                          published_at=NOW, received_at=NOW)],
         company_facts=[fact],
         chunks=[SourceChunk(chunk_id='chunk-1', document_id='doc-1', document_revision=1,
                             text='Компания закупает сталь', locator='page=1', start=0, end=24,
@@ -52,7 +53,7 @@ def make_impact(*, event_id='event-1', impact_id=None, summary='Цена лог�
         urgency=urgency, impact_horizon='short', business_factors=factors or ['procurement_cost'],
         supporting_fact_ids=[fact.fact_id], supporting_path_ids=['path-1'], missing_factors=[],
         summary=summary, causal_chain=[Claim(text='Рост тарифа повышает стоимость поставки.',
-                                              evidence_ids=[fact.fact_id, 'path-1'])],
+                                              evidence_ids=[fact.fact_id, 'path-1', pack.news[0].evidence_id])],
         conditions=[], suggested_action='Проверить условия ближайшей поставки.', exposure=exposure,
     )
     return CompanyImpact(
@@ -76,6 +77,86 @@ class FakeLLM:
 
 
 class SynthesisTests(unittest.TestCase):
+    def test_path_chunk_cannot_bypass_invalid_supporting_fact(self):
+        for changes, expected in (
+            ({'status': 'conflicting'}, 'inconsistent'),
+            ({'verification_status': 'unverified'}, 'needs_context'),
+            ({'valid_until': NOW - timedelta(days=1)}, 'needs_context'),
+        ):
+            with self.subTest(changes=changes):
+                impact = make_impact()
+                impact.evidence.company_facts[0] = impact.evidence.company_facts[0].model_copy(update=changes)
+                impact.assessment.supporting_fact_ids = []
+                impact.assessment.causal_chain = [Claim(text='Связь через документ.', evidence_ids=[
+                    impact.evidence.news[0].evidence_id, 'path-1'])]
+                self.assertEqual(route_assessment(impact.assessment, impact.evidence), expected)
+
+    def test_relevant_impact_needs_news_and_selected_company_causal_citations(self):
+        impact = make_impact()
+        news_id = impact.evidence.news[0].evidence_id
+        for ids in ([], [news_id], ['fact-event-1'], ['chunk-1'], ['path-1']):
+            with self.subTest(citations=ids):
+                assessment = impact.assessment.model_copy(update={
+                    'causal_chain': [Claim(text='Вывод', evidence_ids=ids)] if ids else []})
+                self.assertEqual(route_assessment(assessment, impact.evidence), 'needs_context')
+
+    def test_causal_citations_resolve_selected_fact_chunks_and_paths(self):
+        impact = make_impact()
+        news_id = impact.evidence.news[0].evidence_id
+        for company_id in ('fact-event-1', 'chunk-1', 'path-1'):
+            with self.subTest(company_id=company_id):
+                assessment = impact.assessment.model_copy(update={
+                    'causal_chain': [Claim(text='Вывод', evidence_ids=[news_id, company_id])]})
+                self.assertEqual(route_assessment(assessment, impact.evidence), 'accepted')
+
+    def test_unselected_company_evidence_and_news_only_paths_do_not_ground_impact(self):
+        impact = make_impact()
+        news_id = impact.evidence.news[0].evidence_id
+        other = impact.evidence.company_facts[0].model_copy(update={'fact_id': 'other-fact'})
+        pack = impact.evidence.model_copy(update={
+            'company_facts': [*impact.evidence.company_facts, other],
+            'candidate_paths': [CandidatePath(path_id='news-only', node_ids=['supplier'],
+                relation_types=['mentions'], evidence_refs=[news_id])]})
+        for company_id, paths in (('other-fact', []), ('news-only', ['news-only'])):
+            with self.subTest(company_id=company_id):
+                assessment = impact.assessment.model_copy(update={
+                    'supporting_path_ids': paths,
+                    'causal_chain': [Claim(text='Вывод', evidence_ids=[news_id, company_id])]})
+                self.assertEqual(route_assessment(assessment, pack), 'needs_context')
+
+    def test_unknown_causal_citation_is_inconsistent(self):
+        impact = make_impact()
+        assessment = impact.assessment.model_copy(update={
+            'causal_chain': [Claim(text='Вывод', evidence_ids=['foreign'])]})
+        self.assertEqual(route_assessment(assessment, impact.evidence), 'inconsistent')
+
+    def test_selected_path_can_ground_company_side_without_explicit_fact_selection(self):
+        impact = make_impact()
+        news_id = impact.evidence.news[0].evidence_id
+        for ref in ('chunk-1', 'fact-event-1'):
+            with self.subTest(path_reference=ref):
+                pack = impact.evidence.model_copy(update={'candidate_paths': [CandidatePath(
+                    path_id='path-1', node_ids=['company-1', 'steel'],
+                    relation_types=['buys'], evidence_refs=[ref])]})
+                assessment = impact.assessment.model_copy(update={
+                    'supporting_fact_ids': [],
+                    'causal_chain': [Claim(text='Вывод', evidence_ids=[news_id, 'path-1'])]})
+                self.assertEqual(route_assessment(assessment, pack), 'accepted')
+                if ref == 'fact-event-1':
+                    pack.company_facts = [pack.company_facts[0].model_copy(
+                        update={'verification_status': 'unverified'})]
+                    self.assertEqual(route_assessment(assessment, pack), 'needs_context')
+
+    def test_truncated_context_cannot_support_negative_conclusion(self):
+        impact = make_impact(risk='no', opportunity='no')
+        pack = impact.evidence.model_copy(update={'retrieval': {'context_truncated': True}})
+        for relevance in ('irrelevant', 'relevant'):
+            with self.subTest(relevance=relevance):
+                assessment = impact.assessment.model_copy(update={'relevance': relevance})
+                self.assertEqual(route_assessment(assessment, pack), 'needs_context')
+                self.assertEqual(route_assessment(assessment, impact.evidence),
+                                 'irrelevant' if relevance == 'irrelevant' else 'accepted')
+
     def test_assessment_references_and_logic_are_checked(self):
         impact = make_impact()
         validate_assessment(impact.assessment, impact.evidence)

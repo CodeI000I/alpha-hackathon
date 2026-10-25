@@ -26,12 +26,21 @@ IMPACT_PROMPT = (
     'Учитывай фиксированные цены, исключения и смягчающие условия. '
     'exposure копируй только из supporting facts; при неизвестности оставь пустым. '
     'Риск и возможность могут сосуществовать; event_probability всегда null. '
+    'Для relevant causal_chain должен объяснить связь и сослаться одновременно на новость '
+    'и выбранное supporting основание компании (fact, его chunk или подтверждённый path). '
+    'Без такой связи укажи недостаточность evidence. При context_truncated нельзя уверенно '
+    'отрицать влияние. urgency — окно необходимого действия, impact_horizon — горизонт эффекта. '
+    'Обоснуй срочность сроками из evidence, а impact_magnitude — масштабом затронутой '
+    'деятельности. При нехватке оснований для конкретной оценки используй unknown; '
+    'не придумывай суммы и численные пороги. '
     'preliminary_triage, если передан, — непроверенная подсказка. Проверяй его по полному evidence: '
     'он не доказывает влияние, не исключает новость и не задаёт urgency.'
 )
 CHAT_PROMPT = (
     'Ответь на вопрос по закреплённой версии ситуации. Гипотетические условия '
-    'помечай явно и не превращай их в корпоративные факты.'
+    'помечай явно и не превращай их в корпоративные факты. '
+    'Укажи evidence_ids, подтверждающие ответ; если оснований нет, явно назови '
+    'недостающие сведения в missing_facts. Пустые строки не описывают пробел.'
 )
 
 
@@ -67,6 +76,7 @@ class AnalyticsService:
         self.max_input_chars = getattr(settings, 'max_input_chars', 32000)
         from .synthesis import ISSUE_PROMPT, SNAPSHOT_PROMPT
         self.policy = digest(dict(version=policy_version, retrieval=getattr(self.retriever, 'version', 'hybrid-v1'),
+                                  grounding='causal-news-company-chat-v2',
                                   configured_version=getattr(settings, 'policy_version', ''),
                                   triage_version=triage_version,
                                   assessment_context='complete-evidence-v1', max_input_chars=self.max_input_chars,
@@ -360,6 +370,7 @@ class AnalyticsService:
         return dict(impact=impact.model_dump(mode='json'))
 
     def analyze_event_for_company(self, scope, event_id, *, update_issues=True):
+        from orchestrator.observability import GraphTrace
         self._company(scope)
         with self._company_lock(scope):
             started = time.monotonic()
@@ -375,20 +386,30 @@ class AnalyticsService:
             run = dict(run_id=run_id, event_id=event_id, status='running', error=None,
                        model_policy=self.policy, started_at=self.clock().isoformat())
             self.store.put('run', run_id, run, **scope.db())
+            trace = GraphTrace(run_id, self.policy)
+            phase = 'checkpoint'
             try:
-                config = {'configurable': {'thread_id': 'impact:' + run_id}}
+                config = {'configurable': {'thread_id': 'impact:' + run_id},
+                          'callbacks': [trace],
+                          'metadata': {'analytics_run_id': run_id, 'model_policy': self.policy}}
                 initial = {'scope': scope.model_dump(), 'event_id': event_id, 'cached': False}
                 checkpoint = self.impact_graph.get_state(config) if self.checkpointer else None
+                phase = 'impact_graph'
                 result = self.impact_graph.invoke(None if checkpoint and checkpoint.next else initial, config)
                 impact = CompanyImpact.model_validate(result['impact'])
                 if update_issues:
+                    phase = 'synthesize_issues'
                     self._update_issues(scope)
             except Exception as exc:
                 self.store.put('run', run_id, dict(run, status='failed',
                     error=exc.code if isinstance(exc, AIError) else type(exc).__name__,
+                    failed_node=trace.failed_node or phase,
                     latency_ms=round((time.monotonic() - started) * 1000)), **scope.db())
                 raise
             self.store.put('run', run_id, dict(run, status='completed', cached=result.get('cached', False),
+                quality=dict(route=impact.route, evidence_count=len(impact.evidence.evidence_ids),
+                             causal_claim_count=len(impact.assessment.causal_chain),
+                             context_truncated=bool(impact.evidence.retrieval.get('context_truncated'))),
                 latency_ms=round((time.monotonic() - started) * 1000)), **scope.db())
             return impact
 
@@ -607,7 +628,7 @@ class AnalyticsService:
         return self.store.get('job', job['job_id'], **scope.db()).payload
 
     def ask_about_issue(self, scope, issue_id, question, *, conversation_id, request_id, version=None):
-        from .synthesis import validate_claims
+        from .synthesis import validate_answer
         if not question.strip() or len(question) > 6000 or not conversation_id or not request_id:
             raise ValueError('invalid conversation request')
         key = digest([scope.user_id, conversation_id])
@@ -630,8 +651,8 @@ class AnalyticsService:
             answer = self.llm.structured('chat', DATA_INSTRUCTION + CHAT_PROMPT,
                 dict(issue=issue.model_dump(mode='json'), evidence=[pack.model_dump(mode='json') for pack in packs],
                      question=question, history=conversation['replies'][-6:]), Answer,
-                lambda value: validate_claims(value, available))
-            validate_claims(answer, available)
+                lambda value: validate_answer(value, available))
+            validate_answer(answer, available)
             reply = dict(request_id=request_id, question=question, answer=answer.model_dump(mode='json'),
                          issue_version=issue.version, created_at=self.clock().isoformat())
             conversation['replies'].append(reply)

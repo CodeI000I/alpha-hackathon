@@ -36,6 +36,12 @@ def validate_claims(output, available_ids):
     visit(output)
 
 
+def validate_answer(answer, available_ids):
+    validate_claims(answer, available_ids)
+    if not answer.evidence_ids and not any(fact.strip() for fact in answer.missing_facts):
+        raise ValueError('answer requires evidence or an explicit missing fact')
+
+
 def validate_assessment(assessment: ImpactAssessment, pack: EvidencePack):
     """Validate evidence references and the assessment's basic logical consistency."""
     facts = {fact.fact_id for fact in pack.company_facts}
@@ -69,20 +75,31 @@ def route_assessment(assessment: ImpactAssessment, pack: EvidencePack):
     if pack.event.status in {'cancelled', 'superseded'} and assessment.relevance == 'relevant':
         return 'inconsistent'
     supported_facts = {fact.fact_id: fact for fact in pack.company_facts}
-    if any(supported_facts[fact_id].status == 'conflicting'
-           for fact_id in assessment.supporting_fact_ids):
+    selected_paths = [path for path in pack.candidate_paths
+                      if path.path_id in assessment.supporting_path_ids]
+    company_ids = set(supported_facts) | {chunk.chunk_id for chunk in pack.chunks}
+    selected_ids = set(assessment.supporting_fact_ids)
+    for path in selected_paths:
+        company_refs = set(path.evidence_refs) & company_ids
+        if company_refs:
+            selected_ids.update(company_refs | {path.path_id})
+    selected_facts = [fact for key, fact in supported_facts.items()
+                      if key in selected_ids or set(fact.source_refs) & selected_ids]
+    selected_ids.update(ref for fact in selected_facts for ref in fact.source_refs if ref in company_ids)
+    if any(fact.status == 'conflicting' for fact in selected_facts):
         return 'inconsistent'
-    if any(supported_facts[fact_id].modality == 'hypothesis'
-           or supported_facts[fact_id].verification_status == 'unverified'
-           for fact_id in assessment.supporting_fact_ids):
+    if any(fact.modality == 'hypothesis' or fact.verification_status == 'unverified'
+           for fact in selected_facts):
         return 'needs_context'
-    if any(not supported_facts[fact_id].applicable(pack.as_of)
-           for fact_id in assessment.supporting_fact_ids):
+    if any(not fact.applicable(pack.as_of) for fact in selected_facts):
         return 'needs_context'
-    if any(path.status != 'supported' for path in pack.candidate_paths
-           if path.path_id in assessment.supporting_path_ids):
+    if any(path.status != 'supported' for path in selected_paths):
         return 'needs_context'
     if assessment.relevance == 'unknown' or assessment.evidence_sufficiency == 'insufficient':
+        return 'needs_context'
+    if pack.retrieval.get('context_truncated') and (
+            assessment.relevance == 'irrelevant'
+            or assessment.risk_supported == assessment.opportunity_supported == 'no'):
         return 'needs_context'
     if assessment.relevance == 'irrelevant':
         return ('irrelevant' if assessment.evidence_sufficiency == 'sufficient'
@@ -92,6 +109,9 @@ def route_assessment(assessment: ImpactAssessment, pack: EvidencePack):
     if assessment.risk_supported == 'unknown' and assessment.opportunity_supported == 'unknown':
         return 'needs_context'
     if not (assessment.supporting_fact_ids or assessment.supporting_path_ids):
+        return 'needs_context'
+    cited = {ref for claim in assessment.causal_chain for ref in claim.evidence_ids}
+    if not (cited & {news.evidence_id for news in pack.news} and cited & selected_ids):
         return 'needs_context'
     return 'accepted'
 

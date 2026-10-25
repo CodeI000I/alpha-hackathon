@@ -67,6 +67,9 @@ class SyntheticGateway:
             fixed = any('фиксирована' in fact['text'] for fact in pack['company_facts'])
             positive = pack['event']['event_type'] == 'currency_change'
             risk = not positive and not (fixed and pack['event']['event_type'] == 'supplier_price')
+            summary = ('Зафиксированная цена ограничивает действие нового прайса.' if fixed and not risk and not positive
+                       else 'Изменение валютного курса может снизить затраты.' if positive
+                       else 'Изменение может повысить затраты на поставку.')
             return dict(relevance='relevant', evidence_sufficiency='conditional',
                         link_type='indirect' if pack['candidate_paths'] else 'direct',
                         risk_supported='yes' if risk else 'no', opportunity_supported='yes' if positive else 'no',
@@ -74,9 +77,11 @@ class SyntheticGateway:
                         business_factors=['procurement_cost'],
                         supporting_fact_ids=[fact['fact_id'] for fact in pack['company_facts']],
                         supporting_path_ids=[path['path_id'] for path in pack['candidate_paths']],
+                        causal_chain=[dict(text=summary,
+                            evidence_ids=[pack['company_facts'][0]['fact_id'],
+                                          NewsArticle.model_validate(pack['news'][0]).evidence_id])],
                         missing_factors=['Размер и валюта ближайшего платежа'], exposure='shipment-november',
-                        summary='Зафиксированная цена ограничивает действие нового прайса.' if fixed and not risk and not positive
-                        else ('Изменение валютного курса может снизить затраты.' if positive else 'Изменение может повысить затраты на поставку.'),
+                        summary=summary,
                         conditions=['Оценка зависит от условий конкретной отгрузки.'],
                         suggested_action='Сверить цену, валюту и дату ближайшей поставки.')
         if name == 'IssueSynthesis':

@@ -75,6 +75,8 @@ class UnconfiguredModel(ReadOnlyModel):
 
 @contextmanager
 def runtime(*, read_only=False, env_file=None, allow_unconfigured=False):
+    from orchestrator.observability import configure_logging
+    configure_logging()
     config = load_analytics_settings(env_file)
     model_settings = load_settings(env_file)
     store = PostgresStore(config.database_url.get_secret_value(), connect_timeout=5, statement_timeout_ms=10000)

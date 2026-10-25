@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -166,6 +167,250 @@ func TestRSSAmbiguousZoneDoesNotDependOnWorkerTimezone(t *testing.T) {
 		body := `<rss><channel><item><guid>x</guid><title>T</title><pubDate>Fri, 23 Oct 2026 12:30:00 PST</pubDate></item></channel></rss>`
 		if _, err := fixtureRSS(body).Fetch(context.Background(), src); err == nil {
 			t.Fatalf("ambiguous PST accepted with worker local zone %s", location)
+		}
+	}
+}
+
+func TestRSSCuratedSourceAcceptsOnlyAllowedHTTPSArticles(t *testing.T) {
+	var config map[string]any
+	if err := json.Unmarshal([]byte(`{"feed_url":"https://agency.example/rss","article_hosts":["agency.example","www.agency.example"]}`), &config); err != nil {
+		t.Fatal(err)
+	}
+	src := postgres.SourceConfig{ID: "official", Config: config}
+	for _, article := range []string{
+		"https://agency.example/news/1", "https://www.agency.example:443/news/1?view=full",
+		"https://external.example/news/1", "https://agency.example.external.example/news/1",
+		"http://agency.example/news/1", "https://user@agency.example/news/1",
+		"https://agency.example:8443/news/1", "https://agency.example:/news/1",
+		"https://agency.example/news/1#fragment", "https://agency.example/news/1#",
+		"/news/1", "javascript:alert(1)",
+	} {
+		t.Run(article, func(t *testing.T) {
+			body := fmt.Sprintf(`<rss><channel><item><guid>id-1</guid><title>Title</title><link>%s</link><pubDate>Fri, 23 Oct 2026 12:30:00 GMT</pubDate></item></channel></rss>`, article)
+			items, err := fixtureRSS(body).Fetch(context.Background(), src)
+			want := 0
+			if article == "https://agency.example/news/1" || article == "https://www.agency.example:443/news/1?view=full" {
+				want = 1
+			}
+			if err != nil || len(items) != want {
+				t.Fatalf("article %q: got %d items, %v; want %d", article, len(items), err, want)
+			}
+		})
+	}
+}
+
+func TestRSSRejectsInvalidArticleHostPolicy(t *testing.T) {
+	for _, raw := range []any{nil, "agency.example", []any{}, []any{42}, []any{""}, []any{"agency.example:443"}, []any{"localhost"}} {
+		src := postgres.SourceConfig{ID: "fixture", Config: map[string]any{
+			"feed_url": "https://feed.example/rss", "article_hosts": raw,
+		}}
+		if _, err := fixtureRSS(`<rss><channel/></rss>`).Fetch(context.Background(), src); err == nil {
+			t.Fatalf("invalid article_hosts accepted: %#v", raw)
+		}
+	}
+}
+
+func TestRSSCuratedFeedRequiresApprovedHTTPSOriginBeforeFetching(t *testing.T) {
+	for _, feedURL := range []string{"https://external.example/rss", "http://agency.example/rss", "https://agency.example:8443/rss", "https://agency.example:/rss"} {
+		requests := 0
+		fetcher := RSSFetcher{Client: &http.Client{Transport: rssTransport(func(*http.Request) (*http.Response, error) {
+			requests++
+			return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<rss><channel/></rss>`))}, nil
+		})}}
+		src := postgres.SourceConfig{ID: "official", Config: map[string]any{
+			"feed_url": feedURL, "article_hosts": []any{"agency.example"},
+		}}
+		if _, err := fetcher.Fetch(context.Background(), src); err == nil || requests != 0 {
+			t.Fatalf("unapproved curated feed %q: requests=%d, err=%v", feedURL, requests, err)
+		}
+	}
+}
+
+func TestRSSRejectsUnknownContentPolicyBeforeFetching(t *testing.T) {
+	for _, policy := range []any{"metadata-only", "", nil, 42, map[string]any{"mode": "metadata_only"}} {
+		requests := 0
+		fetcher := RSSFetcher{Client: &http.Client{Transport: rssTransport(func(*http.Request) (*http.Response, error) {
+			requests++
+			return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<rss><channel/></rss>`))}, nil
+		})}}
+		src := postgres.SourceConfig{ID: "fixture", Config: map[string]any{
+			"feed_url": "https://feed.example/rss", "content_policy": policy,
+		}}
+		if _, err := fetcher.Fetch(context.Background(), src); err == nil || requests != 0 {
+			t.Fatalf("invalid content policy %#v: requests=%d, err=%v", policy, requests, err)
+		}
+	}
+}
+
+func TestRSSCuratedFeedRedirectStaysOnOriginalOrigin(t *testing.T) {
+	for _, target := range []string{"https://external.example/rss", "https://www.agency.example/rss", "https://agency.example:8443/rss", "https://agency.example:/rss", "https://agency.example:443/new-rss"} {
+		t.Run(target, func(t *testing.T) {
+			requests := 0
+			fetcher := RSSFetcher{Client: &http.Client{Transport: rssTransport(func(*http.Request) (*http.Response, error) {
+				requests++
+				if requests == 1 {
+					return &http.Response{StatusCode: 302, Header: http.Header{"Location": []string{target}}, Body: io.NopCloser(strings.NewReader(""))}, nil
+				}
+				return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<rss><channel/></rss>`))}, nil
+			})}}
+			src := postgres.SourceConfig{ID: "official", Config: map[string]any{
+				"feed_url": "https://agency.example/rss", "article_hosts": []any{"agency.example", "www.agency.example"},
+			}}
+			_, err := fetcher.Fetch(context.Background(), src)
+			if target == "https://agency.example:443/new-rss" {
+				if err != nil || requests != 2 {
+					t.Fatalf("same origin redirect rejected: requests=%d, err=%v", requests, err)
+				}
+			} else if err == nil || requests != 1 {
+				t.Fatalf("curated feed escaped origin: requests=%d, err=%v", requests, err)
+			}
+		})
+	}
+}
+
+func TestRSSMetadataOnlyPolicyKeepsHeadlineAndSummaryWithoutFullText(t *testing.T) {
+	body := `<rss xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><item><guid>id-1</guid><title>Title</title><link>https://agency.example/news/1</link><description>Short announcement</description><content:encoded>Full licensed article</content:encoded><pubDate>Fri, 23 Oct 2026 12:30:00 GMT</pubDate></item></channel></rss>`
+	for _, policy := range []string{"", "feed_content", "metadata_only"} {
+		t.Run(policy, func(t *testing.T) {
+			config := map[string]any{"feed_url": "https://feed.example/rss"}
+			if policy != "" {
+				config["content_policy"] = policy
+			}
+			items, err := fixtureRSS(body).Fetch(context.Background(), postgres.SourceConfig{ID: "fixture", Config: config})
+			if err != nil || len(items) != 1 || items[0].Title != "Title" || items[0].Summary != "Short announcement" {
+				t.Fatalf("got %+v, %v", items, err)
+			}
+			want := "Full licensed article"
+			if policy == "metadata_only" {
+				want = ""
+			}
+			if items[0].Body != want {
+				t.Fatalf("body=%q; want %q", items[0].Body, want)
+			}
+		})
+	}
+}
+
+func TestRSSRedirectPolicyCannotBeBypassedByPriorHandler(t *testing.T) {
+	for _, target := range []string{"http://feed.example/other", "https://user@feed.example/other", "https://127.0.0.1/other", "https://localhost/other", "ftp://feed.example/other"} {
+		t.Run(target, func(t *testing.T) {
+			requests := 0
+			fetcher := RSSFetcher{Client: &http.Client{
+				CheckRedirect: func(*http.Request, []*http.Request) error { return nil },
+				Transport: rssTransport(func(req *http.Request) (*http.Response, error) {
+					requests++
+					if requests > 1 {
+						return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<rss><channel/></rss>`))}, nil
+					}
+					return &http.Response{StatusCode: 302, Header: http.Header{"Location": []string{target}}, Body: io.NopCloser(strings.NewReader(""))}, nil
+				}),
+			}}
+			_, err := fetcher.Fetch(context.Background(), postgres.SourceConfig{ID: "fixture", Config: map[string]any{"feed_url": "https://feed.example/rss"}})
+			if err == nil || requests != 1 {
+				t.Fatalf("blocked redirect reached transport: requests=%d, err=%v", requests, err)
+			}
+		})
+	}
+}
+
+func TestRSSRedirectLimitStillAppliesWithPriorHandler(t *testing.T) {
+	requests := 0
+	fetcher := RSSFetcher{Client: &http.Client{
+		CheckRedirect: func(*http.Request, []*http.Request) error { return nil },
+		Transport: rssTransport(func(req *http.Request) (*http.Response, error) {
+			requests++
+			if requests > 10 {
+				return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<rss><channel/></rss>`))}, nil
+			}
+			return &http.Response{StatusCode: 302, Header: http.Header{"Location": []string{fmt.Sprintf("https://feed.example/next-%d", requests)}}, Body: io.NopCloser(strings.NewReader(""))}, nil
+		}),
+	}}
+	_, err := fetcher.Fetch(context.Background(), postgres.SourceConfig{ID: "fixture", Config: map[string]any{"feed_url": "https://feed.example/rss"}})
+	if err == nil || requests != 10 {
+		t.Fatalf("redirect limit bypassed: requests=%d, err=%v", requests, err)
+	}
+}
+
+func TestRSSSafeRedirectPreservesExistingHandler(t *testing.T) {
+	requests, redirects := 0, 0
+	fetcher := RSSFetcher{Client: &http.Client{
+		CheckRedirect: func(*http.Request, []*http.Request) error { redirects++; return nil },
+		Transport: rssTransport(func(req *http.Request) (*http.Response, error) {
+			requests++
+			if requests == 1 {
+				return &http.Response{StatusCode: 302, Header: http.Header{"Location": []string{"https://cdn.example/rss"}}, Body: io.NopCloser(strings.NewReader(""))}, nil
+			}
+			return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<rss><channel/></rss>`))}, nil
+		}),
+	}}
+	_, err := fetcher.Fetch(context.Background(), postgres.SourceConfig{ID: "fixture", Config: map[string]any{"feed_url": "https://feed.example/rss"}})
+	if err != nil || requests != 2 || redirects != 1 {
+		t.Fatalf("safe redirect failed: requests=%d, redirects=%d, err=%v", requests, redirects, err)
+	}
+}
+
+func TestRSSCategoryFilterAcceptsAnyMatchingCategoryBeforeDateValidation(t *testing.T) {
+	body := `<rss><channel>
+		<item><guid>economy</guid><title>Economy</title><category>Экономика</category><pubDate>Fri, 23 Oct 2026 12:30:00 GMT</pubDate></item>
+		<item><guid>sport</guid><title>Sport</title><category>Спорт</category><pubDate>unknown</pubDate></item>
+		<item><guid>mixed</guid><title>Mixed</title><category>Политика</category><category> Экономика </category><pubDate>Fri, 23 Oct 2026 12:30:00 GMT</pubDate></item>
+		<item><guid>uncategorized</guid><title>No category</title><pubDate>unknown</pubDate></item>
+	</channel></rss>`
+	src := postgres.SourceConfig{ID: "fixture", Config: map[string]any{
+		"feed_url": "https://feed.example/rss", "categories": []any{"Экономика"},
+	}}
+	items, err := fixtureRSS(body).Fetch(context.Background(), src)
+	if err != nil || len(items) != 2 || items[0].ExternalID != "economy" || items[1].ExternalID != "mixed" {
+		t.Fatalf("category filter got %+v, %v", items, err)
+	}
+}
+
+func TestRSSCategoryFilterPreservesUnconfiguredFeedsAndAcceptsMultipleChoices(t *testing.T) {
+	body := `<rss><channel>
+		<item><guid>economy</guid><title>Economy</title><category>Экономика</category><pubDate>Fri, 23 Oct 2026 12:30:00 GMT</pubDate></item>
+		<item><guid>sport</guid><title>Sport</title><category>Спорт</category><pubDate>Fri, 23 Oct 2026 12:30:00 GMT</pubDate></item>
+		<item><guid>none</guid><title>No category</title><pubDate>Fri, 23 Oct 2026 12:30:00 GMT</pubDate></item>
+	</channel></rss>`
+	for _, configured := range []bool{false, true} {
+		config := map[string]any{"feed_url": "https://feed.example/rss"}
+		want := 3
+		if configured {
+			config["categories"] = []any{"Экономика", "Спорт"}
+			want = 2
+		}
+		items, err := fixtureRSS(body).Fetch(context.Background(), postgres.SourceConfig{ID: "fixture", Config: config})
+		if err != nil || len(items) != want {
+			t.Fatalf("configured=%t: got %+v, %v; want %d items", configured, items, err, want)
+		}
+	}
+}
+
+func TestRSSCategoryFilterSupportsAtomTerms(t *testing.T) {
+	body := `<feed xmlns="http://www.w3.org/2005/Atom">
+		<entry><id>economy</id><title>Economy</title><category term="Политика"/><category term="Экономика"/><published>2026-10-23T12:30:00Z</published></entry>
+		<entry><id>sport</id><title>Sport</title><category term="Спорт"/><published>unknown</published></entry>
+	</feed>`
+	src := postgres.SourceConfig{ID: "fixture", Config: map[string]any{
+		"feed_url": "https://feed.example/rss", "categories": []any{"Экономика"},
+	}}
+	items, err := fixtureRSS(body).Fetch(context.Background(), src)
+	if err != nil || len(items) != 1 || items[0].ExternalID != "economy" {
+		t.Fatalf("Atom category filter got %+v, %v", items, err)
+	}
+}
+
+func TestRSSRejectsInvalidCategoryPolicyBeforeFetching(t *testing.T) {
+	for _, raw := range []any{nil, "Экономика", []any{}, []any{42}, []any{""}, []any{" "}} {
+		requests := 0
+		fetcher := RSSFetcher{Client: &http.Client{Transport: rssTransport(func(*http.Request) (*http.Response, error) {
+			requests++
+			return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<rss><channel/></rss>`))}, nil
+		})}}
+		src := postgres.SourceConfig{ID: "fixture", Config: map[string]any{
+			"feed_url": "https://feed.example/rss", "categories": raw,
+		}}
+		if _, err := fetcher.Fetch(context.Background(), src); err == nil || requests != 0 {
+			t.Fatalf("invalid categories %#v: requests=%d, err=%v", raw, requests, err)
 		}
 	}
 }

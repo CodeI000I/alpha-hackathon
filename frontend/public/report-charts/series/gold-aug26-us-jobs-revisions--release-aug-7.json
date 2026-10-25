@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-us-jobs-revisions--release-aug-7",
+  "chart_id": "gold-aug26-us-jobs-revisions",
+  "series_id": "release-aug-7",
+  "label": "В релизе 7 августа",
+  "unit": "тыс. рабочих мест",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Слабый рынок труда*: важны и новый результат, и пересмотры",
+    "page": 4,
+    "crop": [
+      0.03,
+      0.1,
+      0.96,
+      0.42
+    ],
+    "image": "images/gold-aug26-us-jobs-revisions.jpg",
+    "image_sha256": "dd4abe78e675fefb028baf070bf7bb1bcca791276860e98dedfabe7dcc6f7d87"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "category"
+  },
+  "note": "Звёздочка в источнике: число рабочих мест в экономике США без учёта сельскохозяйственного сектора.",
+  "exact_points": [
+    {
+      "label": "Май",
+      "value": 63
+    },
+    {
+      "label": "Июнь",
+      "value": 20
+    },
+    {
+      "label": "Июль",
+      "value": -23
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "Май",
+      "value": 63,
+      "source_index": 0
+    },
+    {
+      "x": "Июнь",
+      "value": 20,
+      "source_index": 1
+    },
+    {
+      "x": "Июль",
+      "value": -23,
+      "source_index": 2
+    }
+  ],
+  "json_file": "series/gold-aug26-us-jobs-revisions--release-aug-7.json",
+  "svg_file": "series/gold-aug26-us-jobs-revisions--release-aug-7.svg"
+}

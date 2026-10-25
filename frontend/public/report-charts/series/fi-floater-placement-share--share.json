@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "id": "fi-floater-placement-share--share",
+  "chart_id": "fi-floater-placement-share",
+  "series_id": "share",
+  "label": "Доля флоутеров",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Доля флоутеров в структуре размещений, %",
+    "page": 21,
+    "crop": [
+      0.3359,
+      0.49456,
+      0.61026,
+      0.81137
+    ],
+    "image": "images/fi-floater-placement-share.jpg",
+    "image_sha256": "ca3d1f7d02ab1e010b48d3e564d42f78208a7feed5f86e2b22ad16b5220d7aef"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "Месяцы 1П26; перенесены подписи всех шести столбцов.",
+  "exact_points": [
+    {
+      "label": "Январь",
+      "value": 90
+    },
+    {
+      "label": "Февраль",
+      "value": 64
+    },
+    {
+      "label": "Март",
+      "value": 56
+    },
+    {
+      "label": "Апрель",
+      "value": 55
+    },
+    {
+      "label": "Май",
+      "value": 64
+    },
+    {
+      "label": "Июнь",
+      "value": 59
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "Январь",
+      "value": 90,
+      "source_index": 0
+    },
+    {
+      "x": "Февраль",
+      "value": 64,
+      "source_index": 1
+    },
+    {
+      "x": "Март",
+      "value": 56,
+      "source_index": 2
+    },
+    {
+      "x": "Апрель",
+      "value": 55,
+      "source_index": 3
+    },
+    {
+      "x": "Май",
+      "value": 64,
+      "source_index": 4
+    },
+    {
+      "x": "Июнь",
+      "value": 59,
+      "source_index": 5
+    }
+  ],
+  "json_file": "series/fi-floater-placement-share--share.json",
+  "svg_file": "series/fi-floater-placement-share--share.svg"
+}

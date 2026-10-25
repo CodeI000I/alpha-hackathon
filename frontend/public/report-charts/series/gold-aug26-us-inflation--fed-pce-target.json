@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-us-inflation--fed-pce-target",
+  "chart_id": "gold-aug26-us-inflation",
+  "series_id": "fed-pce-target",
+  "label": "Цель ФРС по PCE: 2%",
+  "unit": "%",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Годовая инфляция в июле: показатели выше цели ФРС",
+    "page": 5,
+    "crop": [
+      0.03,
+      0.49,
+      0.97,
+      0.76
+    ],
+    "image": "images/gold-aug26-us-inflation.jpg",
+    "image_sha256": "e49df504383600169e6f5bd2884a5bb053e3695affec5b3f6b6d3360aeee3a11"
+  },
+  "x_axis": {
+    "label": "Показатель",
+    "kind": "category"
+  },
+  "note": "Зелёная пунктирная линия показывает цель ФРС по PCE: 2%.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "e49df504383600169e6f5bd2884a5bb053e3695affec5b3f6b6d3360aeee3a11",
+    "plot": [
+      88,
+      106,
+      1135,
+      383
+    ],
+    "x_ticks": [
+      {
+        "position": 0.11174785100286533,
+        "label": "CPI"
+      },
+      {
+        "position": 0.37058261700095513,
+        "label": "Базовый CPI"
+      },
+      {
+        "position": 0.6294173829990449,
+        "label": "PCE"
+      },
+      {
+        "position": 0.8872970391595033,
+        "label": "Базовый PCE"
+      }
+    ],
+    "series": [
+      {
+        "id": "fed-pce-target",
+        "mode": "line",
+        "y_axis": {
+          "min": 0,
+          "max": 4
+        },
+        "anchors": [
+          [
+            0.0,
+            0.50181
+          ],
+          [
+            1.0,
+            0.50181
+          ]
+        ],
+        "estimated_error": 0.03,
+        "note": "Горизонтальная цель ФРС подписана как 2%; координата измерена на уровне пунктирной линии."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value": 1.993
+    },
+    {
+      "x": 1.0,
+      "value": 1.993
+    }
+  ],
+  "json_file": "series/gold-aug26-us-inflation--fed-pce-target.json",
+  "svg_file": "series/gold-aug26-us-inflation--fed-pce-target.svg"
+}

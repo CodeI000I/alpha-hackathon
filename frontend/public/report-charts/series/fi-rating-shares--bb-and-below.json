@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "id": "fi-rating-shares--bb-and-below",
+  "chart_id": "fi-rating-shares",
+  "series_id": "bb-and-below",
+  "label": "BB и ниже",
+  "unit": "%",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Структура корпоративных облигаций по уровню кредитного рейтинга",
+    "page": 22,
+    "crop": [
+      0.56154,
+      0.52116,
+      0.97863,
+      0.86215
+    ],
+    "image": "images/fi-rating-shares.jpg",
+    "image_sha256": "8d5a12916652a73aedab617347c8db6cc8319b688c2e1423e99e71e6590633f3"
+  },
+  "x_axis": {
+    "label": "Период",
+    "kind": "time"
+  },
+  "note": "Три сегмента с напечатанными значениями сохранены точно. Малые неподписанные сегменты оцифрованы приблизительно; их ошибки могут быть сопоставимы с самой долей. Сумма рядов не нормализуется до 100%.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "8d5a12916652a73aedab617347c8db6cc8319b688c2e1423e99e71e6590633f3",
+    "plot": [
+      73,
+      128,
+      1130,
+      480
+    ],
+    "x_ticks": [
+      {
+        "position": 0.06,
+        "label": "2017"
+      },
+      {
+        "position": 0.17,
+        "label": "2018"
+      },
+      {
+        "position": 0.28,
+        "label": "2019"
+      },
+      {
+        "position": 0.39,
+        "label": "2020"
+      },
+      {
+        "position": 0.5,
+        "label": "2021"
+      },
+      {
+        "position": 0.61,
+        "label": "2022"
+      },
+      {
+        "position": 0.72,
+        "label": "2023"
+      },
+      {
+        "position": 0.83,
+        "label": "2024"
+      },
+      {
+        "position": 0.94,
+        "label": "2025"
+      }
+    ],
+    "series": [
+      {
+        "id": "bb-and-below",
+        "mode": "stacked",
+        "y_axis": {
+          "min": 0,
+          "max": 100
+        },
+        "anchors": [
+          [
+            0.06,
+            0.09,
+            0.1
+          ],
+          [
+            0.17,
+            0.09,
+            0.09
+          ],
+          [
+            0.28,
+            0.06,
+            0.07
+          ],
+          [
+            0.39,
+            0.1,
+            0.11
+          ],
+          [
+            0.5,
+            0.12,
+            0.14
+          ],
+          [
+            0.61,
+            0.13,
+            0.15
+          ],
+          [
+            0.72,
+            0.1,
+            0.1
+          ],
+          [
+            0.83,
+            0.04,
+            0.05
+          ],
+          [
+            0.94,
+            0.04,
+            0.04
+          ]
+        ],
+        "estimated_error": 1.5,
+        "note": "Приближённые тонкие сегменты между BB+–BBB+ и Отозван/нет рейтинга; округлённые доли не нормировались."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.06,
+      "value": 1.0
+    },
+    {
+      "x": 0.17,
+      "value": 0.0
+    },
+    {
+      "x": 0.28,
+      "value": 1.0
+    },
+    {
+      "x": 0.39,
+      "value": 1.0
+    },
+    {
+      "x": 0.5,
+      "value": 2.0
+    },
+    {
+      "x": 0.61,
+      "value": 2.0
+    },
+    {
+      "x": 0.72,
+      "value": 0.0
+    },
+    {
+      "x": 0.83,
+      "value": 1.0
+    },
+    {
+      "x": 0.94,
+      "value": 0.0
+    }
+  ],
+  "json_file": "series/fi-rating-shares--bb-and-below.json",
+  "svg_file": "series/fi-rating-shares--bb-and-below.svg"
+}

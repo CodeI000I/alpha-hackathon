@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "id": "fi-ofz-coupon-share--share",
+  "chart_id": "fi-ofz-coupon-share",
+  "series_id": "share",
+  "label": "Доля объема",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "file": "FI_Strategy_3Q26_22072026.pdf",
+      "sha256": "6c3a4882ee784b608880693d8ba2b62d0ba2236e34b404179adaab909c6dd046",
+      "pages": 27,
+      "id": "fi-strategy-3q26",
+      "title": "Тактический взгляд на 3-й квартал 2026: Время собирать камни"
+    },
+    "chart_title": "Структура ОФЗ по типу купона на 13.07.2026 г., %",
+    "page": 16,
+    "crop": [
+      0.67436,
+      0.54776,
+      0.95726,
+      0.84764
+    ],
+    "image": "images/fi-ofz-coupon-share.jpg",
+    "image_sha256": "d2621d997aa876fa5cdf7c26463a2fbb8495ab86f932b516c830db00bbc06152"
+  },
+  "x_axis": {
+    "label": "Тип купона",
+    "kind": "category"
+  },
+  "note": "Подписи сегментов. Общий объем в центре — 32,2 трлн руб.",
+  "exact_points": [
+    {
+      "label": "ОФЗ-ПД",
+      "value": 63
+    },
+    {
+      "label": "ОФЗ-ПК",
+      "value": 37
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "ОФЗ-ПД",
+      "value": 63,
+      "source_index": 0
+    },
+    {
+      "x": "ОФЗ-ПК",
+      "value": 37,
+      "source_index": 1
+    }
+  ],
+  "json_file": "series/fi-ofz-coupon-share--share.json",
+  "svg_file": "series/fi-ofz-coupon-share--share.svg"
+}

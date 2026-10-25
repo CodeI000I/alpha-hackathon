@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-gold-vs-dollar-returns--return",
+  "chart_id": "gold-aug26-gold-vs-dollar-returns",
+  "series_id": "return",
+  "label": "Доходность",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Доходность золота VS доллара США по результатам августа",
+    "page": 3,
+    "crop": [
+      0.03,
+      0.41,
+      0.96,
+      0.63
+    ],
+    "image": "images/gold-aug26-gold-vs-dollar-returns.jpg",
+    "image_sha256": "93e745024b5c46ead11b5587a16c761f5dfa36bdd9f4613fab7a1c9863c92524"
+  },
+  "x_axis": {
+    "label": "Актив",
+    "kind": "category"
+  },
+  "note": "Подписи значений на столбцах: +9,7% и −0,5%.",
+  "exact_points": [
+    {
+      "label": "Золото",
+      "value": 9.7
+    },
+    {
+      "label": "Доллар США по индексу DXY",
+      "value": -0.5
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "Золото",
+      "value": 9.7,
+      "source_index": 0
+    },
+    {
+      "x": "Доллар США по индексу DXY",
+      "value": -0.5,
+      "source_index": 1
+    }
+  ],
+  "json_file": "series/gold-aug26-gold-vs-dollar-returns--return.json",
+  "svg_file": "series/gold-aug26-gold-vs-dollar-returns--return.svg"
+}

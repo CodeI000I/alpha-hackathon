@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-us-debt--threshold",
+  "chart_id": "gold-aug26-us-debt",
+  "series_id": "threshold",
+  "label": "Порог $40 трлн",
+  "unit": "$ трлн",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "За август американский госдолг вырос практически на полтриллиона долларов",
+    "page": 6,
+    "crop": [
+      0.03,
+      0.18,
+      0.96,
+      0.51
+    ],
+    "image": "images/gold-aug26-us-debt.jpg",
+    "image_sha256": "a86688d72d051db7c37fdefe047cc251e21e5c4fb8cf55fb6b176e6500931e49"
+  },
+  "x_axis": {
+    "label": "Дата",
+    "kind": "time"
+  },
+  "note": "Частичное покрытие: указаны подписанные начальное и конечное значения и подписанный порог; прочие значения линии не подписаны. Последнее доступное значение — на 7 сентября.",
+  "exact_points": [
+    {
+      "label": "Порог",
+      "value": 40.0
+    }
+  ],
+  "digitization": {
+    "image_sha256": "a86688d72d051db7c37fdefe047cc251e21e5c4fb8cf55fb6b176e6500931e49",
+    "plot": [
+      142,
+      121,
+      1173,
+      485
+    ],
+    "x_ticks": [
+      {
+        "position": 0.04655674102812803,
+        "label": "31.07"
+      },
+      {
+        "position": 0.2521823472356935,
+        "label": "07.08"
+      },
+      {
+        "position": 0.4568380213385063,
+        "label": "14.08"
+      },
+      {
+        "position": 0.6614936954413191,
+        "label": "21.08"
+      },
+      {
+        "position": 0.9544131910766246,
+        "label": "31.08"
+      }
+    ],
+    "series": [
+      {
+        "id": "threshold",
+        "mode": "line",
+        "y_axis": {
+          "min": 39.7,
+          "max": 40.2
+        },
+        "anchors": [
+          [
+            0.00097,
+            0.4011
+          ],
+          [
+            0.99903,
+            0.4011
+          ]
+        ],
+        "estimated_error": 0.004,
+        "note": "Подписанный порог $40 трлн на горизонтальной пунктирной линии."
+      }
+    ]
+  },
+  "points": [
+    {
+      "x": 0.00097,
+      "value": 39.9995
+    },
+    {
+      "x": 0.99903,
+      "value": 39.9995
+    }
+  ],
+  "json_file": "series/gold-aug26-us-debt--threshold.json",
+  "svg_file": "series/gold-aug26-us-debt--threshold.svg"
+}

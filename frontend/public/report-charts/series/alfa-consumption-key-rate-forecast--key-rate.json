@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "id": "alfa-consumption-key-rate-forecast--key-rate",
+  "chart_id": "alfa-consumption-key-rate-forecast",
+  "series_id": "key-rate",
+  "label": "Ключевая ставка",
+  "unit": "%",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    "chart_title": "Рис. 8: Прогноз Альфа-Банка по динамике ключевой ставки на конец периода, %",
+    "page": 2,
+    "crop": [
+      0.52,
+      0.63,
+      0.93,
+      0.89
+    ],
+    "image": "images/alfa-consumption-key-rate-forecast.jpg",
+    "image_sha256": "b31877e96903a5466f4ac67c268579ee594493ffef729cbcec93c9eb04704e81"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "Подписи напечатаны только для указанных месяцев (май, авг. и ноябрь не указаны). Прогноз начинается в сен.26 после вертикального разделителя.",
+  "exact_points": [
+    {
+      "label": "янв.26",
+      "value": 16.0
+    },
+    {
+      "label": "фев.26",
+      "value": 15.5
+    },
+    {
+      "label": "мар.26",
+      "value": 15.0
+    },
+    {
+      "label": "апр.26",
+      "value": 14.5
+    },
+    {
+      "label": "июн.26",
+      "value": 14.25
+    },
+    {
+      "label": "июл.26",
+      "value": 14.0
+    },
+    {
+      "label": "сен.26",
+      "value": 14.0,
+      "forecast": true
+    },
+    {
+      "label": "окт.26",
+      "value": 13.75,
+      "forecast": true
+    },
+    {
+      "label": "дек.26",
+      "value": 13.5,
+      "forecast": true
+    },
+    {
+      "label": "дек.27",
+      "value": 12.0,
+      "forecast": true
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "янв.26",
+      "value": 16.0,
+      "source_index": 0
+    },
+    {
+      "x": "фев.26",
+      "value": 15.5,
+      "source_index": 1
+    },
+    {
+      "x": "мар.26",
+      "value": 15.0,
+      "source_index": 2
+    },
+    {
+      "x": "апр.26",
+      "value": 14.5,
+      "source_index": 3
+    },
+    {
+      "x": "июн.26",
+      "value": 14.25,
+      "source_index": 4
+    },
+    {
+      "x": "июл.26",
+      "value": 14.0,
+      "source_index": 5
+    },
+    {
+      "x": "сен.26",
+      "value": 14.0,
+      "source_index": 6,
+      "forecast": true
+    },
+    {
+      "x": "окт.26",
+      "value": 13.75,
+      "source_index": 7,
+      "forecast": true
+    },
+    {
+      "x": "дек.26",
+      "value": 13.5,
+      "source_index": 8,
+      "forecast": true
+    },
+    {
+      "x": "дек.27",
+      "value": 12.0,
+      "source_index": 9,
+      "forecast": true
+    }
+  ],
+  "json_file": "series/alfa-consumption-key-rate-forecast--key-rate.json",
+  "svg_file": "series/alfa-consumption-key-rate-forecast--key-rate.svg"
+}

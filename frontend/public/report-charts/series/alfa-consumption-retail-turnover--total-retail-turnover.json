@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "alfa-consumption-retail-turnover--total-retail-turnover",
+  "chart_id": "alfa-consumption-retail-turnover",
+  "series_id": "total-retail-turnover",
+  "label": "Оборот розничной торговли (всего)",
+  "unit": "% г/г",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    "chart_title": "Рис. 1: Динамика оборота розничной торговли по сегментам, % г/г",
+    "page": 1,
+    "crop": [
+      0.08,
+      0.34,
+      0.5,
+      0.56
+    ],
+    "image": "images/alfa-consumption-retail-turnover.jpg",
+    "image_sha256": "79b9f88434182f8c1115c89dc80bb33ea9ca3539d7a69a8cb3e1912edb5bf849"
+  },
+  "x_axis": {
+    "label": "Квартал",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      128,
+      211,
+      1130,
+      703
+    ],
+    "x_ticks": [
+      {
+        "position": 0.035928,
+        "label": "1К24"
+      },
+      {
+        "position": 0.11976,
+        "label": "2К24"
+      },
+      {
+        "position": 0.204591,
+        "label": "3К24"
+      },
+      {
+        "position": 0.288423,
+        "label": "4К24"
+      },
+      {
+        "position": 0.372255,
+        "label": "1К25"
+      },
+      {
+        "position": 0.456088,
+        "label": "2К25"
+      },
+      {
+        "position": 0.53992,
+        "label": "3К25"
+      },
+      {
+        "position": 0.623752,
+        "label": "4К25"
+      },
+      {
+        "position": 0.707585,
+        "label": "1К26"
+      },
+      {
+        "position": 0.792415,
+        "label": "апр.26"
+      },
+      {
+        "position": 0.876248,
+        "label": "май.26"
+      },
+      {
+        "position": 0.96008,
+        "label": "июн.26"
+      }
+    ],
+    "series": [
+      {
+        "id": "total-retail-turnover",
+        "mode": "line",
+        "y_axis": {
+          "min": 0,
+          "max": 16
+        },
+        "anchors": [
+          [
+            0.035928,
+            0.284553
+          ],
+          [
+            0.11976,
+            0.471545
+          ],
+          [
+            0.204591,
+            0.607724
+          ],
+          [
+            0.288423,
+            0.686992
+          ],
+          [
+            0.372255,
+            0.825203
+          ],
+          [
+            0.456088,
+            0.800813
+          ],
+          [
+            0.53992,
+            0.713415
+          ],
+          [
+            0.623752,
+            0.662602
+          ],
+          [
+            0.707585,
+            0.776423
+          ],
+          [
+            0.792415,
+            0.597561
+          ],
+          [
+            0.876248,
+            0.51626
+          ],
+          [
+            0.96008,
+            0.546748
+          ]
+        ],
+        "estimated_error": 0.15,
+        "note": "Повторная ручная калибровка непосредственно по маркерам/границам JPEG; приблизительные опорные точки, не исходный ряд."
+      }
+    ],
+    "image_sha256": "79b9f88434182f8c1115c89dc80bb33ea9ca3539d7a69a8cb3e1912edb5bf849"
+  },
+  "points": [
+    {
+      "x": 0.035928,
+      "value": 11.45
+    },
+    {
+      "x": 0.11976,
+      "value": 8.46
+    },
+    {
+      "x": 0.204591,
+      "value": 6.28
+    },
+    {
+      "x": 0.288423,
+      "value": 5.01
+    },
+    {
+      "x": 0.372255,
+      "value": 2.8
+    },
+    {
+      "x": 0.456088,
+      "value": 3.19
+    },
+    {
+      "x": 0.53992,
+      "value": 4.59
+    },
+    {
+      "x": 0.623752,
+      "value": 5.4
+    },
+    {
+      "x": 0.707585,
+      "value": 3.58
+    },
+    {
+      "x": 0.792415,
+      "value": 6.44
+    },
+    {
+      "x": 0.876248,
+      "value": 7.74
+    },
+    {
+      "x": 0.96008,
+      "value": 7.25
+    }
+  ],
+  "json_file": "series/alfa-consumption-retail-turnover--total-retail-turnover.json",
+  "svg_file": "series/alfa-consumption-retail-turnover--total-retail-turnover.svg"
+}

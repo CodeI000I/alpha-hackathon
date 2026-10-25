@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "id": "alfa-7m26-nominal-wages-unemployment--year-2023",
+  "chart_id": "alfa-7m26-nominal-wages-unemployment",
+  "series_id": "year-2023",
+  "label": "2023",
+  "unit": "",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-7m26",
+      "file": "ALFA-7M26.pdf",
+      "sha256": "3c64c1e43f3b46a795f9581967f2dbc8efb0994cb77ab82e95da180830e9ff8c",
+      "pages": 4,
+      "title": "Макростатистика 7М26"
+    },
+    "chart_title": "Рис. 5: Динамика зарплат в номинальном выражении, % г/г и уровень безработицы, %",
+    "page": 2,
+    "crop": [
+      0.08,
+      0.58,
+      0.5,
+      0.805
+    ],
+    "image": "images/alfa-7m26-nominal-wages-unemployment.jpg",
+    "image_sha256": "1660264e88d2e58d2e5ffd60ecdd36d24fd8683a65355f996d74baffc268aa05"
+  },
+  "x_axis": {
+    "label": "Номинальные зарплаты, % г/г",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      112,
+      193,
+      1120,
+      722
+    ],
+    "x_ticks": [
+      {
+        "position": 0,
+        "label": "5%"
+      },
+      {
+        "position": 0.25,
+        "label": "10%"
+      },
+      {
+        "position": 0.5,
+        "label": "15%"
+      },
+      {
+        "position": 0.75,
+        "label": "20%"
+      },
+      {
+        "position": 1,
+        "label": "25%"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2023",
+        "mode": "scatter",
+        "y_axis": {
+          "min": 2,
+          "max": 7
+        },
+        "anchors": [
+          [
+            0.064484,
+            0.701323
+          ],
+          [
+            0.37004,
+            0.68242
+          ],
+          [
+            0.399802,
+            0.741021
+          ],
+          [
+            0.409722,
+            0.701323
+          ],
+          [
+            0.431548,
+            0.801512
+          ],
+          [
+            0.44246,
+            0.801512
+          ],
+          [
+            0.455357,
+            0.782609
+          ],
+          [
+            0.50496,
+            0.803403
+          ],
+          [
+            0.509921,
+            0.824197
+          ],
+          [
+            0.554563,
+            0.759924
+          ],
+          [
+            0.579365,
+            0.801512
+          ],
+          [
+            0.610119,
+            0.824197
+          ]
+        ],
+        "estimated_error": 0.057,
+        "note": "Центры видимых заполненных светло-красных маркеров; часть перекрытых точек опущена."
+      }
+    ],
+    "image_sha256": "1660264e88d2e58d2e5ffd60ecdd36d24fd8683a65355f996d74baffc268aa05"
+  },
+  "points": [
+    {
+      "x": 0.064484,
+      "value": 3.493
+    },
+    {
+      "x": 0.37004,
+      "value": 3.588
+    },
+    {
+      "x": 0.399802,
+      "value": 3.295
+    },
+    {
+      "x": 0.409722,
+      "value": 3.493
+    },
+    {
+      "x": 0.431548,
+      "value": 2.992
+    },
+    {
+      "x": 0.44246,
+      "value": 2.992
+    },
+    {
+      "x": 0.455357,
+      "value": 3.087
+    },
+    {
+      "x": 0.50496,
+      "value": 2.983
+    },
+    {
+      "x": 0.509921,
+      "value": 2.879
+    },
+    {
+      "x": 0.554563,
+      "value": 3.2
+    },
+    {
+      "x": 0.579365,
+      "value": 2.992
+    },
+    {
+      "x": 0.610119,
+      "value": 2.879
+    }
+  ],
+  "json_file": "series/alfa-7m26-nominal-wages-unemployment--year-2023.json",
+  "svg_file": "series/alfa-7m26-nominal-wages-unemployment--year-2023.svg"
+}

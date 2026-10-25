@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "alfa-policy-federal-budget-balance--year-2024",
+  "chart_id": "alfa-policy-federal-budget-balance",
+  "series_id": "year-2024",
+  "label": "2024",
+  "unit": "трлн руб.",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-policy-rate-11sep",
+      "file": "ALFA-Macro_Insights-Policy_Rate_11Sep.pdf",
+      "sha256": "92a96805f2b720f76bd0c52d2491044812b38401ab62d0f4a9157b4ca81c49bb",
+      "pages": 4,
+      "title": "Ключевая ставка ЦБ РФ"
+    },
+    "chart_title": "Рис. 7: Динамика накопленного с начала года баланса федерального бюджета, трлн руб.",
+    "page": 3,
+    "crop": [
+      0.08,
+      0.42,
+      0.5,
+      0.66
+    ],
+    "image": "images/alfa-policy-federal-budget-balance.jpg",
+    "image_sha256": "7aadd4b26bd3b193d17d3321c2996d85b40eb884e294a4acacb4ca759c8769d3"
+  },
+  "x_axis": {
+    "label": "Месяц",
+    "kind": "time"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      207,
+      260,
+      1130,
+      813
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "янв"
+      },
+      {
+        "position": 0.091008,
+        "label": "фев"
+      },
+      {
+        "position": 0.182015,
+        "label": "мар"
+      },
+      {
+        "position": 0.273023,
+        "label": "апр"
+      },
+      {
+        "position": 0.36403,
+        "label": "май"
+      },
+      {
+        "position": 0.455038,
+        "label": "июн"
+      },
+      {
+        "position": 0.546046,
+        "label": "июл"
+      },
+      {
+        "position": 0.637053,
+        "label": "авг"
+      },
+      {
+        "position": 0.728061,
+        "label": "сен"
+      },
+      {
+        "position": 0.819068,
+        "label": "окт"
+      },
+      {
+        "position": 0.910076,
+        "label": "ноя"
+      },
+      {
+        "position": 1.0,
+        "label": "дек"
+      }
+    ],
+    "series": [
+      {
+        "id": "year-2024",
+        "mode": "line",
+        "y_axis": {
+          "min": -7,
+          "max": 1
+        },
+        "anchors": [
+          [
+            0.0,
+            0.141049
+          ],
+          [
+            0.091008,
+            0.267631
+          ],
+          [
+            0.182015,
+            0.162749
+          ],
+          [
+            0.273023,
+            0.271248
+          ],
+          [
+            0.36403,
+            0.21519
+          ],
+          [
+            0.455038,
+            0.198915
+          ],
+          [
+            0.546046,
+            0.264014
+          ],
+          [
+            0.637053,
+            0.128391
+          ],
+          [
+            0.728061,
+            0.052441
+          ],
+          [
+            0.819068,
+            0.112116
+          ],
+          [
+            0.910076,
+            0.17179
+          ],
+          [
+            1.0,
+            0.560579
+          ]
+        ],
+        "estimated_error": 0.087,
+        "note": "Опорные точки повторно измерены по координатам JPEG; значения приблизительны, интерполяция не является исходным рядом."
+      }
+    ],
+    "image_sha256": "7aadd4b26bd3b193d17d3321c2996d85b40eb884e294a4acacb4ca759c8769d3"
+  },
+  "points": [
+    {
+      "x": 0.0,
+      "value": -0.128
+    },
+    {
+      "x": 0.091008,
+      "value": -1.141
+    },
+    {
+      "x": 0.182015,
+      "value": -0.302
+    },
+    {
+      "x": 0.273023,
+      "value": -1.17
+    },
+    {
+      "x": 0.36403,
+      "value": -0.722
+    },
+    {
+      "x": 0.455038,
+      "value": -0.591
+    },
+    {
+      "x": 0.546046,
+      "value": -1.112
+    },
+    {
+      "x": 0.637053,
+      "value": -0.027
+    },
+    {
+      "x": 0.728061,
+      "value": 0.58
+    },
+    {
+      "x": 0.819068,
+      "value": 0.103
+    },
+    {
+      "x": 0.910076,
+      "value": -0.374
+    },
+    {
+      "x": 1.0,
+      "value": -3.485
+    }
+  ],
+  "json_file": "series/alfa-policy-federal-budget-balance--year-2024.json",
+  "svg_file": "series/alfa-policy-federal-budget-balance--year-2024.svg"
+}

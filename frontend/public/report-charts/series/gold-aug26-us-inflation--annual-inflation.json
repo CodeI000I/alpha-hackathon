@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "id": "gold-aug26-us-inflation--annual-inflation",
+  "chart_id": "gold-aug26-us-inflation",
+  "series_id": "annual-inflation",
+  "label": "Годовая инфляция в июле",
+  "unit": "% г/г",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "gold-digest-august-2026",
+      "file": "Gold_digest_August26.pdf",
+      "sha256": "4159576a6223985dd318b6f5a04ad4aeb888f47a6c266d0e9ee9eb35bf01e245",
+      "pages": 8,
+      "title": "Обзор рынка золота. Август 2026"
+    },
+    "chart_title": "Годовая инфляция в июле: показатели выше цели ФРС",
+    "page": 5,
+    "crop": [
+      0.03,
+      0.49,
+      0.97,
+      0.76
+    ],
+    "image": "images/gold-aug26-us-inflation.jpg",
+    "image_sha256": "e49df504383600169e6f5bd2884a5bb053e3695affec5b3f6b6d3360aeee3a11"
+  },
+  "x_axis": {
+    "label": "Показатель",
+    "kind": "category"
+  },
+  "note": "Зелёная пунктирная линия показывает цель ФРС по PCE: 2%.",
+  "exact_points": [
+    {
+      "label": "CPI",
+      "value": 3.4
+    },
+    {
+      "label": "Базовый CPI",
+      "value": 2.5
+    },
+    {
+      "label": "PCE",
+      "value": 3.7
+    },
+    {
+      "label": "Базовый PCE",
+      "value": 3.3
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "CPI",
+      "value": 3.4,
+      "source_index": 0
+    },
+    {
+      "x": "Базовый CPI",
+      "value": 2.5,
+      "source_index": 1
+    },
+    {
+      "x": "PCE",
+      "value": 3.7,
+      "source_index": 2
+    },
+    {
+      "x": "Базовый PCE",
+      "value": 3.3,
+      "source_index": 3
+    }
+  ],
+  "json_file": "series/gold-aug26-us-inflation--annual-inflation.json",
+  "svg_file": "series/gold-aug26-us-inflation--annual-inflation.svg"
+}

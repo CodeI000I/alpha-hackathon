@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "id": "inflation-02-weekly-segment-inflation--aug-18-24",
+  "chart_id": "inflation-02-weekly-segment-inflation",
+  "series_id": "aug-18-24",
+  "label": "Недельное значение за 18–24 августа",
+  "unit": "% н/н",
+  "data_status": "labelled_values",
+  "source": {
+    "document": {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    "chart_title": "Недельная инфляция по сегментам, % н/н",
+    "page": 1,
+    "crop": [
+      0.495,
+      0.645,
+      0.97,
+      0.9
+    ],
+    "image": "images/inflation-02-weekly-segment-inflation.jpg",
+    "image_sha256": "34f10f297e7b581476405e5e56b1cfd063d991e72c750455b1a7b35b39ffe783"
+  },
+  "x_axis": {
+    "label": "Сегмент",
+    "kind": "category"
+  },
+  "note": "Значения перенесены с подписей у столбцов; отрицательные величины показаны в исходном виде.",
+  "exact_points": [
+    {
+      "label": "ИПЦ",
+      "value": 0.01
+    },
+    {
+      "label": "Прод. сегмент",
+      "value": -0.06
+    },
+    {
+      "label": "Плодоовощи",
+      "value": -1.89
+    },
+    {
+      "label": "Непрод. сегмент",
+      "value": 0.26
+    },
+    {
+      "label": "Бензин",
+      "value": 0.89
+    },
+    {
+      "label": "Услуги",
+      "value": -0.13
+    }
+  ],
+  "digitization": null,
+  "points": [
+    {
+      "x": "ИПЦ",
+      "value": 0.01,
+      "source_index": 0
+    },
+    {
+      "x": "Прод. сегмент",
+      "value": -0.06,
+      "source_index": 1
+    },
+    {
+      "x": "Плодоовощи",
+      "value": -1.89,
+      "source_index": 2
+    },
+    {
+      "x": "Непрод. сегмент",
+      "value": 0.26,
+      "source_index": 3
+    },
+    {
+      "x": "Бензин",
+      "value": 0.89,
+      "source_index": 4
+    },
+    {
+      "x": "Услуги",
+      "value": -0.13,
+      "source_index": 5
+    }
+  ],
+  "json_file": "series/inflation-02-weekly-segment-inflation--aug-18-24.json",
+  "svg_file": "series/inflation-02-weekly-segment-inflation--aug-18-24.svg"
+}

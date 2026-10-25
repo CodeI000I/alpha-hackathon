@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "id": "inflation-02-weekly-decomposition-volatility--base-components",
+  "chart_id": "inflation-02-weekly-decomposition-volatility",
+  "series_id": "base-components",
+  "label": "Базовые компоненты",
+  "unit": "п.п.",
+  "data_status": "unavailable",
+  "source": {
+    "document": {
+      "id": "inflation-tracker-02",
+      "file": "Inflation_tracker_02.pdf",
+      "sha256": "09d5537f6a52f5f8f2d9518ed9171e794382972ce38cbdc4bd3099b2db129d0c",
+      "pages": 3,
+      "title": "Инфляция 25–31 августа: основные выводы"
+    },
+    "chart_title": "Недельная инфляция, % н/н и ее декомпозиция на базовые и волатильные компоненты, п.п.",
+    "page": 2,
+    "crop": [
+      0.5,
+      0.1,
+      0.98,
+      0.37
+    ],
+    "image": "images/inflation-02-weekly-decomposition-volatility.jpg",
+    "image_sha256": "264d9415ce461764c24cfcc88c9c39bad526be3d1106efa526ec5892859e55d0"
+  },
+  "x_axis": {
+    "label": "Дата",
+    "kind": "time"
+  },
+  "note": "Численные подписи к точкам и столбцам отсутствуют.",
+  "exact_points": [],
+  "digitization": {
+    "image_sha256": "264d9415ce461764c24cfcc88c9c39bad526be3d1106efa526ec5892859e55d0",
+    "plot": [
+      49,
+      191,
+      1068,
+      757
+    ],
+    "x_ticks": [
+      {
+        "position": 0.017664376840039256,
+        "label": "02.03"
+      },
+      {
+        "position": 0.23960141918925043,
+        "label": "13.04"
+      },
+      {
+        "position": 0.4615384615384616,
+        "label": "25.05"
+      },
+      {
+        "position": 0.6834755038876726,
+        "label": "06.07"
+      },
+      {
+        "position": 0.9054125462368838,
+        "label": "17.08"
+      },
+      {
+        "position": 0.9793915603532876,
+        "label": "31.08"
+      }
+    ],
+    "series": [
+      {
+        "id": "base-components",
+        "mode": "unreadable",
+        "note": "В графике цветные столбцы накладываются на нулевую линию и штрихованный остаток; компоненты в большинстве недель слишком малы для раздельной границы."
+      }
+    ]
+  },
+  "points": [],
+  "json_file": "series/inflation-02-weekly-decomposition-volatility--base-components.json",
+  "svg_file": null
+}

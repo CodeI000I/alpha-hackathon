@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "id": "alfa-consumption-retail-credit-growth--retail-credit-portfolio-growth",
+  "chart_id": "alfa-consumption-retail-credit-growth",
+  "series_id": "retail-credit-portfolio-growth",
+  "label": "Прирост розничного кредитного портфеля по сегментам",
+  "unit": "% м/м",
+  "data_status": "digitized",
+  "source": {
+    "document": {
+      "id": "alfa-consumption",
+      "file": "ALFA-consumption.pdf",
+      "sha256": "807ee9925cf7d15ecffc72ad7142f9a83d342cd19690e12dd3b90aa2ba8ea1c6",
+      "pages": 4,
+      "title": "Потребление на пике"
+    },
+    "chart_title": "Рис. 9: Прирост розничного кредитного портфеля по сегментам, % м/м",
+    "page": 3,
+    "crop": [
+      0.08,
+      0.15,
+      0.5,
+      0.42
+    ],
+    "image": "images/alfa-consumption-retail-credit-growth.jpg",
+    "image_sha256": "15d2dd4c705e0ed966f21f980233b7b3570ff4b7d50c5a595a09e3785a46f708"
+  },
+  "x_axis": {
+    "label": "Непродовольственный сегмент",
+    "kind": "category"
+  },
+  "note": "",
+  "exact_points": [],
+  "digitization": {
+    "plot": [
+      167,
+      227,
+      1107,
+      803
+    ],
+    "x_ticks": [
+      {
+        "position": 0.0,
+        "label": "-1%"
+      },
+      {
+        "position": 0.2,
+        "label": "-0,5%"
+      },
+      {
+        "position": 0.4,
+        "label": "0%"
+      },
+      {
+        "position": 0.6,
+        "label": "0,5%"
+      },
+      {
+        "position": 0.8,
+        "label": "1%"
+      },
+      {
+        "position": 1.0,
+        "label": "1,5%"
+      }
+    ],
+    "series": [
+      {
+        "id": "retail-credit-portfolio-growth",
+        "mode": "scatter",
+        "y_axis": {
+          "min": -0.5,
+          "max": 2
+        },
+        "anchors": [
+          [
+            0.045745,
+            0.708333
+          ],
+          [
+            0.191489,
+            0.583333
+          ],
+          [
+            0.255319,
+            0.657986
+          ],
+          [
+            0.259574,
+            0.880208
+          ],
+          [
+            0.270213,
+            0.513889
+          ],
+          [
+            0.270213,
+            0.673611
+          ],
+          [
+            0.397872,
+            0.453125
+          ],
+          [
+            0.414894,
+            0.548611
+          ],
+          [
+            0.420213,
+            0.246528
+          ],
+          [
+            0.439362,
+            0.352431
+          ],
+          [
+            0.47766,
+            0.241319
+          ],
+          [
+            0.493617,
+            0.604167
+          ],
+          [
+            0.515957,
+            0.572917
+          ],
+          [
+            0.558511,
+            0.385417
+          ],
+          [
+            0.593617,
+            0.375
+          ],
+          [
+            0.826596,
+            0.336806
+          ],
+          [
+            0.928723,
+            0.619792
+          ]
+        ],
+        "estimated_error": 0.035,
+        "note": "Повторная ручная калибровка непосредственно по маркерам/границам JPEG; приблизительные опорные точки, не исходный ряд.17 различимых маркеров; наложенные маркеры фев.26/мар.25 считаны отдельно. Точек, отсутствующих на JPEG, не добавлено."
+      }
+    ],
+    "image_sha256": "15d2dd4c705e0ed966f21f980233b7b3570ff4b7d50c5a595a09e3785a46f708"
+  },
+  "points": [
+    {
+      "x": 0.045745,
+      "value": 0.229
+    },
+    {
+      "x": 0.191489,
+      "value": 0.542
+    },
+    {
+      "x": 0.255319,
+      "value": 0.355
+    },
+    {
+      "x": 0.259574,
+      "value": -0.201
+    },
+    {
+      "x": 0.270213,
+      "value": 0.715
+    },
+    {
+      "x": 0.270213,
+      "value": 0.316
+    },
+    {
+      "x": 0.397872,
+      "value": 0.867
+    },
+    {
+      "x": 0.414894,
+      "value": 0.628
+    },
+    {
+      "x": 0.420213,
+      "value": 1.384
+    },
+    {
+      "x": 0.439362,
+      "value": 1.119
+    },
+    {
+      "x": 0.47766,
+      "value": 1.397
+    },
+    {
+      "x": 0.493617,
+      "value": 0.49
+    },
+    {
+      "x": 0.515957,
+      "value": 0.568
+    },
+    {
+      "x": 0.558511,
+      "value": 1.036
+    },
+    {
+      "x": 0.593617,
+      "value": 1.062
+    },
+    {
+      "x": 0.826596,
+      "value": 1.158
+    },
+    {
+      "x": 0.928723,
+      "value": 0.451
+    }
+  ],
+  "json_file": "series/alfa-consumption-retail-credit-growth--retail-credit-portfolio-growth.json",
+  "svg_file": "series/alfa-consumption-retail-credit-growth--retail-credit-portfolio-growth.svg"
+}

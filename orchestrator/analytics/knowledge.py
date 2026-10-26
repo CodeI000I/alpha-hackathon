@@ -12,7 +12,7 @@ import unicodedata
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Literal
 from zipfile import ZipFile
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -86,12 +86,27 @@ class _ExtractionModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 
+AllowedRelation = Literal[tuple(sorted(ALLOWED_RELATIONS))]
+
+
+class _ExtractedFact(CompanyFact):
+    predicate: AllowedRelation
+    verification_status: Literal['source_supported'] = 'source_supported'
+    modality: Literal['current_fact', 'plan', 'historical'] = 'current_fact'
+    source_refs: list[str] = Field(min_length=1, max_length=20)
+    source_quote: str = Field(min_length=1, max_length=6000)
+
+
 class _ExtractedEdge(KnowledgeEdge):
+    predicate: AllowedRelation
+    verification_status: Literal['source_supported'] = 'source_supported'
+    scope: Literal['private'] = 'private'
+    derivation: Literal['extracted'] = 'extracted'
     source_quote: str = Field(min_length=1, max_length=6000)
 
 
 class FactExtraction(_ExtractionModel):
-    facts: list[CompanyFact] = Field(default_factory=list, max_length=500)
+    facts: list[_ExtractedFact] = Field(default_factory=list, max_length=500)
     edges: list[_ExtractedEdge] = Field(default_factory=list, max_length=1000)
 
 

@@ -17,6 +17,23 @@ from orchestrator.storage import Store
 
 
 class StructuredCompletionTests(unittest.TestCase):
+    def test_pasted_key_whitespace_does_not_reach_authorization_header(self):
+        for raw in (' \tsynthetic-key\r\n', SecretStr(' \tsynthetic-key\r\n')):
+            with self.subTest(input_type=type(raw).__name__):
+                headers = []
+
+                def respond(request):
+                    headers.append(request.headers['Authorization'])
+                    return completion(ANSWER)
+
+                settings = Settings(api_key=raw, max_retries=0)
+                client = LLMClient(settings, MemoryStore(),
+                    http_client=httpx.Client(transport=httpx.MockTransport(respond)))
+                self.addCleanup(client.close)
+                client.complete('chat', [{'role': 'user', 'content': 'Synthetic check'}])
+                self.assertEqual(headers, ['Bearer synthetic-key'])
+                self.assertEqual(settings.api_key.get_secret_value(), 'synthetic-key')
+
     def setUp(self):
         self.store = MemoryStore()
         self.requests, self.replies, self.delays = [], [], []

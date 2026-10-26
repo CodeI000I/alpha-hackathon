@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 from dotenv import dotenv_values
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError, model_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError, field_validator, model_validator
 
 ROOT = Path(__file__).resolve().parent.parent
 ModelID = Literal[
@@ -46,6 +46,11 @@ class Settings(BaseModel):
     systemone_api_key: SecretStr = SecretStr('')
     systemone_timeout_seconds: float = Field(default=10, gt=0, le=60)
     systemone_cooldown_seconds: float = Field(default=60, gt=0, le=3600)
+
+    @field_validator('api_key')
+    @classmethod
+    def trim_api_key(cls, value: SecretStr) -> SecretStr:
+        return SecretStr(value.get_secret_value().strip())
 
     @model_validator(mode='after')
     def validate_policy(self):

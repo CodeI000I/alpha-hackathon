@@ -78,6 +78,7 @@ class AnalyticsService:
         self.policy = digest(dict(version=policy_version, retrieval=getattr(self.retriever, 'version', 'hybrid-v1'),
                                   grounding='causal-news-company-chat-v2',
                                   configured_version=getattr(settings, 'policy_version', ''),
+                                  deepseek_thinking_enabled=getattr(settings, 'deepseek_thinking_enabled', True),
                                   triage_version=triage_version,
                                   assessment_context='complete-evidence-v1', max_input_chars=self.max_input_chars,
                                   prompts=[DATA_INSTRUCTION, IMPACT_PROMPT, ISSUE_PROMPT, SNAPSHOT_PROMPT, CHAT_PROMPT],

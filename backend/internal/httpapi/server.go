@@ -88,7 +88,8 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 }
 
 // spa отдаёт всю сборку фронтенда (dist) как есть: index.html — «Сигнал», bank.html — демо-кабинет
-// Альфа-Бизнеса, assets/ — ресурсы обоих. Пути клиентского роутинга «Сигнала» (/register,
+// Альфа-Бизнеса, assets/ — ресурсы обоих. Корень сайта — вход из Альфа-Бизнеса: bank.html, откуда
+// кнопка «Сигнал» ведёт на /register. Пути клиентского роутинга «Сигнала» (/register,
 // /dashboard, …) получают index.html. Отсутствующий файл — путь с расширением или внутри
 // /assets/ — получает 404: иначе потерянный bank.html или старый чанк после деплоя молча
 // подменился бы страницей «Сигнала».
@@ -96,6 +97,11 @@ func spa(dir string) http.Handler {
 	fileServer := http.FileServer(http.Dir(dir))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		urlPath := path.Clean("/" + r.URL.Path)
+		if urlPath == "/" {
+			w.Header().Set("Cache-Control", "no-cache")
+			http.ServeFile(w, r, filepath.Join(dir, "bank.html"))
+			return
+		}
 		if urlPath == "/bank" {
 			target := "/bank.html"
 			if r.URL.RawQuery != "" {

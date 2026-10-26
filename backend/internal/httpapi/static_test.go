@@ -59,10 +59,24 @@ func TestStaticServesEveryEntryPointAsBuilt(t *testing.T) {
 
 func TestStaticClientRoutesGetSignalIndex(t *testing.T) {
 	h := newStaticTestHandler(t)
-	for _, p := range []string{"/", "/register", "/login", "/dashboard", "/news/101", "/issues/issue_ab12", "/profile?tab=roles"} {
+	for _, p := range []string{"/register", "/login", "/dashboard", "/news/101", "/issues/issue_ab12", "/profile?tab=roles"} {
 		rec := getStatic(h, p)
 		if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "Сигнал") {
 			t.Errorf("%s: %d %q, want index.html", p, rec.Code, rec.Body.String())
+		}
+		if got := rec.Header().Get("Cache-Control"); got != "no-cache" {
+			t.Errorf("%s: Cache-Control = %q, want no-cache", p, got)
+		}
+	}
+}
+
+// Сайт открывается кабинетом Альфа-Бизнеса; «Сигнал» начинается с кнопки, ведущей на /register.
+func TestStaticRootOpensBank(t *testing.T) {
+	h := newStaticTestHandler(t)
+	for _, p := range []string{"/", "/?utm_source=demo"} {
+		rec := getStatic(h, p)
+		if rec.Code != http.StatusOK || rec.Body.String() != "<title>Альфа-Бизнес</title>" {
+			t.Errorf("%s: %d %q, want bank.html", p, rec.Code, rec.Body.String())
 		}
 		if got := rec.Header().Get("Cache-Control"); got != "no-cache" {
 			t.Errorf("%s: Cache-Control = %q, want no-cache", p, got)

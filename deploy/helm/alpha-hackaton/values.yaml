@@ -22,7 +22,8 @@ config:
   ORCHESTRATOR_TIMEOUT: 5m # синхронный /rank: до двух вызовов LLM на каждую роль компании
   INGEST_PERIOD: 15m
   RANK_MAX_PER_RUN: 20 # оценок новостей за проход воркера: бережёт суточный бюджет LLM
-  RANK_LOOKBACK: 168h # оцениваются новости, опубликованные за последнюю неделю
+  RANK_LOOKBACK: 504h # оцениваются новости, опубликованные за последние 21 день
+  NEWS_COLDSTART_ENABLED: "true"
   ANALYTICS_CHECKPOINTS: "true"
   ANALYTICS_OPERATIONAL_RETENTION_DAYS: "30"
   ANALYTICS_TOP_K: "12"

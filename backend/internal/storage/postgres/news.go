@@ -99,7 +99,7 @@ func enqueueNewsDeliveries(ctx context.Context, tx pgx.Tx, newsID, revision int6
 func enqueueUserNewsDeliveries(ctx context.Context, tx pgx.Tx, userID int64) error {
 	_, err := tx.Exec(ctx, `INSERT INTO news_deliveries(news_id,revision,user_id)
 		SELECT n.id,n.revision,u.id FROM news_items n JOIN users u ON u.id=$1
-		WHERE u.company_id IS NOT NULL AND n.published_at >= now()-interval '168 hours'
+		WHERE u.company_id IS NOT NULL AND n.published_at >= now()-interval '504 hours'
 		  AND EXISTS (SELECT 1 FROM user_roles ur WHERE ur.user_id=u.id)
 		ON CONFLICT (news_id,revision,user_id) DO NOTHING`, userID)
 	return err
@@ -108,7 +108,7 @@ func enqueueUserNewsDeliveries(ctx context.Context, tx pgx.Tx, userID int64) err
 func requeueCompanyNewsDeliveries(ctx context.Context, tx pgx.Tx, companyID int64) error {
 	_, err := tx.Exec(ctx, `INSERT INTO news_deliveries(news_id,revision,user_id)
 		SELECT n.id,n.revision,u.id FROM news_items n JOIN users u ON u.company_id=$1
-		WHERE n.published_at >= now()-interval '168 hours'
+		WHERE n.published_at >= now()-interval '504 hours'
 		  AND EXISTS (SELECT 1 FROM user_roles ur WHERE ur.user_id=u.id)
 		ON CONFLICT (news_id,revision,user_id) DO UPDATE SET
 			state='pending',attempts=0,failures=0,next_attempt_at=now(),lease_until=NULL,

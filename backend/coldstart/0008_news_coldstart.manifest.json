@@ -1,0 +1,68 @@
+{
+  "start": "2026-10-05T00:00:00+03:00",
+  "end": "2026-10-26T14:22:09.997368+03:00",
+  "inputs": [
+    {
+      "source_id": "S077",
+      "file": "probe-0",
+      "sha256": "23ba7daef1ac0e0a5284e5b4323a5979ce93b35cd10a3dfe7830c1604d624ac5",
+      "accepted": 11,
+      "url": "https://www.cbr.ru/rss/RssPress"
+    },
+    {
+      "source_id": "S142",
+      "file": "probe-4",
+      "sha256": "4e0f98b4fe07164a050a9a09a2ff2583b8ec75fa1797baecd2ff9640503b4473",
+      "accepted": 60,
+      "url": "https://frankmedia.ru/feed"
+    },
+    {
+      "source_id": "S142",
+      "file": "retry-1",
+      "sha256": "dd5a5020d0ab9e7c8ea0ecda034f7e435b7ace479c0a5b621b097d038223add8",
+      "accepted": 60,
+      "url": "https://frankmedia.ru/feed/?paged=2"
+    },
+    {
+      "source_id": "S142",
+      "file": "frank-3.xml",
+      "sha256": "71e25fc177d6b6de85c5929a62a0127ecf43f341f1571905b7f2ffbb0421ef1d",
+      "accepted": 60,
+      "url": "https://frankmedia.ru/feed/?paged=3"
+    },
+    {
+      "source_id": "S142",
+      "file": "frank-4.xml",
+      "sha256": "117343b55c3d7aff5a233c918cccbb0c8d13d97992d344ee3a4a0df3a1cd2cb1",
+      "accepted": 60,
+      "url": "https://frankmedia.ru/feed/?paged=4"
+    },
+    {
+      "source_id": "S142",
+      "file": "frank-5.xml",
+      "sha256": "b3189f53f58532c5115165d0764d7b007e2ea7de8e8415299b941a976737cb69",
+      "accepted": 60,
+      "url": "https://frankmedia.ru/feed/?paged=5"
+    },
+    {
+      "source_id": "S142",
+      "file": "frank-6.xml",
+      "sha256": "aaf13f08fa83cc1587346f146e2d24e7a040bdfc20326709b43846c703d860af",
+      "accepted": 41,
+      "url": "https://frankmedia.ru/feed/?paged=6"
+    }
+  ],
+  "count": 352,
+  "counts": {
+    "S077": 11,
+    "S136": 0,
+    "S142": 341
+  },
+  "migration_sha256": "cc547336aec6f4274dfb0d019fd3dde803c9ef48f308595fdf2fbd2523bf0b72",
+  "source_status": {
+    "S077": "RSS retrieved; feed reaches before requested start",
+    "S136": "not loaded: HTTPS connection timeout, including IPv4",
+    "S142": "six RSS pages retrieved; oldest page reaches 2026-10-02; robots response was HTML challenge"
+  },
+  "personalization": "after registration; no paid model calls for preload"
+}

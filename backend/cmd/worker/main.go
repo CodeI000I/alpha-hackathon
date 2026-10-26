@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/devowt/alpha-hackaton/backend/coldstart"
 	"github.com/devowt/alpha-hackaton/backend/internal/config"
 	"github.com/devowt/alpha-hackaton/backend/internal/feed"
 	"github.com/devowt/alpha-hackaton/backend/internal/ingest"
@@ -37,6 +38,12 @@ func main() {
 	if err := store.Migrate(ctx, migrations.FS); err != nil {
 		log.Error("migrate", "err", err)
 		os.Exit(1)
+	}
+	if cfg.ColdStartEnabled {
+		if err := store.Migrate(ctx, coldstart.FS); err != nil {
+			log.Error("coldstart", "err", err)
+			os.Exit(1)
+		}
 	}
 
 	var ranker feed.Ranker = feed.KeywordRanker{}

@@ -414,6 +414,7 @@ def main():
             'INTERNAL_API_TOKEN': INTERNAL_TOKEN,
             'ORCHESTRATOR_TIMEOUT': '45s',
             'INGEST_PERIOD': '1h',
+            'NEWS_COLDSTART_ENABLED': 'false',  # Offline smoke owns its synthetic corpus.
             'RANK_MAX_PER_RUN': '100',
             'S3_ENDPOINT': fixture.endpoint,
             'S3_ACCESS_KEY': 'loopback-fixture',

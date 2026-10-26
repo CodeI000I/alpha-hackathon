@@ -16,6 +16,7 @@ type Config struct {
 	S3                  S3
 	Orchestrator        Orchestrator
 	InternalToken       string // токен служебных маршрутов /api/v1/internal/...; пусто = маршруты выключены
+	ColdStartEnabled    bool
 	IngestPeriod        time.Duration
 	RankMaxPerRun       int           // сколько оценок новостей воркер делает за проход (бережёт суточный бюджет LLM)
 	RankLookback        time.Duration // оцениваются только новости, опубликованные не раньше now - RankLookback
@@ -46,7 +47,8 @@ func Load() (Config, error) {
 			URL:   os.Getenv("ORCHESTRATOR_URL"),
 			Token: os.Getenv("ORCHESTRATOR_TOKEN"),
 		},
-		InternalToken: os.Getenv("INTERNAL_API_TOKEN"),
+		InternalToken:    os.Getenv("INTERNAL_API_TOKEN"),
+		ColdStartEnabled: env("NEWS_COLDSTART_ENABLED", "true") == "true",
 		S3: S3{
 			Endpoint:  os.Getenv("S3_ENDPOINT"),
 			AccessKey: os.Getenv("S3_ACCESS_KEY"),
@@ -65,7 +67,7 @@ func Load() (Config, error) {
 	}{
 		{"INGEST_PERIOD", "15m", &c.IngestPeriod},
 		{"ORCHESTRATOR_TIMEOUT", "5m", &c.Orchestrator.Timeout},
-		{"RANK_LOOKBACK", "168h", &c.RankLookback},
+		{"RANK_LOOKBACK", "504h", &c.RankLookback},
 	} {
 		if *d.dst, err = time.ParseDuration(env(d.key, d.def)); err != nil || *d.dst <= 0 {
 			return c, fmt.Errorf("%s: want a positive duration like 15m, got %q", d.key, env(d.key, d.def))

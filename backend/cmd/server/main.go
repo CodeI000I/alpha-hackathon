@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/devowt/alpha-hackaton/backend/coldstart"
 	"github.com/devowt/alpha-hackaton/backend/internal/config"
 	"github.com/devowt/alpha-hackaton/backend/internal/httpapi"
 	"github.com/devowt/alpha-hackaton/backend/internal/storage/files"
@@ -41,6 +42,11 @@ func run(log *slog.Logger) error {
 	defer store.Close()
 	if err := store.Migrate(ctx, migrations.FS); err != nil {
 		return err
+	}
+	if cfg.ColdStartEnabled {
+		if err := store.Migrate(ctx, coldstart.FS); err != nil {
+			return err
+		}
 	}
 
 	srv := &httpapi.Server{Store: store, StaticDir: cfg.StaticDir, InternalToken: cfg.InternalToken,

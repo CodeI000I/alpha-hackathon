@@ -12,6 +12,8 @@ Signal превращает внешние новости и корпорати�
 [Вход](https://alpha.devgit.net/login) ·
 [Регистрация](https://alpha.devgit.net/register).
 
+**Github:** [Github](https://github.com/CodeI000I/alpha-hackathon)
+
 **Для проверки проекта:** [инструкция по работе с сервисом](docs/demo-profiles.md).
 
 ## Содержание

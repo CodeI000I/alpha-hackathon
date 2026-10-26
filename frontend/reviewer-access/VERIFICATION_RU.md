@@ -1,0 +1,69 @@
+# Проверка серверных тестовых аккаунтов
+
+Дата: 26 октября 2026, Москва. Стенд: https://alpha.devgit.net.
+Проверка выполнена настоящими HTTPS-запросами, без моков.
+
+## Доступ
+
+Подтверждены успешный POST /api/v1/auth/login и GET /api/v1/auth/me для всех восьми пользователей из fixtures/miro-personas. Проверены companyId и назначенные роли. Сессии проверки завершены через /auth/logout. Браузерный сценарий вручную в этой проверке не выполнялся.
+
+Попытки создать четыре профиля по стандартному набору вернули HTTP 409 «company or user already exists». Затем выполнен вход с реквизитами из репозитория: все восемь работают. Дубликаты, новые компании и пользователи не создавались; существующие данные, документы и пароли не изменялись.
+
+## Состояние данных
+
+| Компания | companyId | Пользователи (ID / роль) | Полей профиля | Файлов | Событий |
+|---|---:|---|---:|---:|---:|
+| Билайн | 9 | 10 / strategy; 15 / product | 16 | 4 | 0 |
+| X5 | 8 | 9 / cfo; 16 / commercial | 17 | 4 | 0 |
+| РЖД | 10 | 11 / procurement; 12 / operations | 14 | 4 | 0 |
+| Группа «Эталон» | 13 | 13 / commercial; 14 / cfo | 17 | 4 | 0 |
+
+События проверены через GET /api/v1/users/{id}/feed?limit=200. При первом проходе получение данных для Анны завершилось тайм-аутом после успешного входа; повторная проверка её профиля, списка файлов и ленты успешна.
+
+## Ошибки аналитики
+
+### Билайн
+
+- 01_strategy_brief.txt (file_id 10): failed — invalid_response
+- 02_pilot_economics.txt (file_id 11): failed — invalid_response
+- 03_decision_questions.txt (file_id 12): ready
+- 04_product_readiness.txt (file_id 13): failed — invalid_response
+
+Бизнес-ситуации: GET /api/v1/analytics/issues → 0 записей.
+
+### X5
+
+- 01_financial_plan.txt (file_id 14): ready
+- 02_liquidity_and_debt.txt (file_id 15): failed — invalid_response
+- 03_treasury_questions.txt (file_id 16): ready
+- 04_commercial_demand.txt (file_id 17): ready
+
+Бизнес-ситуации: GET /api/v1/analytics/issues → 0 записей.
+
+### РЖД
+
+/analytics/documents?role=procurement: HTTP 503
+
+Бизнес-ситуации: /analytics/issues?role=procurement&limit=50&offset=0: HTTP 503
+
+### Группа «Эталон»
+
+- 01_sales_segments.txt (file_id 6): failed — invalid_response
+- 02_demand_signals.txt (file_id 7): failed — invalid_response
+- 03_commercial_questions.txt (file_id 8): ready
+- 04_financial_sensitivity.txt (file_id 9): failed — invalid_response
+
+Бизнес-ситуации: GET /api/v1/analytics/issues → 0 записей.
+
+Статусы аналитики проверены для первичных ролей strategy / cfo / procurement / commercial. Статусы для всех вторых ролей отдельно не проверялись. Загруженный файл не равен успешно проанализированному.
+
+## Что нужно проверить команде backend / ИИ
+
+1. Для перечисленных file_id найти причину invalid_response в журнале обработчика и ответе аналитического сервиса. Сам код ошибки не доказывает конкретную первопричину.
+2. Проверить доступность аналитического сервиса для РЖД (HTTP 503).
+3. Проверить очередь и формирование персональной ленты: успешный вход не гарантирует наличие событий.
+4. После исправления повторить анализ штатным механизмом, без повторной загрузки тех же файлов, и проверить ленту/бизнес-ситуации.
+5. Документы README и docs/demo-profiles.md с фразой «аккаунты ещё не созданы» устарели относительно этой проверки.
+
+Проверенные публичные тестовые реквизиты приведены в [таблице аккаунтов](./README.md). Инструкция самостоятельной регистрации — [здесь](./REGISTRATION_RU.md).
+

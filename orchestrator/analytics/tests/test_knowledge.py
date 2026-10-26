@@ -1,3 +1,4 @@
+from copy import deepcopy
 import hashlib
 import json
 from datetime import datetime, timezone
@@ -10,6 +11,7 @@ from unittest.mock import patch
 
 from orchestrator.analytics.knowledge import (
     DocumentParseError,
+    FactExtraction,
     HybridRetriever,
     KnowledgeExtractionError,
     KnowledgeService,
@@ -396,6 +398,59 @@ class KnowledgeTests(unittest.TestCase):
                 'source_quote': quote,
             }],
         }
+
+    def test_extraction_schema_restricts_relations_and_provenance(self):
+        from orchestrator.analytics.knowledge import ALLOWED_RELATIONS
+        schema = FactExtraction.model_json_schema()
+        for name in ('_ExtractedFact', '_ExtractedEdge'):
+            properties = schema['$defs'][name]['properties']
+            self.assertEqual(properties['predicate']['enum'], sorted(ALLOWED_RELATIONS))
+            self.assertEqual(properties['verification_status']['const'], 'source_supported')
+        fact_schema = schema['$defs']['_ExtractedFact']
+        self.assertNotIn('hypothesis', fact_schema['properties']['modality']['enum'])
+        self.assertTrue({'source_refs', 'source_quote'} <= set(fact_schema['required']))
+
+    def test_extraction_defaults_do_not_bypass_document_evidence_checks(self):
+        document, _, extraction = self._document_and_fact()
+        for kind in ('facts', 'edges'):
+            extraction[kind][0].pop('verification_status')
+        extraction['edges'][0].pop('scope')
+        extraction['edges'][0].pop('derivation')
+        result = KnowledgeService(self.store, FixtureLLM(extraction))._extract(document)
+        self.assertEqual(result.facts[0].verification_status, 'source_supported')
+        self.assertEqual(result.edges[0].verification_status, 'source_supported')
+        cases = [('facts', 'source_refs', []), ('facts', 'source_refs', ['foreign']),
+                 ('facts', 'source_refs', None), ('facts', 'source_quote', ''),
+                 ('facts', 'source_quote', 'Несуществующая цитата'), ('facts', 'source_quote', None),
+                 ('facts', 'observed_at', '2026-10-26T00:00:00Z'),
+                 ('edges', 'evidence_refs', []), ('edges', 'evidence_refs', ['foreign']),
+                 ('edges', 'evidence_refs', None), ('edges', 'source_quote', ''),
+                 ('edges', 'source_quote', 'Несуществующая цитата'), ('edges', 'source_quote', None)]
+        for kind, field, value in cases:
+            with self.subTest(kind=kind, field=field, value=value):
+                invalid = deepcopy(extraction)
+                if value is None:
+                    invalid[kind][0].pop(field)
+                else:
+                    invalid[kind][0][field] = value
+                with self.assertRaises(KnowledgeExtractionError):
+                    KnowledgeService(self.store, FixtureLLM(invalid)).ingest(self.scope, document)
+                self.assertIsNone(self.store.get('company', self.scope.company_id, **self.scope.db()))
+                self.assertEqual(self.store.list('fact', **self.scope.db()), [])
+                self.assertEqual(self.store.list('edge', **self.scope.db()), [])
+
+    def test_extraction_rejects_relations_and_provenance_outside_its_contract(self):
+        document, _, extraction = self._document_and_fact()
+        cases = [('facts', 'predicate', 'has_fixed_price'), ('edges', 'predicate', 'has_fixed_price'),
+                 ('facts', 'verification_status', 'unverified'), ('facts', 'modality', 'hypothesis'),
+                 ('edges', 'verification_status', 'user_asserted'), ('edges', 'scope', 'global'),
+                 ('edges', 'derivation', 'inferred')]
+        for kind, field, value in cases:
+            with self.subTest(kind=kind, field=field):
+                invalid = deepcopy(extraction)
+                invalid[kind][0][field] = value
+                with self.assertRaises(KnowledgeExtractionError):
+                    KnowledgeService(self.store, FixtureLLM(invalid))._extract(document)
 
     def test_ingest_persists_original_chunks_and_source_backed_facts(self):
         document, chunk, extraction = self._document_and_fact()

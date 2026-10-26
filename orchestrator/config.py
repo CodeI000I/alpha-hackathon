@@ -33,7 +33,7 @@ class Settings(BaseModel):
     max_retry_delay_seconds: float = Field(default=15, gt=0, le=60)
     max_concurrent_requests: int = Field(default=2, ge=1, le=8)
     requests_per_minute: int = Field(default=20, ge=1, le=120)
-    max_output_tokens: int = Field(default=1800, ge=64, le=8192)
+    max_output_tokens: int = Field(default=8192, ge=64, le=8192)
     max_input_chars: int = Field(default=32000, ge=1000, le=100000)
     retrieval_top_k: int = Field(default=8, ge=1, le=30)
     relevance_low: float = Field(default=0.35, ge=0, le=1)
@@ -57,7 +57,10 @@ class Settings(BaseModel):
         if self.relevance_low >= self.relevance_high:
             raise ValueError('relevance_low must be below relevance_high')
         # The team key must never be redirected to an arbitrary host via config.
-        if self.base_url.rstrip('/') != 'https://changellenge.up.railway.app/v1':
+        if self.base_url.rstrip('/') not in {
+            'https://changellenge.up.railway.app/v1',
+            'https://api.alfahack-gateway26.ru/v1',
+        }:
             raise ValueError('unsupported gateway')
         return self
 

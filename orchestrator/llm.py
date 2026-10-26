@@ -146,12 +146,12 @@ class LLMClient:
                     choice = choices[0] if isinstance(choices, list) and choices else None
                     message = getattr(choice, 'message', None)
                     content = getattr(message, 'content', None)
-                    if not isinstance(content, str) or not content.strip():
-                        self.store.record_call(call_id, 'invalid_response')
-                        raise AIError('invalid_response', 'Шлюз вернул пустой ответ.')
                     if getattr(choice, 'finish_reason', None) not in ('stop', None):
                         self.store.record_call(call_id, 'incomplete_response', result.usage)
                         raise AIError('incomplete_response', 'Ответ модели не завершён; результат не опубликован.')
+                    if not isinstance(content, str) or not content.strip():
+                        self.store.record_call(call_id, 'invalid_response', result.usage)
+                        raise AIError('invalid_response', 'Шлюз вернул пустой ответ.')
                     if validate:
                         try:
                             content = validate(content)

@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 import httpx
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 
 from orchestrator.analytics.store import MemoryStore
 from orchestrator.config import Settings
@@ -33,6 +33,43 @@ class StructuredCompletionTests(unittest.TestCase):
                 client.complete('chat', [{'role': 'user', 'content': 'Synthetic check'}])
                 self.assertEqual(headers, ['Bearer synthetic-key'])
                 self.assertEqual(settings.api_key.get_secret_value(), 'synthetic-key')
+
+    def test_only_the_two_organizer_gateways_are_allowed(self):
+        for base in ('https://changellenge.up.railway.app/v1',
+                     'https://api.alfahack-gateway26.ru/v1'):
+            self.assertEqual(Settings(base_url=base + '/').base_url, base + '/')
+        for base in ('https://example.test/v1',
+                     'http://api.alfahack-gateway26.ru/v1',
+                     'https://api.alfahack-gateway26.ru.evil.test/v1',
+                     'https://api.alfahack-gateway26.ru/v1?redirect=evil',
+                     'https://api.alfahack-gateway26.ru@evil.test/v1'):
+            with self.subTest(base=base), self.assertRaises(ValidationError):
+                Settings(base_url=base)
+
+    def test_reasoning_only_truncation_records_incomplete_response_and_usage(self):
+        for content in (None, ''):
+            with self.subTest(content=content):
+                payload = completion(ANSWER).json()
+                payload['choices'][0].update(finish_reason='length')
+                payload['choices'][0]['message'].update(content=content, reasoning_content='synthetic reasoning')
+                self.replies.append(httpx.Response(200, json=payload))
+                with self.assertRaises(AIError) as caught:
+                    self.structured()
+                self.assertEqual(caught.exception.code, 'incomplete_response')
+        self.assertEqual(len(self.requests), 2)
+        self.assertEqual(self.delays, [])
+        row = self.store.metrics()[0]
+        self.assertEqual((row['status'], row['calls'], row['completion_tokens']),
+                         ('incomplete_response', 2, 60))
+
+    def test_empty_completed_response_records_usage_and_remains_invalid(self):
+        payload = completion(ANSWER).json()
+        payload['choices'][0]['message']['content'] = ''
+        self.replies.append(httpx.Response(200, json=payload))
+        with self.assertRaises(AIError) as caught:
+            self.structured()
+        self.assertEqual(caught.exception.code, 'invalid_response')
+        self.assert_invalid_call()
 
     def setUp(self):
         self.store = MemoryStore()

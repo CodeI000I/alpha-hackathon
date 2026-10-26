@@ -69,6 +69,27 @@ class ServiceTests(unittest.TestCase):
         return NewsArticle(news_id='n1', title='Изменение цены', content='Поставщик изменил прайс.',
                            published_at=NOW, received_at=NOW, **kwargs)
 
+    def test_thinking_mode_invalidates_persisted_impact_and_matches_read_only_policy(self):
+        from orchestrator.config import Settings
+        from orchestrator.analytics.runtime import ReadOnlyModel
+        settings = Settings().model_copy(update={'deepseek_thinking_enabled': True})
+        enabled_model = FakeModel()
+        enabled_model.settings = settings
+        enabled = AnalyticsService(self.store, enabled_model, clock=lambda: NOW, debounce_seconds=0)
+        event_id = enabled.ingest_news(self.article())['event_id']
+        first = enabled.analyze_event_for_company(self.scope, event_id)
+
+        disabled_model = FakeModel()
+        disabled_model.settings = settings.model_copy(update={'deepseek_thinking_enabled': False})
+        disabled = AnalyticsService(self.store, disabled_model, clock=lambda: NOW, debounce_seconds=0)
+        self.assertNotEqual(enabled.policy, disabled.policy)
+        second = disabled.analyze_event_for_company(self.scope, event_id)
+        self.assertEqual(disabled_model.calls.count('ImpactAssessment'), 1)
+        self.assertNotEqual(first.context_version, second.context_version)
+        self.assertEqual(len(self.store.history('impact', first.impact_id, **self.scope.db())), 2)
+        reader = AnalyticsService(self.store, ReadOnlyModel(disabled_model.settings), clock=lambda: NOW)
+        self.assertEqual(reader.policy, disabled.policy)
+
     def test_chat_rejects_answers_without_evidence_or_nonblank_missing_facts(self):
         from orchestrator.models import Answer
         self.service.ingest_news(self.article(), scopes=[self.scope])

@@ -28,6 +28,7 @@ class Settings(BaseModel):
     analysis_model: ModelID | None = None
     synthesis_model: ModelID | None = None
     chat_model: ModelID | None = None
+    deepseek_thinking_enabled: bool = True
     request_timeout_seconds: float = Field(default=60, gt=0, le=180)
     max_retries: int = Field(default=2, ge=0, le=3)
     max_retry_delay_seconds: float = Field(default=15, gt=0, le=60)

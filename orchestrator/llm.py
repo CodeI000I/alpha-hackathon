@@ -98,6 +98,9 @@ class LLMClient:
 
     def _complete(self, stage, messages, *, max_tokens=None, validate=None):
         s = self.settings
+        options = {}
+        if not s.deepseek_thinking_enabled and s.model_for(stage).startswith('deepseek/'):
+            options['extra_body'] = {'thinking': {'type': 'disabled'}}
         if len(canonical(messages)) > s.max_input_chars:
             raise AIError('input_limit', 'Контекст превышает лимит; сократите документы или top_k.')
         if not self.semaphore.acquire(timeout=s.request_timeout_seconds):
@@ -114,6 +117,7 @@ class LLMClient:
                     result = self.sdk.chat.completions.create(
                         model=s.model_for(stage), messages=messages,
                         max_tokens=max_tokens or s.max_output_tokens,
+                        **options,
                     )
                 except APIStatusError as exc:
                     if budget_error(exc.body):
@@ -194,7 +198,8 @@ class LLMClient:
         try:
             messages = structured_messages(instruction, context, schema)
             key = digest(dict(model=self.settings.model_for(stage), messages=messages,
-                              max_tokens=self.settings.max_output_tokens, gateway=self.settings.base_url))
+                              max_tokens=self.settings.max_output_tokens, gateway=self.settings.base_url,
+                              deepseek_thinking_enabled=self.settings.deepseek_thinking_enabled))
             cached = self.store.cache_get(key)
             cache_hit = cached is not None
             output = parse(canonical(cached)) if cache_hit else self._complete(stage, messages, validate=parse)

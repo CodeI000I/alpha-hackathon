@@ -92,6 +92,7 @@ services:
       AI_BASE_URL: ${AI_BASE_URL:-https://changellenge.up.railway.app/v1}
       AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-deepseek/deepseek-v4.1-flash}
       AI_DECISION_MODEL: ${AI_DECISION_MODEL:-}
+      AI_DEEPSEEK_THINKING_ENABLED: ${AI_DEEPSEEK_THINKING_ENABLED:-true}
       AI_ANALYSIS_MODEL: ${AI_ANALYSIS_MODEL:-}
       AI_SYNTHESIS_MODEL: ${AI_SYNTHESIS_MODEL:-}
       AI_CHAT_MODEL: ${AI_CHAT_MODEL:-}

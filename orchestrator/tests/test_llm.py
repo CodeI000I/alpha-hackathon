@@ -1,5 +1,6 @@
 """Model boundary checks use an in-memory store and a local mock gateway."""
 
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -33,6 +34,46 @@ class StructuredCompletionTests(unittest.TestCase):
                 client.complete('chat', [{'role': 'user', 'content': 'Synthetic check'}])
                 self.assertEqual(headers, ['Bearer synthetic-key'])
                 self.assertEqual(settings.api_key.get_secret_value(), 'synthetic-key')
+
+    def test_deepseek_thinking_disable_is_opt_in_for_the_selected_model(self):
+        cases = [({}, False), ({'deepseek_thinking_enabled': False}, True),
+                 ({'deepseek_thinking_enabled': False, 'decision_model': 'google/gemma-4-26b-a4b-it'}, False),
+                 ({'deepseek_thinking_enabled': False, 'default_model': 'google/gemma-4-26b-a4b-it',
+                   'decision_model': 'deepseek/deepseek-v4.1-flash'}, True)]
+        for overrides, disabled in cases:
+            with self.subTest(overrides=overrides):
+                requests = []
+                def respond(request):
+                    requests.append(json.loads(request.content))
+                    return completion(ANSWER)
+                client = LLMClient(Settings(api_key='synthetic-key', max_retries=0, **overrides),
+                    MemoryStore(), http_client=httpx.Client(transport=httpx.MockTransport(respond)))
+                try:
+                    client.complete('decision', [{'role': 'user', 'content': 'Synthetic check'}])
+                finally:
+                    client.close()
+                if disabled:
+                    self.assertEqual(requests[0]['thinking'], {'type': 'disabled'})
+                else:
+                    self.assertNotIn('thinking', requests[0])
+
+    def test_structured_cache_separates_deepseek_thinking_modes(self):
+        store, requests = MemoryStore(), []
+        def respond(request):
+            requests.append(json.loads(request.content))
+            return completion(ANSWER)
+        for enabled in (True, False):
+            client = LLMClient(Settings(api_key='synthetic-key', max_retries=0,
+                deepseek_thinking_enabled=enabled), store,
+                http_client=httpx.Client(transport=httpx.MockTransport(respond)))
+            try:
+                for _ in range(2):
+                    client.structured('chat', 'Synthetic instruction', {}, Answer)
+            finally:
+                client.close()
+        self.assertEqual(len(requests), 2)
+        self.assertNotIn('thinking', requests[0])
+        self.assertEqual(requests[1]['thinking'], {'type': 'disabled'})
 
     def test_only_the_two_organizer_gateways_are_allowed(self):
         for base in ('https://changellenge.up.railway.app/v1',

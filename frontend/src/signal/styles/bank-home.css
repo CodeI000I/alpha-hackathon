@@ -44,7 +44,7 @@ body:has(.bank-app){margin:0;background:#f2f3f5}
 .bank-benefit-icon{display:grid;place-items:center;border:1.5px solid #9481ef;border-radius:50%;color:#9481ef!important}
 .bank-benefit-icon svg{width:23px;height:23px}
 .bank-signal-link>svg{color:#7d7e82}
-.bank-new-badge{display:inline-flex;align-items:center;flex-shrink:0;margin-left:auto;padding:2px 6px;border-radius:5px;background:#eae6f5;color:#705a9b;font-size:10px;font-weight:500;line-height:16px}
+.bank-new-badge{display:inline-flex;align-items:center;flex-shrink:0;margin-left:auto;padding:2px 6px;border-radius:5px;background:var(--bank-red);color:#fff;font-size:10px;font-weight:500;line-height:16px}
 .bank-nav-divider{height:1px;background:#e2e3e7;margin:16px 4px}
 .bank-menu-settings{flex-shrink:0;border-top:1px solid #e2e3e7!important;border-radius:0!important;color:var(--bank-muted)!important;min-height:60px;padding-left:12px!important}
 .bank-main{margin-left:var(--bank-sidebar);padding:16px 48px 32px;max-width:1880px;min-width:0}

@@ -9,8 +9,10 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -85,16 +87,38 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// spa отдаёт статику фронтенда, а неизвестные пути — index.html (клиентский роутинг).
+// spa отдаёт всю сборку фронтенда (dist) как есть: index.html — «Сигнал», bank.html — демо-кабинет
+// Альфа-Бизнеса, assets/ — ресурсы обоих. Пути клиентского роутинга «Сигнала» (/register,
+// /dashboard, …) получают index.html. Отсутствующий файл — путь с расширением или внутри
+// /assets/ — получает 404: иначе потерянный bank.html или старый чанк после деплоя молча
+// подменился бы страницей «Сигнала».
 func spa(dir string) http.Handler {
 	fileServer := http.FileServer(http.Dir(dir))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := filepath.Join(dir, filepath.Clean("/"+r.URL.Path))
-		if st, err := os.Stat(path); err != nil || st.IsDir() {
-			http.ServeFile(w, r, filepath.Join(dir, "index.html"))
+		urlPath := path.Clean("/" + r.URL.Path)
+		if urlPath == "/bank" {
+			target := "/bank.html"
+			if r.URL.RawQuery != "" {
+				target += "?" + r.URL.RawQuery
+			}
+			http.Redirect(w, r, target, http.StatusFound)
 			return
 		}
-		fileServer.ServeHTTP(w, r)
+		if st, err := os.Stat(filepath.Join(dir, filepath.FromSlash(urlPath))); err == nil && !st.IsDir() {
+			// HTML ссылается на ресурсы с хешем в имени: без перепроверки браузер после деплоя
+			// открыл бы старую страницу, чьих ресурсов уже нет.
+			if path.Ext(urlPath) == ".html" {
+				w.Header().Set("Cache-Control", "no-cache")
+			}
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+		if strings.HasPrefix(urlPath, "/assets/") || path.Ext(urlPath) != "" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Cache-Control", "no-cache")
+		http.ServeFile(w, r, filepath.Join(dir, "index.html"))
 	})
 }
 

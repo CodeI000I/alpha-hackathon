@@ -172,6 +172,10 @@ func TestOnboardingSessionLoginAndLogout(t *testing.T) {
 	if cookie == nil || !cookie.HttpOnly || cookie.SameSite != http.SameSiteStrictMode {
 		t.Fatalf("unsafe session cookie: %#v", cookie)
 	}
+	// Одна cookie на весь сайт: переход /bank.html → /register попадает в ту же сессию.
+	if cookie.Path != "/" {
+		t.Fatalf("session cookie path = %q, want / so bank.html and Signal share it", cookie.Path)
+	}
 
 	payload, _ := json.Marshal(map[string]string{"email": strings.ToUpper(user.Email), "password": "correct-horse-battery"})
 	loginReq, _ := http.NewRequest(http.MethodPost, server.URL+"/api/v1/auth/login", bytes.NewReader(payload))
